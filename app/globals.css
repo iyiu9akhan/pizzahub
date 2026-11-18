@@ -1,0 +1,168 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --brand: #106033;
+  --brand-dark: color-mix(in srgb, var(--brand) 78%, black);
+  --brand-muted: color-mix(in srgb, var(--brand) 18%, white);
+  --surface: #ffffff;
+  --ink: #14201A;
+  --ink-muted: #5F6F66;
+  --line: color-mix(in srgb, var(--brand) 18%, white);
+  --page-bg: color-mix(in srgb, var(--brand) 6%, white);
+  --brand-soft: color-mix(in srgb, var(--brand) 10%, var(--surface));
+  --brand-fg: var(--brand);
+
+  --font-heading: var(--font-montserrat);
+  --font-text: var(--font-quicksand);
+
+  --background: var(--page-bg);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--brand);
+  --primary-foreground: #ffffff;
+  --secondary: var(--brand-soft);
+  --secondary-foreground: var(--brand-fg);
+  --muted: var(--brand-soft);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--brand-soft);
+  --accent-foreground: var(--brand-fg);
+  --destructive: #EF4444;
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--brand);
+  --radius: 0.75rem;
+}
+
+.dark {
+  --surface: #141D18;
+  --ink: #E9F1EC;
+  --ink-muted: #9DAEA4;
+  --line: #26362D;
+  --page-bg: #0C1310;
+  --brand-fg: color-mix(in srgb, var(--brand) 45%, white);
+  --brand-soft: color-mix(in srgb, var(--brand) 16%, var(--surface));
+  --brand-muted: #26362D;
+  --background: var(--page-bg);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --border: var(--line);
+  --input: var(--line);
+}
+
+@theme inline {
+  --font-heading: var(--font-montserrat);
+  --font-text: var(--font-quicksand);
+
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-brand-fg: var(--brand-fg);
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-muted: var(--brand-muted);
+  --color-page: var(--page-bg);
+
+  --color-border: var(--line);
+  --color-input: var(--line);
+  --color-ring: var(--brand);
+  --color-background: var(--page-bg);
+  --color-foreground: var(--ink);
+  --color-primary: var(--brand);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--brand-soft);
+  --color-secondary-foreground: var(--brand-fg);
+  --color-muted: var(--brand-soft);
+  --color-muted-foreground: var(--ink-muted);
+  --color-accent: var(--brand-soft);
+  --color-accent-foreground: var(--brand-fg);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--ink);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+@layer base {
+  * {
+    border-color: var(--line);
+  }
+  body {
+    font-family: var(--font-text), sans-serif;
+    background-color: var(--page-bg);
+    color: var(--ink);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading), sans-serif;
+  }
+
+  button:not(:disabled), [role="button"]:not([aria-disabled="true"]), a[href], summary, select,
+  label[for], input[type="checkbox"], input[type="radio"], input[type="submit"] {
+    cursor: pointer;
+  }
+  button:disabled, [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
+@keyframes hero-float {
+  0%, 100% {
+    transform: translateY(-8px);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+.animate-hero-float {
+  animation: hero-float 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-float {
+    animation: none;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+@keyframes float-reverse {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 5s ease-in-out infinite;
+}
