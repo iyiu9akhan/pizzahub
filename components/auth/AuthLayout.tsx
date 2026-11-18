@@ -8,7 +8,7 @@ export interface AuthLayoutProps {
   children: React.ReactNode
   image: string
   quoteHeadline: string
-  quoteSubtext: string
+  quoteSubtext?: string
   badgeText?: string
   isRegister?: boolean
   className?: string
@@ -18,7 +18,6 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
   children,
   image,
   quoteHeadline,
-  quoteSubtext,
   badgeText,
   isRegister = false,
   className = "",
@@ -37,56 +36,40 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
             <ArrowLeft className="h-4 w-4" />
             Back to home
           </Link>
-          {/* TODO: tomar ager moon-icon theme toggle component ekhane boshao */}
         </div>
 
         {/* Card */}
         <div className="grid overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl shadow-black/5 lg:grid-cols-2">
           {/* ───────── LEFT: visual ───────── */}
           {isRegister ? (
-            <div className="relative hidden min-h-[720px] flex-col overflow-hidden bg-brand text-white lg:flex">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl"
-              />
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-black/20 blur-3xl"
+            <div className="relative hidden min-h-[720px] overflow-hidden bg-[#e8decb] lg:block">
+              <Image
+                src={image}
+                alt="The Anatomy of Pizza"
+                fill
+                priority
+                unoptimized
+                className="object-cover object-center"
               />
 
-              <div className="relative z-10 p-10 pb-0">
-                <BrandLogo isLight />
-                <h2 className="mt-8 font-heading text-3xl font-extrabold leading-tight tracking-tight xl:text-4xl">
-                  {quoteHeadline}
-                </h2>
-                <p className="mt-3 max-w-sm font-text text-sm leading-relaxed text-white/85">
-                  {quoteSubtext}
-                </p>
+              {/* Top-left BrandLogo pill (adapts to light/dark theme via bg-surface) */}
+              <div className="relative z-10 p-6">
+                <div className="inline-block rounded-2xl border border-line/50 bg-surface/95 px-4 py-2.5 shadow-lg backdrop-blur-md">
+                  <BrandLogo />
+                </div>
               </div>
 
-              <div className="relative z-10 mt-4 flex-1">
-                <div
-                  aria-hidden="true"
-                  className="absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10"
-                />
-                <Image
-                  src={image}
-                  alt="Pizza slice with melted cheese and pepperoni"
-                  fill
-                  priority
-                  unoptimized
-                  className="scale-[1.3] object-contain drop-shadow-2xl"
-                />
-
-                {badgeText && (
-                  <div className="absolute bottom-6 left-10 flex items-center gap-2.5 rounded-2xl bg-white px-4 py-2.5 text-ink shadow-xl">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-soft text-brand-fg">
-                      <Tag className="h-4 w-4" />
-                    </span>
-                    <span className="font-heading text-sm font-bold">{badgeText}</span>
-                  </div>
-                )}
-              </div>
+              {/* Bottom-left Discount Badge (forced dark text on white pill) */}
+              {badgeText && (
+                <div className="absolute bottom-6 left-6 z-10 flex items-center gap-2.5 rounded-2xl bg-white/95 px-4 py-2.5 text-zinc-900 shadow-xl backdrop-blur-md">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                    <Tag className="h-4 w-4" />
+                  </span>
+                  <span className="font-heading text-sm font-bold text-zinc-900">
+                    {badgeText}
+                  </span>
+                </div>
+              )}
             </div>
           ) : (
             /* Login: poster (text already inside the image) */

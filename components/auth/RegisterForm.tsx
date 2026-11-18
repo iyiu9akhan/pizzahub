@@ -7,10 +7,7 @@ import SocialButtons from "@/components/auth/SocialButtons"
 import Checkbox from "@/components/ui/Checkbox"
 import RoleSelect from "@/components/auth/RoleSelect"
 import { UserRole } from "@/types/auth"
-
-export interface RegisterFormProps {
-  className?: string
-}
+import { RegisterFormData, RegisterFormProps } from "@/types/registerDataType"
 
 const inputBase =
   "h-11 sm:h-12 w-full rounded-xl border border-line bg-surface pl-11 pr-4 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-hidden focus:ring-2 focus:ring-brand/20"
@@ -24,7 +21,10 @@ const iconWrap =
 const eyeBtn =
   "absolute inset-y-0 right-0 flex items-center pr-3.5 text-ink-muted hover:text-ink transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand/40 rounded-lg cursor-pointer"
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ className = "" }) => {
+const RegisterForm: React.FC<RegisterFormProps> = ({
+  className = "",
+  onSubmit,
+}) => {
   const [role, setRole] = useState<UserRole>("customer")
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false)
@@ -48,16 +48,21 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ className = "" }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // UI-only for now; role is ready in state
+    if (onSubmit) {
+      onSubmit({
+        role,
+        ...formData,
+      })
+    }
   }
 
   return (
     <div className={`w-full ${className}`}>
       <div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
+        <h1 className="font-heading text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
           Create your account
         </h1>
-        <p className="mt-1.5 font-text text-sm sm:text-base text-ink-muted">
+        <p className="mt-1.5 font-text text-sm text-ink-muted sm:text-base">
           Sign up and get your first pizza deal.
         </p>
       </div>
@@ -69,9 +74,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ className = "" }) => {
       <form onSubmit={handleSubmit} className="mt-5 space-y-3">
         {/* Full Name */}
         <div>
-          <label htmlFor="reg-name" className={labelBase}>Full name</label>
+          <label htmlFor="reg-name" className={labelBase}>
+            Full name
+          </label>
           <div className="relative">
-            <div className={iconWrap}><User className="h-5 w-5" /></div>
+            <div className={iconWrap}>
+              <User className="h-5 w-5" />
+            </div>
             <input
               id="reg-name"
               name="fullName"
@@ -86,10 +95,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ className = "" }) => {
         </div>
 
         {/* Email */}
-        <div>
-          <label htmlFor="reg-email" className={labelBase}>Email address</label>
+        <div className="">
+          <label htmlFor="reg-email" className={labelBase}>
+            Email address
+          </label>
           <div className="relative">
-            <div className={iconWrap}><Mail className="h-5 w-5" /></div>
+            <div className={iconWrap}>
+              <Mail className="h-5 w-5" />
+            </div>
             <input
               id="reg-email"
               name="email"
@@ -104,10 +117,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ className = "" }) => {
         </div>
 
         {/* Phone */}
-        <div>
-          <label htmlFor="reg-phone" className={labelBase}>Phone number</label>
+        {/* <div>
+          <label htmlFor="reg-phone" className={labelBase}>
+            Phone number
+          </label>
           <div className="relative">
-            <div className={iconWrap}><Phone className="h-5 w-5" /></div>
+            <div className={iconWrap}>
+              <Phone className="h-5 w-5" />
+            </div>
             <input
               id="reg-phone"
               name="phone"
@@ -119,13 +136,17 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ className = "" }) => {
               className={inputBase}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Password */}
-        <div>
-          <label htmlFor="reg-password" className={labelBase}>Password</label>
+        <div className="mb-3">
+          <label htmlFor="reg-password" className={labelBase}>
+            Password
+          </label>
           <div className="relative">
-            <div className={iconWrap}><Lock className="h-5 w-5" /></div>
+            <div className={iconWrap}>
+              <Lock className="h-5 w-5" />
+            </div>
             <input
               id="reg-password"
               name="password"
@@ -142,16 +163,24 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ className = "" }) => {
               aria-label={showPassword ? "Hide password" : "Show password"}
               className={eyeBtn}
             >
-              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
             </button>
           </div>
         </div>
 
         {/* Confirm Password */}
         <div>
-          <label htmlFor="reg-confirm-password" className={labelBase}>Confirm password</label>
+          <label htmlFor="reg-confirm-password" className={labelBase}>
+            Confirm password
+          </label>
           <div className="relative">
-            <div className={iconWrap}><Lock className="h-5 w-5" /></div>
+            <div className={iconWrap}>
+              <Lock className="h-5 w-5" />
+            </div>
             <input
               id="reg-confirm-password"
               name="confirmPassword"
@@ -165,10 +194,16 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ className = "" }) => {
             <button
               type="button"
               onClick={() => setShowConfirmPassword((prev) => !prev)}
-              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              aria-label={
+                showConfirmPassword ? "Hide password" : "Show password"
+              }
               className={eyeBtn}
             >
-              {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              {showConfirmPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
             </button>
           </div>
         </div>
@@ -187,14 +222,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ className = "" }) => {
                 I agree to the{" "}
                 <Link
                   href="#"
-                  className="font-heading font-semibold text-brand-fg hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand/40 rounded-xs cursor-pointer"
+                  className="cursor-pointer rounded-xs font-heading font-semibold text-brand-fg hover:underline focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:outline-hidden"
                 >
                   Terms of Service
                 </Link>{" "}
                 &{" "}
                 <Link
                   href="#"
-                  className="font-heading font-semibold text-brand-fg hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand/40 rounded-xs cursor-pointer"
+                  className="cursor-pointer rounded-xs font-heading font-semibold text-brand-fg hover:underline focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:outline-hidden"
                 >
                   Privacy Policy
                 </Link>
@@ -205,7 +240,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ className = "" }) => {
 
         <button
           type="submit"
-          className="w-full h-11 sm:h-12 rounded-xl bg-brand text-white font-heading font-semibold text-sm sm:text-base shadow-sm transition-all duration-300 hover:bg-brand-dark hover:shadow-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand/40 active:scale-[0.99] cursor-pointer mt-3"
+          className="mt-3 h-11 w-full cursor-pointer rounded-xl bg-brand font-heading text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:bg-brand-dark hover:shadow-md focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:outline-hidden active:scale-[0.99] sm:h-12 sm:text-base"
         >
           Create Account
         </button>
@@ -226,7 +261,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ className = "" }) => {
         Already have an account?{" "}
         <Link
           href="/login"
-          className="font-heading font-bold text-brand-fg hover:text-brand-dark transition-colors underline-offset-4 hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand/40 rounded-sm cursor-pointer"
+          className="cursor-pointer rounded-sm font-heading font-bold text-brand-fg underline-offset-4 transition-colors hover:text-brand-dark hover:underline focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:outline-hidden"
         >
           Login
         </Link>

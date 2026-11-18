@@ -26,21 +26,12 @@ const MenuCard: React.FC<MenuCardProps> = ({
   onAddToCart,
 }) => {
   return (
-    /*
-      overflow-visible is REQUIRED so the floating thumbnail above the card isn't clipped.
-      The card itself starts with pt-14 to leave room below the thumbnail overlap.
-    */
+ 
     <div
       className={`group relative flex flex-col justify-between rounded-2xl bg-brand pt-14 pb-4 px-4 shadow-xl shadow-brand/25 transition-all duration-300 hover:-translate-y-1 hover:bg-brand-dark cursor-pointer overflow-visible ${className}`}
     >
-      {/* ── Floating thumbnail: half above the card top-left corner ── */}
-      {/*
-        Size: 100×100px.
-        -top-12 → pulls 48px above the card top edge.
-        -left-3  → slight left offset to match the foodbar reference badge position.
-        No background, no clip, pure transparent PNG.
-      */}
-      <div className="absolute -top-12 -left-3 w-[100px] h-[100px] drop-shadow-xl z-10 transition-transform duration-500 group-hover:scale-110 pointer-events-none">
+     
+      <div className="absolute -top-17 -left-7 w-35 h-35 drop-shadow-xl z-10 transition-transform duration-500 group-hover:scale-110 pointer-events-none">
         <Image
           src={item.image}
           alt={item.name}
@@ -50,14 +41,12 @@ const MenuCard: React.FC<MenuCardProps> = ({
         />
       </div>
 
-      {/* ── Top right: Price ─────────────────────────────────────── */}
       <div className="self-end text-right">
         <span className="font-heading text-base font-bold text-white tracking-tight">
           {formatPrice(item.price)}
         </span>
       </div>
 
-      {/* ── Bottom row: Info + Cart button ───────────────────────── */}
       <div className="flex items-end justify-between mt-3">
         <div className="flex flex-col text-left">
           <h3 className="font-heading text-sm font-semibold text-white leading-tight">
@@ -78,7 +67,7 @@ const MenuCard: React.FC<MenuCardProps> = ({
             onAddToCart?.(item)
           }}
           aria-label={`Add ${item.name} to cart`}
-          className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/15 text-white transition-all duration-200 hover:bg-white/30 active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/50 cursor-pointer"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-white transition-all duration-200 hover:bg-white/30 active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/50 cursor-pointer"
         >
           <ShoppingCart className="h-3.5 w-3.5" />
         </button>
