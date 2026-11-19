@@ -5,12 +5,9 @@ import Link from "next/link"
 import { Mail, Lock, Eye, EyeOff } from "lucide-react"
 import SocialButtons from "@/components/auth/SocialButtons"
 import Checkbox from "@/components/ui/Checkbox"
+import { LoginFormData, LoginFormProps } from "@/types/loginFormType" 
 
-export interface LoginFormProps {
-  className?: string
-}
-
-const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ className = "", onSubmit }) => {
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [email, setEmail] = useState<string>("")
   const [password, setPassword] = useState<string>("")
@@ -18,7 +15,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // UI-only for now
+    if (onSubmit) {
+      onSubmit({
+        email,
+        password,
+        rememberMe,
+      })
+    }
   }
 
   return (
@@ -33,6 +36,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
       </div>
 
       <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+        {/* Email Input */}
         <div>
           <label
             htmlFor="login-email"
@@ -56,6 +60,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
           </div>
         </div>
 
+        {/* Password Input */}
         <div>
           <label
             htmlFor="login-password"

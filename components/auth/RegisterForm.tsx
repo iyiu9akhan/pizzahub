@@ -116,29 +116,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           </div>
         </div>
 
-        {/* Phone */}
-        {/* <div>
-          <label htmlFor="reg-phone" className={labelBase}>
-            Phone number
-          </label>
-          <div className="relative">
-            <div className={iconWrap}>
-              <Phone className="h-5 w-5" />
-            </div>
-            <input
-              id="reg-phone"
-              name="phone"
-              type="tel"
-              required
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="+1 (555) 000-0000"
-              className={inputBase}
-            />
-          </div>
-        </div> */}
-
-        {/* Password */}
+       {/* password input  */}
         <div className="mb-3">
           <label htmlFor="reg-password" className={labelBase}>
             Password
@@ -172,7 +150,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           </div>
         </div>
 
-        {/* Confirm Password */}
+        {/* Confirm Password input*/}
         <div>
           <label htmlFor="reg-confirm-password" className={labelBase}>
             Confirm password

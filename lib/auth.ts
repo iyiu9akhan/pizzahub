@@ -2,22 +2,25 @@ import { betterAuth } from "better-auth"
 import { MongoClient } from "mongodb"
 import { mongodbAdapter } from "@better-auth/mongo-adapter"
 
-const client = new MongoClient(process.env.BETTER_AUTH_DB_URI as string)
-const db = client.db("pizzahub")
+const client = new MongoClient(process.env.MONGODB_URI as string)
+const db = client.db("pizzahub") // db name
 
 export const auth = betterAuth({
+  //login with mail & pass
   emailAndPassword: {
     enabled: true,
   },
+  //sending user role to db
   user: {
     additionalFields: {
       role: {
-        type: "string",
-        required: false,
+        type: ["customer", "vendor", "admin"],
+        input: true,
         defaultValue: "customer",
       },
     },
   },
+  //google login
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
