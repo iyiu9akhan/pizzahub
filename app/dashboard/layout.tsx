@@ -1,16 +1,19 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar"
+import { DashboardTopbar } from "@/components/dashboard/DashboardTopbar"
 
-const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <SidebarProvider>
-      <DashboardSidebar/>
-      <main>
-        <SidebarTrigger />
-        {children}
-      </main>
+      <DashboardSidebar />
+      <SidebarInset className="min-w-0 bg-page">
+        <DashboardTopbar />
+        <main className="w-full min-w-0 flex-1">{children}</main>
+      </SidebarInset>
     </SidebarProvider>
   )
 }
-
-export default DashboardLayout

@@ -9,12 +9,14 @@
   --brand-dark: color-mix(in srgb, var(--brand) 78%, black);
   --brand-muted: color-mix(in srgb, var(--brand) 18%, white);
   --surface: #ffffff;
-  --ink: #14201A;
-  --ink-muted: #5F6F66;
+  --ink: #14201a;
+  --ink-muted: #5f6f66;
   --line: color-mix(in srgb, var(--brand) 18%, white);
   --page-bg: color-mix(in srgb, var(--brand) 6%, white);
   --brand-soft: color-mix(in srgb, var(--brand) 10%, var(--surface));
   --brand-fg: var(--brand);
+  --danger: #AF0000;
+  --danger-foreground: #ffffff;
 
   --font-heading: var(--font-montserrat);
   --font-text: var(--font-quicksand);
@@ -33,7 +35,7 @@
   --muted-foreground: var(--ink-muted);
   --accent: var(--brand-soft);
   --accent-foreground: var(--brand-fg);
-  --destructive: #EF4444;
+  --destructive: #fff;
   --border: var(--line);
   --input: var(--line);
   --ring: var(--brand);
@@ -41,14 +43,14 @@
 }
 
 .dark {
-  --surface: #141D18;
-  --ink: #E9F1EC;
-  --ink-muted: #9DAEA4;
-  --line: #26362D;
-  --page-bg: #0C1310;
+  --surface: #141d18;
+  --ink: #e9f1ec;
+  --ink-muted: #9daea4;
+  --line: #26362d;
+  --page-bg: #0c1310;
   --brand-fg: color-mix(in srgb, var(--brand) 45%, white);
   --brand-soft: color-mix(in srgb, var(--brand) 16%, var(--surface));
-  --brand-muted: #26362D;
+  --brand-muted: #26362d;
   --background: var(--page-bg);
   --foreground: var(--ink);
   --card: var(--surface);
@@ -57,6 +59,8 @@
   --popover-foreground: var(--ink);
   --border: var(--line);
   --input: var(--line);
+  --danger: #AF0000;
+  --danger-foreground: #ffffff;
 }
 
 @theme inline {
@@ -73,6 +77,8 @@
   --color-brand-soft: var(--brand-soft);
   --color-brand-muted: var(--brand-muted);
   --color-page: var(--page-bg);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
 
   --color-border: var(--line);
   --color-input: var(--line);
@@ -109,21 +115,35 @@
     background-color: var(--page-bg);
     color: var(--ink);
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-heading), sans-serif;
   }
 
-  button:not(:disabled), [role="button"]:not([aria-disabled="true"]), a[href], summary, select,
-  label[for], input[type="checkbox"], input[type="radio"], input[type="submit"] {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  summary,
+  select,
+  label[for],
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="submit"] {
     cursor: pointer;
   }
-  button:disabled, [aria-disabled="true"] {
+  button:disabled,
+  [aria-disabled="true"] {
     cursor: not-allowed;
   }
 }
 
 @keyframes hero-float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(-8px);
   }
   50% {
@@ -142,7 +162,8 @@
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
   50% {
@@ -151,7 +172,8 @@
 }
 
 @keyframes float-reverse {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {

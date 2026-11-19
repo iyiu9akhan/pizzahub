@@ -42,7 +42,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
         <div className="grid overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl shadow-black/5 lg:grid-cols-2">
           {/* ───────── LEFT: visual ───────── */}
           {isRegister ? (
-            <div className="relative hidden min-h-[720px] overflow-hidden bg-[#e8decb] lg:block">
+            <div className="relative hidden min-h-180 overflow-hidden bg-[#e8decb] lg:block">
               <Image
                 src={image}
                 alt="The Anatomy of Pizza"
@@ -73,7 +73,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
             </div>
           ) : (
             /* Login: poster (text already inside the image) */
-            <div className="relative hidden min-h-[640px] bg-[#f3e9d8] lg:block">
+            <div className="relative hidden min-h-160 bg-[#f3e9d8] lg:block">
               <Image
                 src={image}
                 alt={quoteHeadline}
