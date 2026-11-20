@@ -9,16 +9,27 @@ import AddMenuItemForm from "@/components/dashboard/vendor/addMenuItemForm/AddMe
 import { AddMenuItemFormValues } from "@/types/AddMenuItemDataType"
 import { createItem } from "@/lib/actions/CreateItem"
 import { toastSuccess, toastError } from "@/lib/toast"
+import { useSession } from "@/lib/auth-client"
 
 export default function AddMenuItemPage() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Handle form submission: upload images then create the item
   const handleCreate = async (values: AddMenuItemFormValues) => {
     setIsSubmitting(true)
     try {
-      await createItem(values)
+      await createItem({
+        ...values,
+        vendorId: session?.user?.id,
+        vendorName:
+          (session?.user as { businessName?: string } | undefined)?.businessName ||
+          session?.user?.name ||
+          "Vendor",
+        // TODO(admin): re-enable approval filter after admin panel is built
+        status: "pending",
+      })
       toastSuccess("Menu item added. Waiting for admin approval.")
       router.push("/dashboard/vendor/menu-items")
       router.refresh()

@@ -7,4 +7,7 @@ export interface AddMenuItemFormValues {
   location: string
   images: File[]
   existingImages: string[]
+  vendorId?: string
+  vendorName?: string
+  status?: string
 }

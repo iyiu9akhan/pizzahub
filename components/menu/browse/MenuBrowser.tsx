@@ -111,6 +111,7 @@ export default function MenuBrowser({
         // Status check: if item has status field, only show when approved.
         // If status field is missing (legacy backend items), include it.
         // NOTE: This will become strictly status === "approved" once backend adds status to all records.
+        // TODO(admin): re-enable approval filter after admin panel is built
         if (item.status && item.status !== "approved") {
           return false
         }

@@ -17,6 +17,7 @@ import UserAvatar from "@/components/ui/UserAvatar"
 import { useSession, authClient } from "@/lib/auth-client"
 import { toastSuccess, toastError } from "@/lib/toast"
 import { getPendingOrdersCount } from "@/lib/api/items"
+import { getCustomerActiveOrdersCount } from "@/lib/api/orders"
 
 export interface NavBtnProps {
   className?: string
@@ -24,7 +25,6 @@ export interface NavBtnProps {
   cartOnly?: boolean
   authOnly?: boolean
   mobileActionsOnly?: boolean
-  cartCount?: number
   onLinkClick?: () => void
 }
 
@@ -41,7 +41,6 @@ const NavBtn: React.FC<NavBtnProps> = ({
   cartOnly = false,
   authOnly = false,
   mobileActionsOnly = false,
-  cartCount = 2,
   onLinkClick,
 }) => {
   const { data: session, isPending } = useSession()
@@ -52,6 +51,8 @@ const NavBtn: React.FC<NavBtnProps> = ({
 
   // Pending orders badge count for vendors — defaults to 0 if endpoint is not implemented
   const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0)
+  // Active orders badge count for customers — fetched from the orders API
+  const [customerOrderCount, setCustomerOrderCount] = useState<number>(0)
 
   const role = session?.user?.role || "customer"
 
@@ -61,6 +62,15 @@ const NavBtn: React.FC<NavBtnProps> = ({
       getPendingOrdersCount()
         .then(setPendingOrdersCount)
         .catch(() => setPendingOrdersCount(0))
+    }
+  }, [role, session])
+
+  // Fetch active order count for customers (powers the cart badge)
+  useEffect(() => {
+    if (role === "customer" && session?.user?.id) {
+      getCustomerActiveOrdersCount(session.user.id)
+        .then(setCustomerOrderCount)
+        .catch(() => setCustomerOrderCount(0))
     }
   }, [role, session])
 
@@ -239,7 +249,7 @@ const NavBtn: React.FC<NavBtnProps> = ({
   )
 
   if (cartOnly) {
-    return <CartBtn count={cartCount} className={className} />
+    return <CartBtn count={customerOrderCount} className={className} />
   }
 
   if (mobileActionsOnly) {
@@ -247,7 +257,7 @@ const NavBtn: React.FC<NavBtnProps> = ({
       <div className={`flex items-center gap-2 ${className}`}>
         <ThemeToggle />
         {/* Customer: show cart. Vendor: show orders icon. Admin/guest: neither. */}
-        {role === "customer" && session && <CartBtn count={cartCount} />}
+        {role === "customer" && session && <CartBtn count={customerOrderCount} />}
         {role === "vendor" && session && ordersIcon}
       </div>
     )
@@ -265,7 +275,7 @@ const NavBtn: React.FC<NavBtnProps> = ({
     >
       <ThemeToggle />
       {/* Customer sees cart; Vendor sees orders icon; Admin/guest sees neither */}
-      {role === "customer" && session && <CartBtn count={cartCount} />}
+      {role === "customer" && session && <CartBtn count={customerOrderCount} />}
       {role === "vendor" && session && ordersIcon}
       {session && (
         <span className="mx-0.5 hidden h-5 w-px bg-line sm:block" />

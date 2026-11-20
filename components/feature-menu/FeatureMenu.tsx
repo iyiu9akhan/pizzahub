@@ -23,16 +23,23 @@ async function FeaturedItems() {
   let items: MenuItemData[] = []
   try {
     const raw = await getItems()
+
+    // TODO(admin): re-enable approval filter after admin panel is built
+    // Same rule as /menu page: hide items whose status is set and not "approved".
+    // Items without a status field (legacy data) are still shown.
+    const visible = raw.filter(
+      (item: Record<string, unknown>) =>
+        !item.status || item.status === "approved"
+    )
+
     // Normalize images and take at most 4 for the featured grid
-    items = raw
-      .slice(0, 4)
-      .map((item: Record<string, unknown>) => ({
-        ...item,
-        images: [
-          ...((item.images as string[]) ?? []),
-          ...((item.existingImages as string[]) ?? []),
-        ],
-      })) as MenuItemData[]
+    items = visible.slice(0, 4).map((item: Record<string, unknown>) => ({
+      ...item,
+      images: [
+        ...((item.images as string[]) ?? []),
+        ...((item.existingImages as string[]) ?? []),
+      ],
+    })) as MenuItemData[]
   } catch {
     // API unavailable — render empty state below
   }
@@ -55,7 +62,7 @@ async function FeaturedItems() {
       {items.map((item) => (
         <div
           key={item._id}
-          className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+          className="animate-in duration-500 fade-in slide-in-from-bottom-4"
         >
           <MenuItemCard item={item} />
         </div>
@@ -76,7 +83,8 @@ const FeatureMenu = () => {
               Featured Menu Items
             </h2>
             <p className="mt-2 font-text text-sm text-ink-muted">
-              Fresh, delicious pizzas made by our top-rated vendors — ready to order now.
+              Fresh, delicious pizzas made by our top-rated vendors — ready to
+              order now.
             </p>
           </div>
 

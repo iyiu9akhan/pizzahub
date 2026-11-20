@@ -1,10 +1,21 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
-// Fetch all items (used on vendor list page and home featured section)
-export const getItems = async () => {
+// Fetch items from the backend API with optional vendor filtering
+export const getItems = async (options?: { vendorId?: string }) => {
   const res = await fetch(`${BASE_URL}/items`, { cache: "no-store" })
   if (!res.ok) throw new Error("Failed to fetch items")
-  return res.json()
+  const data = await res.json()
+
+  // If vendorId is provided, filter ONLY by vendorId (never by status/approval for vendor dashboard)
+  // TODO(admin): re-enable approval filter after admin panel is built
+  if (options?.vendorId && Array.isArray(data)) {
+    return data.filter((item: Record<string, unknown>) => {
+      const itemVendorId = item.vendorId ?? item.vendor_id ?? item.userId
+      return itemVendorId ? String(itemVendorId) === String(options.vendorId) : false
+    })
+  }
+
+  return data
 }
 
 // Fetch a single item by ID (used on edit page)

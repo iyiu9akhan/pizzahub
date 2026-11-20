@@ -1,9 +1,5 @@
 export type OrderStatus =
-  | "pending"
-  | "preparing"
-  | "delivering"
-  | "delivered"
-  | "cancelled"
+  "pending" | "preparing" | "delivering" | "delivered" | "cancelled"
 
 export interface OrderItem {
   itemId: string
@@ -14,6 +10,8 @@ export interface OrderItem {
 }
 
 export interface OrderPizzaType {
+  vendorId: string
+  vendorName?: string
   customerId: string
   customerName: string
   customerEmail: string

@@ -39,6 +39,10 @@ export const createItem = async (data: AddMenuItemFormValues) => {
     price: data.price,
     location: data.location,
     images, // single field — no existingImages sent to backend
+    ...(data.vendorId ? { vendorId: data.vendorId } : {}),
+    ...(data.vendorName ? { vendorName: data.vendorName } : {}),
+    // TODO(admin): re-enable approval filter after admin panel is built
+    status: data.status ?? "pending",
   }
 
   const res = await fetch(`${BASE_URL}/items`, {

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Eye, Pencil, Trash2 } from "lucide-react"
+import { CheckCircle2, Clock, Eye, Pencil, Trash2, XCircle } from "lucide-react"
 import MenuItemCard, { MenuItemData } from "@/components/menu/MenuItemCard"
 import {
   AlertDialog,
@@ -19,6 +19,58 @@ import { toastSuccess, toastError } from "@/lib/toast"
 
 interface Props {
   initialItems: MenuItemData[]
+}
+
+// Status display config: label, helper text, icon and colors (light + dark mode)
+// TODO(admin): update the wording here when the admin approval flow is built
+const STATUS_CONFIG = {
+  pending: {
+    label: "Pending Review",
+    hint: "Waiting for admin approval. Not visible to customers yet.",
+    Icon: Clock,
+    box: "border-amber-300/70 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10",
+    iconBox: "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400",
+    title: "text-amber-700 dark:text-amber-400",
+  },
+  approved: {
+    label: "Approved",
+    hint: "Live on the menu. Customers can order this item.",
+    Icon: CheckCircle2,
+    box: "border-emerald-300/70 bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10",
+    iconBox: "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400",
+    title: "text-emerald-700 dark:text-emerald-400",
+  },
+  rejected: {
+    label: "Rejected",
+    hint: "This item was not approved. Edit it and try again.",
+    Icon: XCircle,
+    box: "border-red-300/70 bg-red-50 dark:border-red-500/30 dark:bg-red-500/10",
+    iconBox: "bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400",
+    title: "text-red-700 dark:text-red-400",
+  },
+} as const
+
+// Small status panel shown above the action buttons on each card
+const StatusPanel = ({ status }: { status?: string }) => {
+  // Missing or unknown status falls back to "pending"
+  const key = status === "approved" || status === "rejected" ? status : "pending"
+  const { label, hint, Icon, box, iconBox, title } = STATUS_CONFIG[key]
+
+  return (
+    <div className={`flex items-start gap-3 rounded-xl border px-3 py-2.5 ${box}`}>
+      <span
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${iconBox}`}
+      >
+        <Icon className="h-4 w-4" />
+      </span>
+      <div className="min-w-0">
+        <p className={`font-heading text-sm font-semibold leading-tight ${title}`}>
+          {label}
+        </p>
+        <p className="mt-0.5 text-xs leading-snug text-ink-muted">{hint}</p>
+      </div>
+    </div>
+  )
 }
 
 // Renders the vendor's menu item grid with details/edit/delete per card
@@ -69,42 +121,46 @@ const VendorMenuItemsGrid = ({ initialItems }: Props) => {
           const isCurrentDeleting = isDeleting && itemToDelete?._id === item._id
 
           return (
+            // No `status` prop here: the status is shown in the footer panel instead
             <MenuItemCard
               key={item._id}
               item={item}
-              status={item.status}
               actions={
-                // Vendor action footer: Details link, Edit link, and Delete button
-                <div className="flex items-center gap-2">
-                  {/* Details button — links to public menu item details route */}
-                  <Link
-                    href={`/menu/${item._id}`}
-                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-line bg-surface px-3 py-2.5 font-heading text-xs font-semibold text-ink transition-colors hover:border-brand/50 hover:bg-brand/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 sm:text-sm"
-                  >
-                    <Eye className="h-4 w-4" />
-                    <span>Details</span>
-                  </Link>
+                // Vendor footer: status panel + Details, Edit, Delete
+                <div className="flex flex-col gap-3">
+                  <StatusPanel status={item.status} />
 
-                  {/* Edit button — links to item edit route */}
-                  <Link
-                    href={`/dashboard/vendor/menu-items/${item._id}/edit`}
-                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-brand px-3 py-2.5 font-heading text-xs font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 sm:text-sm"
-                  >
-                    <Pencil className="h-4 w-4" />
-                    <span>Edit</span>
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    {/* Details button — links to public menu item details route */}
+                    <Link
+                      href={`/menu/${item._id}`}
+                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-line bg-surface px-3 py-2.5 font-heading text-xs font-semibold text-ink transition-colors hover:border-brand/50 hover:bg-brand/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 sm:text-sm"
+                    >
+                      <Eye className="h-4 w-4" />
+                      <span>Details</span>
+                    </Link>
 
-                  {/* Trigger for the delete confirmation dialog */}
-                  <button
-                    type="button"
-                    onClick={() => setItemToDelete(item)}
-                    disabled={isCurrentDeleting}
-                    aria-label={`Delete ${item.itemName}`}
-                    title="Delete"
-                    className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-red-300 text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                    {/* Edit button — links to item edit route */}
+                    <Link
+                      href={`/dashboard/vendor/menu-items/${item._id}/edit`}
+                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-brand px-3 py-2.5 font-heading text-xs font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 sm:text-sm"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      <span>Edit</span>
+                    </Link>
+
+                    {/* Trigger for the delete confirmation dialog */}
+                    <button
+                      type="button"
+                      onClick={() => setItemToDelete(item)}
+                      disabled={isCurrentDeleting}
+                      aria-label={`Delete ${item.itemName}`}
+                      title="Delete"
+                      className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-red-300 text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               }
             />

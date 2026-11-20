@@ -1,14 +1,24 @@
+// Vendor customer orders page — /dashboard/vendor/orders
+export const dynamic = "force-dynamic"
+
 import React from "react"
 import { getOrders } from "@/lib/api/orders"
 import VendorOrdersClient from "@/components/dashboard/vendor/customerOrders/VendorOrdersClient"
+import { headers } from "next/headers"
+import { auth } from "@/lib/auth"
 
 // Fetch orders on the server and pass them to the client component
 const VendorOrdersPage = async () => {
+  // Get the logged-in vendor's id from the server session
+  const session = await auth.api.getSession({ headers: await headers() })
+  const vendorId = session?.user?.id
+
   let orders = []
   let hasError = false
 
   try {
-    orders = await getOrders()
+    // Only this vendor's orders (order.vendorId === vendorId)
+    orders = await getOrders({ vendorId })
   } catch (error) {
     console.error("Failed to fetch orders:", error)
     hasError = true
@@ -35,7 +45,9 @@ const VendorOrdersPage = async () => {
           </p>
         </div>
       ) : (
-        <VendorOrdersClient initialOrders={Array.isArray(orders) ? orders : []} />
+        <VendorOrdersClient
+          initialOrders={Array.isArray(orders) ? orders : []}
+        />
       )}
     </div>
   )

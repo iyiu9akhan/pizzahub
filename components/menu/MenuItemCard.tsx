@@ -23,6 +23,7 @@ export interface MenuItemData {
   images?: string[]
   status?: MenuItemStatus
   vendorName?: string
+  vendorId?: string
   isPremiumVendor?: boolean
 }
 

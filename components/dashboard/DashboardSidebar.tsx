@@ -23,7 +23,6 @@ import {
   House,
   LayoutDashboard,
   ShoppingBag,
-  Heart,
   User,
   Store,
   Package,
@@ -39,10 +38,9 @@ import {
 const menuItemsByRole = {
   customer: [
     { id: "home", name: "Home", url: "/", icon: House },
-    { id: "dashboard", name: "Dashboard", url: "/dashboard/customer", icon: LayoutDashboard },
-    { id: "orders", name: "My Orders", url: "/dashboard/customer/orders", icon: ShoppingBag },
-    { id: "wishlist", name: "Wishlist", url: "/dashboard/customer/wishlist", icon: Heart },
-    { id: "profile", name: "Profile", url: "/dashboard/customer/profile", icon: User },
+    { id: "overview", name: "Overview", url: "/dashboard/customer", icon: LayoutDashboard },
+    { id: "my-orders", name: "My Orders", url: "/dashboard/customer/my-orders", icon: ShoppingBag },
+    { id: "profile", name: "Profile Settings", url: "/dashboard/customer/profile", icon: User },
   ],
 
   vendor: [

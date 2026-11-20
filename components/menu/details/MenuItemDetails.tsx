@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useState, useSyncExternalStore } from "react"
 import Link from "next/link"
 
 import {
@@ -18,6 +18,9 @@ import { formatBDT } from "@/lib/format"
 
 import type { MenuItem } from "@/types/menu"
 
+// Subscription for client hydration detection without setState in effect
+const emptySubscribe = () => () => {}
+
 export interface MenuItemDetailsProps {
   item: MenuItem
   onOrderClick: () => void
@@ -30,12 +33,7 @@ export default function MenuItemDetails({
   const { data: session, isPending } = useSession()
 
   const [activeImageIndex, setActiveImageIndex] = useState(0)
-  const [mounted, setMounted] = useState(false)
-
-  // Prevent hydration mismatch
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false)
 
   const role =
     (session?.user as { role?: string } | undefined)?.role || "customer"

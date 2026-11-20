@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useSyncExternalStore } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 
@@ -19,6 +19,9 @@ import { useRouter } from "next/navigation"
 import OrderPizza from "@/lib/actions/OrderPizza"
 import type OrderPizzaType from "@/types/OrderPizzaType"
 
+// Subscription for client hydration detection without setState in effect
+const emptySubscribe = () => () => {}
+
 export default function ItemDetailsPage() {
   const params = useParams<{ id: string }>()
   const itemId = params.id
@@ -27,13 +30,12 @@ export default function ItemDetailsPage() {
 
   const [item, setItem] = useState<MenuItem | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [mounted, setMounted] = useState(false)
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  )
   const router = useRouter()
-
-  // Prevent hydration mismatch
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   // Fetch menu item
   useEffect(() => {
@@ -76,8 +78,17 @@ export default function ItemDetailsPage() {
   const handleOrderClick = async () => {
     if (!session?.user || !item) return
 
+    // Block the order if the item has no vendor (order could not reach any vendor dashboard)
+    if (!item.vendorId) {
+      toastInfo("Order failed!", "This item has no vendor assigned.")
+      return
+    }
+
     try {
       const orderData: OrderPizzaType = {
+        vendorId: item.vendorId,
+        vendorName: item.vendorName,
+
         customerId: session.user.id,
         customerName: session.user.name,
         customerEmail: session.user.email,
