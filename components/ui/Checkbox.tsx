@@ -1,3 +1,4 @@
+// Custom accessible Checkbox component styled with brand design tokens.
 "use client"
 
 import React from "react"
@@ -30,6 +31,7 @@ const Checkbox: React.FC<CheckboxProps> = ({
       } ${className}`}
     >
       <div className="relative flex items-center justify-center shrink-0">
+        {/* Native checkbox input hidden for custom indicator */}
         <input
           id={id}
           type="checkbox"
@@ -39,6 +41,7 @@ const Checkbox: React.FC<CheckboxProps> = ({
           onChange={(e) => onChange(e.target.checked)}
           className="peer sr-only"
         />
+        {/* Visual box with checkmark */}
         <div className="h-5 w-5 rounded-md border-2 border-brand bg-surface transition-all duration-200 peer-focus-visible:ring-2 peer-focus-visible:ring-brand/40 peer-checked:bg-brand peer-checked:border-brand flex items-center justify-center shadow-2xs group-hover:border-brand-dark cursor-pointer">
           <Check
             className={`h-3.5 w-3.5 stroke-[3] text-white transition-opacity duration-150 ${

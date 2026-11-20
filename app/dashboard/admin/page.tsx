@@ -1,3 +1,4 @@
+// Admin dashboard overview page — /dashboard/admin
 import React from "react"
 
 const AdminDashboardPage = () => {

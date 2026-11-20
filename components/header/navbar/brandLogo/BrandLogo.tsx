@@ -1,3 +1,4 @@
+// BrandLogo component — PizzaHub brand icon and title linking to home.
 import React from "react"
 import Link from "next/link"
 import { Pizza } from "lucide-react"
@@ -20,6 +21,7 @@ const BrandLogo: React.FC<BrandLogoProps> = ({
       className={`group flex items-center gap-2.5 rounded-xl transition-opacity hover:opacity-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand/40 ${className}`}
       aria-label="PizzaHub Home"
     >
+      {/* Pizza slice icon badge */}
       <div
         className={`flex h-11 w-11 items-center justify-center rounded-xl shadow-md transition-transform duration-300 group-hover:scale-105 ${
           isLight ? "bg-white text-brand" : "bg-brand text-white shadow-brand/25"
@@ -27,6 +29,8 @@ const BrandLogo: React.FC<BrandLogoProps> = ({
       >
         <Pizza className="h-6 w-6 transition-transform duration-300 group-hover:rotate-12" />
       </div>
+
+      {/* Brand text title and tagline */}
       <div className="flex flex-col">
         <span
           className={`font-heading text-xl font-extrabold leading-tight tracking-tight ${

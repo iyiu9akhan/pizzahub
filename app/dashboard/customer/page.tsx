@@ -1,9 +1,8 @@
-import React from 'react'
+// Customer dashboard overview page — /dashboard/customer
+import React from "react"
 
 const CustomerDashboardPage = () => {
-  return (
-    <div>customer dashboard</div>
-  )
+  return <div>customer dashboard</div>
 }
 
 export default CustomerDashboardPage

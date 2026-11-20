@@ -1,3 +1,4 @@
+// RoleSelect component — radio card selector for choosing between customer and vendor roles on signup.
 "use client"
 
 import React from "react"
@@ -19,6 +20,7 @@ interface RoleOption {
   icon: React.ComponentType<{ className?: string }>
 }
 
+// Available self-registration roles
 const ROLES: RoleOption[] = [
   {
     value: "customer",
@@ -64,6 +66,7 @@ const RoleSelect: React.FC<RoleSelectProps> = ({
                   : "border-line bg-surface hover:border-brand-muted hover:bg-brand-soft/30"
               }`}
             >
+              {/* Hidden radio input for accessibility */}
               <input
                 id={`role-${role.value}`}
                 type="radio"
@@ -74,6 +77,7 @@ const RoleSelect: React.FC<RoleSelectProps> = ({
                 className="sr-only"
               />
 
+              {/* Role icon container */}
               <div
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors sm:h-10 sm:w-10 ${
                   isSelected
@@ -84,6 +88,7 @@ const RoleSelect: React.FC<RoleSelectProps> = ({
                 <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
 
+              {/* Role title and caption */}
               <div className="flex min-w-0 flex-1 flex-col text-left">
                 <span className="font-heading text-xs font-bold leading-tight text-ink sm:text-sm">
                   {role.title}
@@ -93,6 +98,7 @@ const RoleSelect: React.FC<RoleSelectProps> = ({
                 </span>
               </div>
 
+              {/* Selection checkmark badge */}
               {isSelected && (
                 <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-white shadow-sm ring-2 ring-surface">
                   <Check className="h-3 w-3 stroke-3" />

@@ -1,3 +1,4 @@
+// Type definitions for registration form data and component props.
 import { UserRole } from "@/types/auth"
 
 export interface RegisterFormData {

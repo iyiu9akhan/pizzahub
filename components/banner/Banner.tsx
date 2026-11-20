@@ -1,13 +1,16 @@
+// Hero Banner component on the landing page.
+// Displays featured hero pizza with animated illustration, pricing, ratings, and call-to-actions.
 import React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ShoppingCart, Star, Clock, ArrowRight } from "lucide-react"
-import { formatPrice } from "@/lib/currency"
+import { formatBDT } from "@/lib/format"
 
 export interface BannerProps {
   className?: string
 }
 
+// Key metrics displayed in the hero banner
 const STATS = [
   { value: "30 min", label: "Avg. delivery" },
   { value: "50+", label: "Pizza varieties" },
@@ -19,7 +22,7 @@ const Banner: React.FC<BannerProps> = ({ className = "" }) => {
     <section
       className={`relative z-0 w-full -mt-20 overflow-x-clip bg-page transition-colors duration-300 ${className}`}
     >
-      {/* Soft decorative background glow */}
+      {/* Decorative ambient background glows */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -top-40 -left-40 h-130 w-130 rounded-full bg-brand-soft opacity-70 blur-3xl"
@@ -31,20 +34,19 @@ const Banner: React.FC<BannerProps> = ({ className = "" }) => {
 
       <div className="relative mx-auto max-w-7xl px-6 pt-28 pb-16 lg:pt-36 lg:pb-28">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-12">
-          {/* ───────── LEFT: Pizza visual ───────── */}
+          {/* Left Column: Floating pizza visual with floating rating & delivery chips */}
           <div className="relative order-1 mx-auto w-full max-w-105 sm:max-w-120 lg:max-w-130">
-            {/* Big circle backdrop */}
+            {/* Circular decorative backdrop */}
             <div
               aria-hidden="true"
               className="absolute inset-[14%] rounded-full bg-brand-soft"
             />
-            {/* Thin outline ring */}
             <div
               aria-hidden="true"
               className="absolute inset-[6%] rounded-full border border-dashed border-brand/30"
             />
 
-            {/* Pizza: float on wrapper */}
+            {/* Floating pizza hero image */}
             <div className="relative aspect-square w-full animate-hero-float motion-reduce:animate-none">
               <Image
                 src="/images/pizza/hero-pizza.png"
@@ -56,7 +58,7 @@ const Banner: React.FC<BannerProps> = ({ className = "" }) => {
               />
             </div>
 
-            {/* Badge: rating */}
+            {/* Customer rating badge */}
             <div className="absolute left-0 top-[14%] flex items-center gap-2.5 rounded-2xl border border-line bg-surface px-3.5 py-2.5 shadow-xl sm:left-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-soft text-brand-fg">
                 <Star className="h-4 w-4 fill-current" />
@@ -67,7 +69,7 @@ const Banner: React.FC<BannerProps> = ({ className = "" }) => {
               </div>
             </div>
 
-            {/* Badge: delivery */}
+            {/* Fast delivery badge */}
             <div className="absolute bottom-[10%] right-0 flex items-center gap-2.5 rounded-2xl border border-line bg-surface px-3.5 py-2.5 shadow-xl sm:right-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-white">
                 <Clock className="h-4 w-4" />
@@ -79,7 +81,7 @@ const Banner: React.FC<BannerProps> = ({ className = "" }) => {
             </div>
           </div>
 
-          {/* ───────── RIGHT: Content ───────── */}
+          {/* Right Column: Copy, price in BDT, CTAs, and stats */}
           <div className="order-2 flex flex-col items-center text-center lg:items-start lg:text-left lg:pl-6 xl:pl-12">
             <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-1.5 font-text text-xs font-semibold uppercase tracking-[0.16em] text-ink-muted">
               <span aria-hidden="true">🍕</span> Today&apos;s Special
@@ -96,11 +98,11 @@ const Banner: React.FC<BannerProps> = ({ className = "" }) => {
               fresh basil — baked to perfection, delivered hot to your door.
             </p>
 
-            {/* Price + CTAs */}
+            {/* Price display with BDT format and Action buttons */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-6 lg:justify-start">
               <div className="flex flex-col items-start">
                 <span className="font-heading text-4xl font-extrabold leading-none text-brand-fg xl:text-5xl">
-                  {formatPrice(599)}
+                  {formatBDT(599)}
                 </span>
                 <span className="mt-1.5 font-text text-xs tracking-wide text-ink-muted">
                   total payable
@@ -117,7 +119,7 @@ const Banner: React.FC<BannerProps> = ({ className = "" }) => {
                 </Link>
 
                 <Link
-                  href="#menu"
+                  href="/menu"
                   className="group inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-line bg-surface px-6 font-heading text-base font-semibold text-ink transition-all duration-300 hover:border-brand hover:text-brand-fg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand/40 active:scale-95"
                 >
                   <span>View menu</span>
@@ -126,7 +128,7 @@ const Banner: React.FC<BannerProps> = ({ className = "" }) => {
               </div>
             </div>
 
-            {/* Stats */}
+            {/* Key stats summary */}
             <dl className="mt-10 grid w-full max-w-md grid-cols-3 gap-4 border-t border-line pt-6">
               {STATS.map((s) => (
                 <div key={s.label} className="flex flex-col lg:items-start">

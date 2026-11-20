@@ -1,15 +1,22 @@
+// NavBtn component — right-side navigation actions in the navbar.
+// Displays role-aware icons: cart for customer, orders badge for vendor, neither for admin/guest.
+// Also includes the user profile menu with dashboard links and interactive logout.
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { LayoutDashboard, Settings, LogOut } from "lucide-react"
+import { LayoutDashboard, Settings, LogOut, ClipboardList } from "lucide-react"
 
 import ThemeToggle from "@/components/header/navbar/navBtn/ThemeToggle"
 import CartBtn from "@/components/header/navbar/navBtn/CartBtn"
 import AuthBtns from "@/components/header/navbar/navBtn/AuthBtns"
+import LoadingButton from "@/components/ui/LoadingButton"
+import UserAvatar from "@/components/ui/UserAvatar"
 
 import { useSession, authClient } from "@/lib/auth-client"
+import { toastSuccess, toastError } from "@/lib/toast"
+import { getPendingOrdersCount } from "@/lib/api/items"
 
 export interface NavBtnProps {
   className?: string
@@ -21,6 +28,7 @@ export interface NavBtnProps {
   onLinkClick?: () => void
 }
 
+// Fallback avatars by user role — used by UserAvatar via role-based default
 const ROLE_AVATARS: Record<string, string> = {
   admin: "/images/profilePic/admin-demo.png",
   vendor: "/images/profilePic/vendor-demo.png",
@@ -39,8 +47,24 @@ const NavBtn: React.FC<NavBtnProps> = ({
   const { data: session, isPending } = useSession()
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState<boolean>(false)
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
+  // Pending orders badge count for vendors — defaults to 0 if endpoint is not implemented
+  const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0)
+
+  const role = session?.user?.role || "customer"
+
+  // Fetch pending orders count for vendors
+  useEffect(() => {
+    if (role === "vendor" && session) {
+      getPendingOrdersCount()
+        .then(setPendingOrdersCount)
+        .catch(() => setPendingOrdersCount(0))
+    }
+  }, [role, session])
+
+  // Close dropdown on outside click
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       if (
@@ -50,36 +74,59 @@ const NavBtn: React.FC<NavBtnProps> = ({
         setMenuOpen(false)
       }
     }
-
     document.addEventListener("mousedown", handleOutsideClick)
     return () => document.removeEventListener("mousedown", handleOutsideClick)
   }, [])
 
+  // Execute logout with spinner and toast notification
   const handleLogout = async () => {
+    setIsLoggingOut(true)
     try {
-      setMenuOpen(false)
       await authClient.signOut()
+      toastSuccess("Logged out. See you next time!")
+      setMenuOpen(false)
       onLinkClick?.()
       router.push("/login")
       router.refresh()
-    } catch (err) {
-      console.error("Logout failed:", err)
+    } catch {
+      toastError("Logout failed. Please try again.")
+    } finally {
+      setIsLoggingOut(false)
     }
   }
 
-  const role = session?.user?.role || "customer"
   const dashboardHref = `/dashboard/${role}`
   const profileSettingsHref = `/dashboard/${role}/profile`
-  const avatarSrc = ROLE_AVATARS[role] || ROLE_AVATARS.customer
 
-  const renderAvatar = (sizeClass = "size-9", ringClass = "border-2 border-line") => (
-    <img
-      src={avatarSrc}
-      alt={session?.user?.name || `${role} profile`}
-      className={`${sizeClass} shrink-0 rounded-full object-cover bg-surface ${ringClass}`}
+  // Avatar size helper — maps button context to UserAvatar size prop
+  const renderAvatar = (size: "sm" | "md" | "lg" = "md") => (
+    <UserAvatar
+      src={session?.user?.image}
+      name={session?.user?.name || role}
+      size={size}
+      fallbackSrc={ROLE_AVATARS[role] || ROLE_AVATARS.customer}
     />
   )
 
+  // Vendor-only orders icon with notification badge
+  const ordersIcon = role === "vendor" && session && (
+    <Link
+      href="/dashboard/vendor/orders"
+      aria-label="Vendor orders"
+      title="Customer orders"
+      className="relative flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface text-ink shadow-2xs transition-all hover:border-brand-muted hover:bg-brand-soft hover:text-brand-fg"
+    >
+      <ClipboardList className="h-4 w-4" />
+      {/* Badge: visible only when pending count is greater than 0 */}
+      {pendingOrdersCount > 0 && (
+        <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-heading font-bold text-white shadow-xs">
+          {pendingOrdersCount}
+        </span>
+      )}
+    </Link>
+  )
+
+  // Profile dropdown menu or authentication buttons
   const authActions = isPending ? (
     <div className="h-9 w-20 animate-pulse rounded-md bg-muted" />
   ) : session ? (
@@ -103,7 +150,7 @@ const NavBtn: React.FC<NavBtnProps> = ({
         {fullWidth ? (
           <>
             <span className="flex items-center gap-2.5 truncate">
-              {renderAvatar("size-7", "border border-line")}
+              {renderAvatar("sm")}
               <span className="truncate text-sm font-medium">
                 {session.user.name || "User"}
               </span>
@@ -111,7 +158,7 @@ const NavBtn: React.FC<NavBtnProps> = ({
             <span className="text-xs text-ink-muted">Menu</span>
           </>
         ) : (
-          renderAvatar("size-full", "border border-line/70")
+          renderAvatar("md")
         )}
       </button>
 
@@ -122,8 +169,9 @@ const NavBtn: React.FC<NavBtnProps> = ({
             fullWidth ? "w-full" : "absolute right-0 w-64"
           }`}
         >
+          {/* User info banner inside dropdown */}
           <div className="flex items-center gap-3 border-b border-line px-3 py-2.5">
-            {renderAvatar("size-10", "border-2 border-line")}
+            {renderAvatar("lg")}
             <div className="min-w-0 flex-1">
               <p className="truncate font-heading text-sm font-bold text-ink">
                 {session.user.name || "PizzaHub User"}
@@ -136,6 +184,7 @@ const NavBtn: React.FC<NavBtnProps> = ({
             </div>
           </div>
 
+          {/* Navigation links */}
           <div className="mt-1.5 flex flex-col gap-1">
             <Link
               href={dashboardHref}
@@ -165,15 +214,18 @@ const NavBtn: React.FC<NavBtnProps> = ({
 
             <div className="my-1 border-t border-line" />
 
-            <button
+            {/* Logout button using LoadingButton */}
+            <LoadingButton
               type="button"
               role="menuitem"
+              isLoading={isLoggingOut}
+              loadingText="Logging out…"
               onClick={handleLogout}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-danger transition-colors hover:bg-danger hover:text-danger-foreground"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-danger transition-colors hover:bg-danger hover:text-danger-foreground cursor-pointer"
             >
               <LogOut size={17} />
               <span>Logout</span>
-            </button>
+            </LoadingButton>
           </div>
         </div>
       )}
@@ -194,7 +246,9 @@ const NavBtn: React.FC<NavBtnProps> = ({
     return (
       <div className={`flex items-center gap-2 ${className}`}>
         <ThemeToggle />
-        <CartBtn count={cartCount} />
+        {/* Customer: show cart. Vendor: show orders icon. Admin/guest: neither. */}
+        {role === "customer" && session && <CartBtn count={cartCount} />}
+        {role === "vendor" && session && ordersIcon}
       </div>
     )
   }
@@ -210,8 +264,12 @@ const NavBtn: React.FC<NavBtnProps> = ({
       } ${className}`}
     >
       <ThemeToggle />
-      <CartBtn count={cartCount} />
-      <div className="mx-0.5 hidden h-5 w-px bg-line sm:block" />
+      {/* Customer sees cart; Vendor sees orders icon; Admin/guest sees neither */}
+      {role === "customer" && session && <CartBtn count={cartCount} />}
+      {role === "vendor" && session && ordersIcon}
+      {session && (
+        <span className="mx-0.5 hidden h-5 w-px bg-line sm:block" />
+      )}
       {authActions}
     </div>
   )

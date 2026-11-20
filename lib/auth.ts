@@ -6,21 +6,27 @@ const client = new MongoClient(process.env.MONGODB_URI as string)
 const db = client.db("pizzahub") // db name
 
 export const auth = betterAuth({
-  //login with mail & pass
+  // Email + password sign-in
   emailAndPassword: {
     enabled: true,
   },
-  //sending user role to db
   user: {
     additionalFields: {
+      // User role — determines dashboard access
       role: {
         type: ["customer", "vendor", "admin"],
         input: true,
         defaultValue: "customer",
       },
+      // Vendor's restaurant/business name — editable from profile settings
+      businessName: {
+        type: "string",
+        input: true,
+        defaultValue: "",
+      },
     },
   },
-  //google login
+  // Google OAuth provider
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,

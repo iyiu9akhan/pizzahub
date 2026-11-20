@@ -1,3 +1,5 @@
+// AuthLayout component — shared container layout for login and register screens.
+// Features a split card layout with branded imagery on the left and form on the right.
 import React from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -27,7 +29,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
       className={`min-h-screen w-full bg-page px-4 py-6 transition-colors duration-300 sm:px-6 sm:py-10 ${className}`}
     >
       <div className="mx-auto w-full max-w-5xl">
-        {/* Top bar */}
+        {/* Top bar with back to home navigation link */}
         <div className="mb-5 flex items-center justify-between">
           <Link
             href="/"
@@ -38,9 +40,9 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
           </Link>
         </div>
 
-        {/* Card */}
+        {/* Card with split layout */}
         <div className="grid overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl shadow-black/5 lg:grid-cols-2">
-          {/* ───────── LEFT: visual ───────── */}
+          {/* Left Column: Visual branding and promotional poster */}
           {isRegister ? (
             <div className="relative hidden min-h-180 overflow-hidden bg-[#e8decb] lg:block">
               <Image
@@ -52,14 +54,14 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
                 className="object-cover object-center"
               />
 
-              {/* Top-left BrandLogo pill (adapts to light/dark theme via bg-surface) */}
+              {/* Brand logo pill overlay */}
               <div className="relative z-10 p-6">
                 <div className="inline-block rounded-2xl border border-line/50 bg-surface/95 px-4 py-2.5 shadow-lg backdrop-blur-md">
                   <BrandLogo />
                 </div>
               </div>
 
-              {/* Bottom-left Discount Badge (forced dark text on white pill) */}
+              {/* Promotional discount badge */}
               {badgeText && (
                 <div className="absolute bottom-6 left-6 z-10 flex items-center gap-2.5 rounded-2xl bg-white/95 px-4 py-2.5 text-zinc-900 shadow-xl backdrop-blur-md">
                   <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
@@ -72,7 +74,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
               )}
             </div>
           ) : (
-            /* Login: poster (text already inside the image) */
+            /* Login screen poster visual */
             <div className="relative hidden min-h-160 bg-[#f3e9d8] lg:block">
               <Image
                 src={image}
@@ -85,7 +87,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
             </div>
           )}
 
-          {/* ───────── RIGHT: form ───────── */}
+          {/* Right Column: Auth form content */}
           <div className="flex flex-col justify-center p-6 sm:p-10 lg:p-12">
             {!isRegister && (
               <div className="mb-8">

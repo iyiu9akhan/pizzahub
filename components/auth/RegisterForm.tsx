@@ -1,16 +1,19 @@
+// Registration form — full name, email, password, confirm password, role, terms.
+// Accepts isLoading from parent to show spinner while the API call is running.
 "use client"
 
 import React, { useState } from "react"
 import Link from "next/link"
-import { Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react"
+import { Mail, Lock, User, Eye, EyeOff } from "lucide-react"
 import SocialButtons from "@/components/auth/SocialButtons"
 import Checkbox from "@/components/ui/Checkbox"
 import RoleSelect from "@/components/auth/RoleSelect"
 import { UserRole } from "@/types/auth"
-import { RegisterFormData, RegisterFormProps } from "@/types/registerDataType"
+import type { RegisterFormProps } from "@/types/registerDataType"
+import LoadingButton from "@/components/ui/LoadingButton"
 
 const inputBase =
-  "h-11 sm:h-12 w-full rounded-xl border border-line bg-surface pl-11 pr-4 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-hidden focus:ring-2 focus:ring-brand/20"
+  "h-11 sm:h-12 w-full rounded-xl border border-line bg-surface pl-11 pr-4 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-hidden focus:ring-2 focus:ring-brand/20 disabled:opacity-60"
 
 const labelBase =
   "block font-heading text-xs sm:text-sm font-semibold text-ink mb-1"
@@ -21,9 +24,15 @@ const iconWrap =
 const eyeBtn =
   "absolute inset-y-0 right-0 flex items-center pr-3.5 text-ink-muted hover:text-ink transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand/40 rounded-lg cursor-pointer"
 
-const RegisterForm: React.FC<RegisterFormProps> = ({
+// Extended props: add isLoading for the spinner
+interface RegisterFormExtendedProps extends RegisterFormProps {
+  isLoading?: boolean
+}
+
+const RegisterForm: React.FC<RegisterFormExtendedProps> = ({
   className = "",
   onSubmit,
+  isLoading = false,
 }) => {
   const [role, setRole] = useState<UserRole>("customer")
   const [showPassword, setShowPassword] = useState<boolean>(false)
@@ -46,13 +55,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     }))
   }
 
+  // Collect form values and bubble up to parent
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (onSubmit) {
-      onSubmit({
-        role,
-        ...formData,
-      })
+      onSubmit({ role, ...formData })
     }
   }
 
@@ -89,13 +96,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               value={formData.fullName}
               onChange={handleChange}
               placeholder="John Doe"
+              disabled={isLoading}
               className={inputBase}
             />
           </div>
         </div>
 
         {/* Email */}
-        <div className="">
+        <div>
           <label htmlFor="reg-email" className={labelBase}>
             Email address
           </label>
@@ -111,12 +119,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               value={formData.email}
               onChange={handleChange}
               placeholder="name@example.com"
+              disabled={isLoading}
               className={inputBase}
             />
           </div>
         </div>
 
-       {/* password input  */}
+        {/* Password */}
         <div className="mb-3">
           <label htmlFor="reg-password" className={labelBase}>
             Password
@@ -133,6 +142,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               value={formData.password}
               onChange={handleChange}
               placeholder="Create a strong password"
+              disabled={isLoading}
               className={`${inputBase} pr-11`}
             />
             <button
@@ -150,7 +160,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           </div>
         </div>
 
-        {/* Confirm Password input*/}
+        {/* Confirm Password */}
         <div>
           <label htmlFor="reg-confirm-password" className={labelBase}>
             Confirm password
@@ -167,6 +177,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               value={formData.confirmPassword}
               onChange={handleChange}
               placeholder="Confirm your password"
+              disabled={isLoading}
               className={`${inputBase} pr-11`}
             />
             <button
@@ -186,7 +197,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           </div>
         </div>
 
-        {/* Terms */}
+        {/* Terms checkbox */}
         <div className="pt-1.5">
           <Checkbox
             id="reg-terms"
@@ -216,12 +227,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           />
         </div>
 
-        <button
+        {/* Submit button with spinner */}
+        <LoadingButton
           type="submit"
+          isLoading={isLoading}
+          loadingText="Creating account…"
           className="mt-3 h-11 w-full cursor-pointer rounded-xl bg-brand font-heading text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:bg-brand-dark hover:shadow-md focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:outline-hidden active:scale-[0.99] sm:h-12 sm:text-base"
         >
           Create Account
-        </button>
+        </LoadingButton>
       </form>
 
       <div className="relative my-5">

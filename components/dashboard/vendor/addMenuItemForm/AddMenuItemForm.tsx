@@ -8,12 +8,13 @@ import {
   FileText,
   ImagePlus,
   Images,
-  Loader2,
   MapPin,
   Star,
   X,
 } from "lucide-react"
 import { formatBDT } from "@/lib/format"
+import { AddMenuItemFormValues } from "@/types/AddMenuItemDataType"
+import LoadingButton from "@/components/ui/LoadingButton"
 
 export const MENU_CATEGORIES = [
   "Classic Pizzas",
@@ -24,7 +25,6 @@ export const MENU_CATEGORIES = [
   "Beverages & Desserts",
 ] as const
 
-/** public/images/addMenu-items-img এর ছবি */
 export const PRESET_IMAGES = [1, 2, 3, 4, 5, 6].map(
   (n) => `/images/addMenu-items-img/item-${n}.jpg`
 )
@@ -42,17 +42,7 @@ const LOCATIONS = [
   "Khulna",
 ]
 
-export interface AddMenuItemFormValues {
-  itemName: string
-  category: string
-  description: string
-  price: number
-  location: string
-  /** নতুন upload করা file (ImgBB তে যাবে) */
-  images: File[]
-  /** gallery থেকে select করা বা আগে থেকে থাকা image URL */
-  existingImages: string[]
-}
+
 
 export interface AddMenuItemFormProps {
   mode?: "create" | "edit"
@@ -617,7 +607,7 @@ const AddMenuItemForm: React.FC<AddMenuItemFormProps> = ({
             />
 
             <div className="overflow-hidden rounded-2xl border border-line bg-surface shadow-sm">
-              <div className="relative aspect-[4/3] bg-brand-soft/40">
+              <div className="relative aspect-4/3 bg-brand-soft/40">
                 {coverImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -640,14 +630,14 @@ const AddMenuItemForm: React.FC<AddMenuItemFormProps> = ({
 
               <div className="space-y-2 p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <h4 className="min-w-0 break-words font-heading text-base font-extrabold text-ink">
+                  <h4 className="min-w-0 wrap-break-word font-heading text-base font-extrabold text-ink">
                     {itemName.trim() || "Item name"}
                   </h4>
                   <span className="shrink-0 font-heading text-lg font-extrabold text-brand-fg">
                     {priceNumber > 0 ? formatBDT(priceNumber) : "৳ 0"}
                   </span>
                 </div>
-                <p className="line-clamp-2 break-words font-text text-xs leading-relaxed text-ink-muted">
+                <p className="line-clamp-2 wrap-break-word font-text text-xs leading-relaxed text-ink-muted">
                   {description.trim() ||
                     "Your item description will appear here."}
                 </p>
@@ -672,18 +662,14 @@ const AddMenuItemForm: React.FC<AddMenuItemFormProps> = ({
               Cancel
             </button>
           )}
-          <button
+          <LoadingButton
             type="submit"
-            disabled={isSubmitting}
+            isLoading={isSubmitting}
+            loadingText="Saving…"
             className="inline-flex h-12 min-w-44 cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand px-7 font-heading text-sm font-semibold text-white shadow-lg shadow-brand/25 transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
           >
-            {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isSubmitting
-              ? "Saving..."
-              : mode === "create"
-                ? "Add menu item"
-                : "Save changes"}
-          </button>
+            {mode === "create" ? "Add menu item" : "Save changes"}
+          </LoadingButton>
         </div>
       </form>
     </div>

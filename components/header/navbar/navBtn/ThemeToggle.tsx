@@ -1,3 +1,5 @@
+// ThemeToggle button — switches between light and dark themes.
+// Persists preference in localStorage and toggles the 'dark' CSS class on documentElement.
 "use client"
 
 import React, { useEffect, useState } from "react"
@@ -13,26 +15,32 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = "" }) => {
   const [mounted, setMounted] = useState<boolean>(false)
   const [isDark, setIsDark] = useState<boolean>(false)
 
+  // Initialize theme from storage or system preference on mount
   useEffect(() => {
-    setMounted(true)
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored === "dark") {
-      setIsDark(true)
-      document.documentElement.classList.add("dark")
-    } else if (stored === "light") {
-      setIsDark(false)
-      document.documentElement.classList.remove("dark")
-    } else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-      setIsDark(prefersDark)
-      if (prefersDark) {
+    const frame = requestAnimationFrame(() => {
+      setMounted(true)
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored === "dark") {
+        setIsDark(true)
         document.documentElement.classList.add("dark")
-      } else {
+      } else if (stored === "light") {
+        setIsDark(false)
         document.documentElement.classList.remove("dark")
+      } else {
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+        setIsDark(prefersDark)
+        if (prefersDark) {
+          document.documentElement.classList.add("dark")
+        } else {
+          document.documentElement.classList.remove("dark")
+        }
       }
-    }
+    })
+
+    return () => cancelAnimationFrame(frame)
   }, [])
 
+  // Toggle between dark and light themes
   const toggleTheme = () => {
     const nextDark = !isDark
     setIsDark(nextDark)

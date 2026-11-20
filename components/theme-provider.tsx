@@ -1,8 +1,10 @@
+// ThemeProvider wrapper with next-themes integration and hotkey listener.
 "use client"
 
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
 
+// Provides theme context across application
 function ThemeProvider({
   children,
   ...props
@@ -21,6 +23,7 @@ function ThemeProvider({
   )
 }
 
+// Determines if target element is an active user input field
 function isTypingTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) {
     return false
@@ -34,6 +37,7 @@ function isTypingTarget(target: EventTarget | null) {
   )
 }
 
+// Global hotkey listener ('d' key) to toggle theme unless actively typing
 function ThemeHotkey() {
   const { resolvedTheme, setTheme } = useTheme()
 

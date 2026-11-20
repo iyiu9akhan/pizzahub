@@ -1,3 +1,5 @@
+// Dashboard sidebar navigation component for customer, vendor, and admin roles.
+// Renders role-specific navigation links, branding, and current user profile details.
 "use client"
 
 import Link from "next/link"
@@ -15,6 +17,7 @@ import {
 } from "@/components/ui/sidebar"
 
 import { useSession } from "@/lib/auth-client"
+import UserAvatar from "@/components/ui/UserAvatar"
 
 import {
   House,
@@ -32,6 +35,7 @@ import {
   Pizza,
 } from "lucide-react"
 
+// Navigation items configuration split by role
 const menuItemsByRole = {
   customer: [
     { id: "home", name: "Home", url: "/", icon: House },
@@ -58,49 +62,48 @@ const menuItemsByRole = {
     { id: "vendors", name: "Manage Vendors", url: "/dashboard/admin/vendors", icon: Store },
     { id: "products", name: "Manage Products", url: "/dashboard/admin/products", icon: Package },
     { id: "orders", name: "Manage Orders", url: "/dashboard/admin/orders", icon: ClipboardList },
+    { id: "profile", name: "Profile Settings", url: "/dashboard/admin/profile", icon: User },
     { id: "settings", name: "Settings", url: "/dashboard/admin/settings", icon: Settings },
   ],
 }
 
 type Role = keyof typeof menuItemsByRole
 
+// Human-readable labels for each role
 const ROLE_LABEL: Record<Role, string> = {
   customer: "Customer",
   vendor: "Vendor",
   admin: "Administrator",
 }
 
+// Sidebar layout for all dashboard pages
 export function DashboardSidebar() {
   const { data: session, isPending } = useSession()
   const pathname = usePathname()
 
+  // Determine user role and fallback to customer
   const role = ((session?.user as { role?: string } | undefined)?.role ??
     "customer") as Role
   const safeRole: Role = role in menuItemsByRole ? role : "customer"
   const menuItems = menuItemsByRole[safeRole]
 
+  // Check if current route matches menu item URL
   const isActive = (url: string) => {
     if (url === "/") return pathname === "/"
-    // Root dashboard link (e.g. /dashboard/vendor) must match exactly,
-    // otherwise it would stay active on every sub page.
     if (url === `/dashboard/${safeRole}`) return pathname === url
     return pathname === url || pathname.startsWith(`${url}/`)
   }
 
   if (isPending) return null
 
+  // User display info
   const userName = session?.user?.name ?? "Guest"
   const userEmail = session?.user?.email ?? ""
-  const initials = userName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase()
+  const userImage = session?.user?.image
 
   return (
     <Sidebar>
-      {/* Header */}
+      {/* Header with PizzaHub logo and role label */}
       <SidebarHeader className="border-b border-line px-4 py-4">
         <Link href="/" className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white shadow-md shadow-brand/25">
@@ -117,7 +120,7 @@ export function DashboardSidebar() {
         </Link>
       </SidebarHeader>
 
-      {/* Menu */}
+      {/* Navigation menu items */}
       <SidebarContent className="px-2 py-3">
         <SidebarGroup>
           <SidebarGroupLabel className="mb-1 px-3 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
@@ -158,12 +161,14 @@ export function DashboardSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer: user card */}
+      {/* Footer: User profile info with avatar fallback */}
       <SidebarFooter className="border-t border-line p-3">
         <div className="flex items-center gap-3 rounded-xl bg-brand-soft/60 p-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand font-heading text-sm font-bold text-white">
-            {initials || "U"}
-          </span>
+          <UserAvatar
+            src={userImage}
+            name={userName}
+            size="md"
+          />
           <div className="min-w-0 leading-tight">
             <p className="truncate font-heading text-sm font-bold text-ink">
               {userName}

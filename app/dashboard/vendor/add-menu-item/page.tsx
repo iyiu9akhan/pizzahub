@@ -1,23 +1,35 @@
+// Add Menu Item page — /dashboard/vendor/add-menu-item
+// Collects form values, uploads images via ImgBB proxy, then POSTs to the API.
 "use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { PackagePlus, Clock } from "lucide-react"
-import AddMenuItemForm, {
-  AddMenuItemFormValues,
-} from "@/components/dashboard/vendor/addMenuItemForm/AddMenuItemForm"
+import AddMenuItemForm from "@/components/dashboard/vendor/addMenuItemForm/AddMenuItemForm"
+import { AddMenuItemFormValues } from "@/types/AddMenuItemDataType"
+import { createItem } from "@/lib/actions/CreateItem"
+import { toastSuccess, toastError } from "@/lib/toast"
 
 export default function AddMenuItemPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Handle form submission: upload images then create the item
   const handleCreate = async (values: AddMenuItemFormValues) => {
     setIsSubmitting(true)
-    console.log("Form data received:", values)
-    console.log("Uploaded files:", values.images)
-    console.log("Gallery / existing URLs:", values.existingImages)
-
-    setIsSubmitting(false)
+    try {
+      await createItem(values)
+      toastSuccess("Menu item added. Waiting for admin approval.")
+      router.push("/dashboard/vendor/menu-items")
+      router.refresh()
+    } catch (err) {
+      toastError(
+        "Failed to add menu item.",
+        err instanceof Error ? err.message : undefined
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -38,6 +50,7 @@ export default function AddMenuItemPage() {
           </div>
         </div>
 
+        {/* Admin review notice */}
         <div className="inline-flex items-center gap-2 self-start rounded-full border border-line bg-surface px-4 py-2 font-text text-xs text-ink-muted sm:self-auto">
           <Clock className="h-4 w-4 text-brand-fg" />
           Reviewed by an admin before it goes live

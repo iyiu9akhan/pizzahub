@@ -1,3 +1,5 @@
+// Login form component — email, password, remember me, and Google sign-in button.
+// Accepts isLoading from parent to show spinner while the API call is in flight.
 "use client"
 
 import React, { useState } from "react"
@@ -5,22 +7,29 @@ import Link from "next/link"
 import { Mail, Lock, Eye, EyeOff } from "lucide-react"
 import SocialButtons from "@/components/auth/SocialButtons"
 import Checkbox from "@/components/ui/Checkbox"
-import { LoginFormData, LoginFormProps } from "@/types/loginFormType" 
+import type { LoginFormProps } from "@/types/loginFormType"
+import LoadingButton from "@/components/ui/LoadingButton"
 
-const LoginForm: React.FC<LoginFormProps> = ({ className = "", onSubmit }) => {
+// Extended props: add isLoading for the spinner
+interface LoginFormExtendedProps extends LoginFormProps {
+  isLoading?: boolean
+}
+
+const LoginForm: React.FC<LoginFormExtendedProps> = ({
+  className = "",
+  onSubmit,
+  isLoading = false,
+}) => {
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [email, setEmail] = useState<string>("")
   const [password, setPassword] = useState<string>("")
   const [rememberMe, setRememberMe] = useState<boolean>(false)
 
+  // Collect form values and bubble up to parent handler
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (onSubmit) {
-      onSubmit({
-        email,
-        password,
-        rememberMe,
-      })
+      onSubmit({ email, password, rememberMe })
     }
   }
 
@@ -55,7 +64,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "", onSubmit }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
-              className="h-12 w-full rounded-xl border border-line bg-surface pl-11 pr-4 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-hidden focus:ring-2 focus:ring-brand/20"
+              disabled={isLoading}
+              className="h-12 w-full rounded-xl border border-line bg-surface pl-11 pr-4 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-hidden focus:ring-2 focus:ring-brand/20 disabled:opacity-60"
             />
           </div>
         </div>
@@ -79,7 +89,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "", onSubmit }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
-              className="h-12 w-full rounded-xl border border-line bg-surface pl-11 pr-11 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-hidden focus:ring-2 focus:ring-brand/20"
+              disabled={isLoading}
+              className="h-12 w-full rounded-xl border border-line bg-surface pl-11 pr-11 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-hidden focus:ring-2 focus:ring-brand/20 disabled:opacity-60"
             />
             <button
               type="button"
@@ -107,12 +118,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "", onSubmit }) => {
           </Link>
         </div>
 
-        <button
+        {/* Submit button with loading spinner */}
+        <LoadingButton
           type="submit"
+          isLoading={isLoading}
+          loadingText="Logging in…"
           className="w-full h-12 rounded-xl bg-brand text-white font-heading font-semibold text-sm sm:text-base shadow-sm transition-all duration-300 hover:bg-brand-dark hover:shadow-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand/40 active:scale-[0.99] cursor-pointer mt-2"
         >
           Login
-        </button>
+        </LoadingButton>
       </form>
 
       <div className="relative my-6">

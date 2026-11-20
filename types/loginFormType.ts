@@ -1,3 +1,4 @@
+// Type definitions for login form fields and component props.
 export interface LoginFormData {
   email: string
   password: string

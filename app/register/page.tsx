@@ -4,36 +4,41 @@ import AuthLayout from "@/components/auth/AuthLayout"
 import RegisterForm from "@/components/auth/RegisterForm"
 import { RegisterFormData } from "@/types/registerDataType"
 import { authClient } from "@/lib/auth-client"
-import { useRouter } from "next/navigation" // <--- 1. Import useRouter
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { toastSuccess, toastError } from "@/lib/toast"
 
+// Register page — creates a new user account via Better Auth
 export default function RegisterPage() {
-  const router = useRouter() 
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleRegisterSubmit = async (formData: RegisterFormData) => {
-    const { data: authData, error } = await authClient.signUp.email({
-      name: formData.fullName,
-      email: formData.email,
-      password: formData.password,
-      image: "https://example.com/image.png",
-      callbackURL: "/",
-      fetchOptions: {
-        body: {
-          role: formData.role,
+    setIsLoading(true)
+    try {
+      const { error } = await authClient.signUp.email({
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        image: "https://example.com/image.png",
+        callbackURL: "/",
+        fetchOptions: {
+          body: { role: formData.role },
         },
-      },
-    })
+      })
 
-    if (error) {
-      console.error("Sign up error:", error)
-      alert(error.message || "Failed to register")
-      return
+      if (error) {
+        // Show error toast instead of alert()
+        toastError("Registration failed", error.message || "Could not create account.")
+        return
+      }
+
+      toastSuccess("Account created! Welcome to PizzaHub.")
+      router.push("/")
+      router.refresh()
+    } finally {
+      setIsLoading(false)
     }
-
-    console.log("new user from formData:", formData)
-    console.log("new user from authData:", authData)
-    
-    router.push("/")
-    router.refresh()
   }
 
   return (
@@ -44,7 +49,7 @@ export default function RegisterPage() {
       quoteSubtext="Sign up now to explore artisanal fresh pizzas and exclusive daily rewards."
       badgeText="Get 20% OFF on your first order"
     >
-      <RegisterForm onSubmit={handleRegisterSubmit} />
+      <RegisterForm onSubmit={handleRegisterSubmit} isLoading={isLoading} />
     </AuthLayout>
   )
 }

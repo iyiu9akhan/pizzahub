@@ -1,9 +1,16 @@
-import React from 'react'
+import React from "react"
+import { getOrders } from "@/lib/api/orders"
 
-const page = () => {
-  return (
-    <div>orders</div>
-  )
+const VendorOrdersPage = async () => {
+  try {
+    const orders = await getOrders()
+
+    console.log("Orders:", orders)
+  } catch (error) {
+    console.error("Failed to fetch orders:", error)
+  }
+
+  return <div>orders</div>
 }
 
-export default page
+export default VendorOrdersPage

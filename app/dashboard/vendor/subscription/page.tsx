@@ -1,7 +1,8 @@
+// Vendor subscription management page — /dashboard/vendor/subscription
 import React from "react"
 
-const page = () => {
+const VendorSubscriptionPage = () => {
   return <div>subscription</div>
 }
 
-export default page
+export default VendorSubscriptionPage
