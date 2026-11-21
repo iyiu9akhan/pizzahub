@@ -14,7 +14,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog"
 import LoadingButton from "@/components/ui/LoadingButton"
-import { deleteItem } from "@/lib/api/items"
+import { deleteItem } from "@/lib/actions/ItemActions"
 import { toastSuccess, toastError } from "@/lib/toast"
 
 interface Props {
@@ -79,22 +79,23 @@ const VendorMenuItemsGrid = ({ initialItems }: Props) => {
   const [itemToDelete, setItemToDelete] = useState<MenuItemData | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // Executes the delete API call and updates state upon confirmation
+  // Executes the delete action and updates state upon confirmation
   const handleConfirmDelete = async () => {
     if (!itemToDelete) return
 
     setIsDeleting(true)
     try {
-      await deleteItem(itemToDelete._id)
+      const res = await deleteItem(itemToDelete._id)
+      if (!res.success) {
+        toastError("Failed to delete item.", res.message)
+        return
+      }
       // Optimistically remove the deleted item from the list
       setItems((prev) => prev.filter((i) => i._id !== itemToDelete._id))
       toastSuccess("Menu item deleted.")
       setItemToDelete(null)
-    } catch (err) {
-      toastError(
-        "Failed to delete item.",
-        err instanceof Error ? err.message : undefined
-      )
+    } catch {
+      toastError("Failed to delete item.", "An unexpected error occurred.")
     } finally {
       setIsDeleting(false)
     }

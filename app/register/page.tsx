@@ -4,6 +4,7 @@ import AuthLayout from "@/components/auth/AuthLayout"
 import RegisterForm from "@/components/auth/RegisterForm"
 import { RegisterFormData } from "@/types/registerDataType"
 import { authClient } from "@/lib/auth-client"
+import { setSignupRole } from "@/lib/actions/SetSignupRole"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toastSuccess, toastError } from "@/lib/toast"
@@ -16,15 +17,13 @@ export default function RegisterPage() {
   const handleRegisterSubmit = async (formData: RegisterFormData) => {
     setIsLoading(true)
     try {
+      // role signup e pathano jabe na (admin() plugin block kore)
       const { error } = await authClient.signUp.email({
         name: formData.fullName,
         email: formData.email,
         password: formData.password,
         image: "https://example.com/image.png",
         callbackURL: "/",
-        fetchOptions: {
-          body: { role: formData.role },
-        },
       })
 
       if (error) {
@@ -32,6 +31,9 @@ export default function RegisterPage() {
         toastError("Registration failed", error.message || "Could not create account.")
         return
       }
+
+      // Signup er por role set (sudhu customer / vendor, admin kokhono na)
+      await setSignupRole(formData.role as "customer" | "vendor")
 
       toastSuccess("Account created! Welcome to PizzaHub.")
       router.push("/")

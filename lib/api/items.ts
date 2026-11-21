@@ -1,66 +1,40 @@
+import "server-only"
+import { authFetch } from "@/lib/core/server"
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
-// Fetch items from the backend API with optional vendor filtering
-// Fetch all items, or only one vendor's items (filtered by the server)
-export const getItems = async (options?: { vendorId?: string }) => {
-  const query = options?.vendorId ? `?vendorId=${options.vendorId}` : ""
-  const res = await fetch(`${BASE_URL}/items${query}`, { cache: "no-store" })
+// Public read: fetch all approved items
+export const getItems = async () => {
+  const res = await fetch(`${BASE_URL}/items`, { cache: "no-store" })
   if (!res.ok) throw new Error("Failed to fetch items")
   return res.json()
 }
 
-// Count items, or the items of one vendor
-export const getItemCount = async (options?: { vendorId?: string }) => {
-  const query = options?.vendorId ? `?vendorId=${options.vendorId}` : ""
-  const res = await fetch(`${BASE_URL}/items/count${query}`, {
-    cache: "no-store",
-  })
-  if (!res.ok) throw new Error("Failed to fetch item count")
-  const data = await res.json()
-  return data.count as number
-}
-
-// Fetch a single item by ID (used on edit page)
+// Public read: fetch a single approved item by ID
 export const getItemById = async (id: string) => {
   const res = await fetch(`${BASE_URL}/items/${id}`, { cache: "no-store" })
-  if (!res.ok) return null // Caller shows "not found" state
+  if (!res.ok) return null
   return res.json()
 }
 
-// Update an existing item (PUT /items/:id)
-export const updateItem = async (id: string, payload: Record<string, unknown>) => {
-  const res = await fetch(`${BASE_URL}/items/${id}`, {
-    method: "PUT",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(payload),
-  })
-  const result = await res.json()
-  if (!res.ok) throw new Error(result.message || "Failed to update menu item")
-  return result
+// Public read: fetch reviews for an item
+export const getItemReviews = async (id: string) => {
+  const res = await fetch(`${BASE_URL}/items/${id}/reviews`, { cache: "no-store" })
+  if (!res.ok) return []
+  return res.json()
 }
 
-// Delete an item by ID (DELETE /items/:id)
-export const deleteItem = async (id: string) => {
-  const res = await fetch(`${BASE_URL}/items/${id}`, { method: "DELETE" })
-  if (!res.ok) {
-    const result = await res.json().catch(() => ({}))
-    throw new Error(result.message || "Failed to delete menu item")
-  }
-  return true
+// Private read: vendor gets own items, admin gets all items
+export const getManageItems = async () => {
+  const res = await authFetch(`${BASE_URL}/items/manage`)
+  if (!res.ok) throw new Error("Failed to fetch managed items")
+  return res.json()
 }
 
-// Return the count of pending vendor orders.
-// If the endpoint does not exist yet, we fall back to 0 so the navbar never crashes.
-export const getPendingOrdersCount = async (): Promise<number> => {
-  try {
-    const res = await fetch(`${BASE_URL}/orders/pending-count`, {
-      cache: "no-store",
-    })
-    if (!res.ok) return 0
-    const data = await res.json()
-    return typeof data?.count === "number" ? data.count : 0
-  } catch {
-    // Endpoint may not exist yet — return 0 safely
-    return 0
-  }
+// Private read: vendor gets own item count
+export const getItemCount = async (): Promise<number> => {
+  const res = await authFetch(`${BASE_URL}/items/count`)
+  if (!res.ok) return 0
+  const data = await res.json()
+  return typeof data === "number" ? data : typeof data?.count === "number" ? data.count : 0
 }

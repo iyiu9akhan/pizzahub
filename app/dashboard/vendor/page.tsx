@@ -16,9 +16,10 @@ import {
 } from "lucide-react"
 
 import { auth } from "@/lib/auth"
-import { getPremiumVendorById } from "@/lib/api/users"
+import { getPremiumVendorById } from "@/lib/api/premiumVendors"
 import { getItemCount } from "@/lib/api/items"
 import { getOrders } from "@/lib/api/orders"
+import { getToken, authFetch } from "@/lib/core/server" // tomar path onujayi
 
 const FREE_LIMIT = 3
 
@@ -56,6 +57,21 @@ const VendorDashboardPage = async () => {
   const user = session?.user
   const vendorId = user?.id
 
+  // ===== TEMP TEST (token + backend middleware check, pore delete korbe) =====
+  try {
+    const token = await getToken()
+    console.log("TOKEN:", token ? token.slice(0, 10) + "..." : "NO TOKEN")
+
+    const res = await authFetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/whoami`
+    )
+    console.log("WHOAMI:", res.status, await res.json())
+  } catch (err) {
+    // redirect() er error ke ignore na kore rethrow korle bhalo, kintu test e log-i jothesto
+    console.log("WHOAMI ERROR:", err)
+  }
+  // ===== END TEMP TEST =====
+
   // Defaults
   let itemCount = 0
   let isPremium = false
@@ -66,7 +82,10 @@ const VendorDashboardPage = async () => {
   if (vendorId) {
     const [count, premiumData, ordersData] = await Promise.all([
       getItemCount({ vendorId }).catch(() => 0),
-      getPremiumVendorById(vendorId).catch(() => ({ isVendor: false, premium: false })),
+      getPremiumVendorById(vendorId).catch(() => ({
+        isVendor: false,
+        premium: false,
+      })),
       getOrders({ vendorId }).catch(() => []),
     ])
 
@@ -93,19 +112,21 @@ const VendorDashboardPage = async () => {
             Welcome back, {user?.name || "Vendor"}
           </h1>
           <p className="mt-2 text-sm text-ink-muted">
-            Manage your restaurant items, track customer orders, and view your plan.
+            Manage your restaurant items, track customer orders, and view your
+            plan.
           </p>
         </div>
 
         {/* Current plan badge */}
         {isPremium ? (
-          <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-amber-100 px-3.5 py-1.5 font-heading text-xs font-bold text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 sm:self-auto">
+          <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-amber-100 px-3.5 py-1.5 font-heading text-xs font-bold text-amber-800 sm:self-auto dark:bg-amber-500/20 dark:text-amber-300">
             <Crown className="h-4 w-4" />
             Premium Vendor
           </span>
         ) : (
           <span className="inline-flex items-center gap-1.5 self-start rounded-full border border-line bg-surface px-3.5 py-1.5 font-text text-xs text-ink-muted sm:self-auto">
-            Current plan: <strong className="font-heading text-ink">Free Plan</strong>
+            Current plan:{" "}
+            <strong className="font-heading text-ink">Free Plan</strong>
           </span>
         )}
       </div>
@@ -125,7 +146,9 @@ const VendorDashboardPage = async () => {
             </span>
             <div>
               <p className="font-heading text-base font-bold text-ink">
-                {isPremium ? "Premium Subscription Active" : "Free Subscription"}
+                {isPremium
+                  ? "Premium Subscription Active"
+                  : "Free Subscription"}
               </p>
               <p className="font-text text-sm text-ink-muted">
                 {isPremium
@@ -149,8 +172,8 @@ const VendorDashboardPage = async () => {
 
         {/* Free plan usage bar */}
         {!isPremium && (
-          <div className="mt-5 pt-5 border-t border-line">
-            <div className="flex items-center justify-between text-xs font-text">
+          <div className="mt-5 border-t border-line pt-5">
+            <div className="flex items-center justify-between font-text text-xs">
               <span className="text-ink-muted">Free item limit</span>
               <span className="font-heading font-bold text-ink">
                 {itemCount} / {FREE_LIMIT} used
@@ -172,7 +195,11 @@ const VendorDashboardPage = async () => {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Active Menu Items"
-          value={isPremium ? `${itemCount} (Unlimited)` : `${itemCount} / ${FREE_LIMIT}`}
+          value={
+            isPremium
+              ? `${itemCount} (Unlimited)`
+              : `${itemCount} / ${FREE_LIMIT}`
+          }
           icon={<Package className="h-6 w-6" />}
           color="bg-brand-soft text-brand-fg"
         />

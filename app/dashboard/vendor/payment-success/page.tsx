@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic"
 
 import { redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
+// import { revalidatePath } from "next/cache"
 import { ObjectId } from "mongodb"
 import { stripe } from "@/lib/stripe"
 import { getSession } from "@/lib/core/server"
@@ -60,8 +60,8 @@ const PaymentSuccessPage = async ({
   }
 
   // Invalidate cached vendor views so the page shows fresh data
-  revalidatePath("/dashboard/vendor")
-  revalidatePath("/dashboard/vendor/subscription")
+//   revalidatePath("/dashboard/vendor")
+//   revalidatePath("/dashboard/vendor/subscription")
 
   return (
     <SuccessContent

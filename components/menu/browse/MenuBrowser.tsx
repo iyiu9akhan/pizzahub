@@ -12,7 +12,6 @@ import MenuEmptyState from "@/components/menu/browse/MenuEmptyState"
 import ActiveFilterChips from "@/components/menu/browse/ActiveFilterChips"
 import { MenuItemCardSkeleton } from "@/components/menu/MenuItemCard"
 
-import { getItems } from "@/lib/api/items"
 import { toastError } from "@/lib/toast"
 import type { MenuItem, SortOption } from "@/types/menu"
 import { RotateCcw } from "lucide-react"
@@ -40,38 +39,14 @@ export default function MenuBrowser({
   const [isLoading, setIsLoading] = useState(false)
   const [fetchError, setFetchError] = useState<string | null>(initialError)
 
-  // Explicit retry handler triggers loading spinner
-  const handleRetry = async () => {
+  // Explicit retry handler refreshes server data
+  const handleRetry = () => {
     setIsLoading(true)
     setFetchError(null)
-    try {
-      const data = await getItems()
-      const rawList: MenuItem[] = Array.isArray(data)
-        ? data
-        : Array.isArray(data?.items)
-          ? data.items
-          : []
-
-      const normalizedList = rawList.map((item) => {
-        const mergedImages = [
-          ...(item.images || []),
-          ...(item.existingImages || []),
-        ]
-        return {
-          ...item,
-          images: Array.from(new Set(mergedImages)),
-        }
-      })
-
-      setItems(normalizedList)
-      setFetchError(null)
-    } catch {
-      const msg = "Failed to load menu items. Please try again."
-      setFetchError(msg)
-      toastError("Error loading menu", msg)
-    } finally {
+    router.refresh()
+    setTimeout(() => {
       setIsLoading(false)
-    }
+    }, 500)
   }
 
   // Extract unique locations from loaded items

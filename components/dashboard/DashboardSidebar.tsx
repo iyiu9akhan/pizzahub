@@ -30,6 +30,7 @@ import {
   ClipboardList,
   Users,
   Settings,
+  CreditCard,
   Crown,
   Pizza,
 } from "lucide-react"
@@ -55,13 +56,12 @@ const menuItemsByRole = {
 
   admin: [
     { id: "home", name: "Home", url: "/", icon: House },
-    { id: "dashboard", name: "Dashboard", url: "/dashboard/admin", icon: LayoutDashboard },
+    { id: "overview", name: "Overview", url: "/dashboard/admin", icon: LayoutDashboard },
     { id: "users", name: "Manage Users", url: "/dashboard/admin/users", icon: Users },
-    { id: "vendors", name: "Manage Vendors", url: "/dashboard/admin/vendors", icon: Store },
-    { id: "products", name: "Manage Products", url: "/dashboard/admin/products", icon: Package },
+    { id: "items", name: "Manage Items", url: "/dashboard/admin/items", icon: Package },
     { id: "orders", name: "Manage Orders", url: "/dashboard/admin/orders", icon: ClipboardList },
+    { id: "transactions", name: "Transactions", url: "/dashboard/admin/transactions", icon: CreditCard },
     { id: "profile", name: "Profile Settings", url: "/dashboard/admin/profile", icon: User },
-    { id: "settings", name: "Settings", url: "/dashboard/admin/settings", icon: Settings },
   ],
 }
 

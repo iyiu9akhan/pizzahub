@@ -1,116 +1,48 @@
+import "server-only"
+import { authFetch } from "@/lib/core/server"
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
-// Get all orders (used by vendor orders page)
-export async function getOrders(options?: { vendorId?: string }) {
-  if (!options?.vendorId) return []
+// Get orders based on logged-in user role (customer: own, vendor: own, admin: all with optional filters)
+export async function getOrders(options?: {
+  vendorId?: string
+  customerId?: string
+  status?: string
+}) {
+  const params = new URLSearchParams()
+  if (options?.vendorId) params.append("vendorId", options.vendorId)
+  if (options?.customerId) params.append("customerId", options.customerId)
+  if (options?.status) params.append("status", options.status)
+  const qs = params.toString() ? `?${params.toString()}` : ""
 
-  const response = await fetch(
-    `${BASE_URL}/orders?vendorId=${encodeURIComponent(options.vendorId)}`,
-    { cache: "no-store" }
-  )
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch orders")
-  }
-
+  const response = await authFetch(`${BASE_URL}/orders${qs}`)
+  if (!response.ok) throw new Error("Failed to fetch orders")
   return response.json()
 }
 
-// Get orders for a specific customer — always fresh (no cache)
-export async function getOrdersByCustomerId(customerId: string) {
-  const response = await fetch(`${BASE_URL}/orders?customerId=${customerId}`, {
-    cache: "no-store",
-  })
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch customer orders")
-  }
-
-  return response.json()
-}
-
-// Get count of pending orders for a customer (used for customer header order badge)
-export async function getCustomerPendingOrdersCount(
-  customerId: string
-): Promise<number> {
+// Customer header badge: pending order count
+export async function getCustomerPendingOrdersCount(): Promise<number> {
   try {
-    const orders = await getOrdersByCustomerId(customerId)
+    const orders = await getOrders()
     if (!Array.isArray(orders)) return 0
-    return orders.filter(
-      (o: { customerId?: string; status?: string }) => {
-        if (o.customerId && o.customerId !== customerId) return false
-        return o.status === "pending"
-      }
-    ).length
+    return orders.filter((o: { status?: string }) => o.status === "pending").length
   } catch {
     return 0
   }
 }
 
-// Get count of active undelivered orders for a vendor (used for vendor header order badge)
-export async function getVendorActiveOrdersCount(
-  vendorId: string
-): Promise<number> {
+// Vendor header badge: undelivered order count
+export async function getVendorActiveOrdersCount(): Promise<number> {
   try {
-    const orders = await getOrders({ vendorId })
+    const orders = await getOrders()
     if (!Array.isArray(orders)) return 0
-    return orders.filter(
-      (o: { status?: string; fulfillmentStatus?: string }) => {
-        if (o.status === "rejected" || o.status === "cancelled") return false
-        return o.fulfillmentStatus !== "delivered"
-      }
-    ).length
+    return orders.filter((o: { status?: string; fulfillmentStatus?: string }) => {
+      if (o.status === "rejected" || o.status === "cancelled") return false
+      return o.fulfillmentStatus !== "delivered"
+    }).length
   } catch {
     return 0
   }
-}
-
-// Get count of active orders for a customer (used by cart badge in navbar)
-// Active = not delivered and not rejected/cancelled
-export async function getCustomerActiveOrdersCount(
-  customerId: string
-): Promise<number> {
-  try {
-    const orders = await getOrdersByCustomerId(customerId)
-    if (!Array.isArray(orders)) return 0
-
-    // Count orders that belong to this customer and are still in progress
-    const active = orders.filter(
-      (o: {
-        customerId?: string
-        status?: string
-        fulfillmentStatus?: string
-      }) => {
-        if (o.customerId && o.customerId !== customerId) return false
-        const done =
-          o.status === "rejected" ||
-          o.status === "cancelled" ||
-          o.fulfillmentStatus === "delivered"
-        return !done
-      }
-    )
-    return active.length
-  } catch {
-    return 0
-  }
-}
-
-// Update an order (status or fulfillmentStatus)
-export async function updateOrderStatus(
-  id: string,
-  update: { status?: string; fulfillmentStatus?: string }
-) {
-  const response = await fetch(`${BASE_URL}/orders/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(update),
-  })
-
-  if (!response.ok) {
-    throw new Error("Failed to update order")
-  }
-
-  return response.json()
 }
 
 export default getOrders

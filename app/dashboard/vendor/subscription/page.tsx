@@ -16,7 +16,7 @@ import {
 } from "lucide-react"
 
 import { auth } from "@/lib/auth"
-import { getPremiumVendorById } from "@/lib/api/users"
+import { getPremiumVendorById } from "@/lib/api/premiumVendors"
 import { getItemCount } from "@/lib/api/items"
 import UpgradeButton from "./UpgradeButton"
 
@@ -86,7 +86,7 @@ const Cell = ({ value }: { value: string | boolean }) =>
 const VendorSubscriptionPage = async ({
   searchParams,
 }: {
-  searchParams: Promise<{ reason?: string, canceled?: string }>
+  searchParams: Promise<{ reason?: string; canceled?: string }>
 }) => {
   const { reason, canceled } = await searchParams
   const fromLimit = reason === "limit"
@@ -101,7 +101,10 @@ const VendorSubscriptionPage = async ({
   if (vendorId) {
     const [count, premiumData] = await Promise.all([
       getItemCount({ vendorId }).catch(() => 0),
-      getPremiumVendorById(vendorId).catch(() => ({ isVendor: false, premium: false })),
+      getPremiumVendorById(vendorId).catch(() => ({
+        isVendor: false,
+        premium: false,
+      })),
     ])
     usedItems = count
     isPremium = Boolean(premiumData.isVendor && premiumData.premium)
@@ -128,7 +131,7 @@ const VendorSubscriptionPage = async ({
           </p>
         </div>
         {isPremium ? (
-          <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-amber-100 px-4 py-2 font-heading text-xs font-bold text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 sm:self-auto">
+          <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-amber-100 px-4 py-2 font-heading text-xs font-bold text-amber-800 sm:self-auto dark:bg-amber-500/20 dark:text-amber-300">
             <Crown className="h-4 w-4" />
             Current plan: Premium
           </span>

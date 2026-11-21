@@ -23,8 +23,13 @@ export default function LoginPage() {
       })
 
       if (error) {
-        // Show descriptive error toast instead of alert()
-        toastError("Login failed", error.message || "Invalid email or password.")
+        // Show descriptive error toast with reason if account is restricted / banned
+        const isBanned =
+          (error as { code?: string })?.code === "BANNED_USER" ||
+          error.message?.toLowerCase().includes("banned") ||
+          error.message?.toLowerCase().includes("restrict")
+        const title = isBanned ? "Account Restricted" : "Login failed"
+        toastError(title, error.message || "Invalid email or password.")
         return
       }
 

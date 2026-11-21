@@ -5,8 +5,8 @@ import CustomerOrdersCard, {
   OrderUpdate,
   VendorOrder,
 } from "./CustomerOrdersCard"
-import { updateOrderStatus } from "@/lib/api/orders"
 import { toastSuccess, toastError } from "@/lib/toast"
+import { updateOrderStatus } from "@/lib/actions/OrderStatus"
 
 interface Props {
   initialOrders: VendorOrder[]

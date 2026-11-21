@@ -4,8 +4,8 @@
 
 import React from "react"
 import Link from "next/link"
-import { MapPin, Pizza, Crown } from "lucide-react"
-import { formatUSD } from "@/lib/format"
+import { MapPin, Pizza, Crown, Star } from "lucide-react"
+import { formatBDT } from "@/lib/format"
 import { Skeleton } from "@/components/ui/skeleton"
 
 // ----- Types ----------------------------------------------------------------
@@ -25,6 +25,8 @@ export interface MenuItemData {
   vendorName?: string
   vendorId?: string
   isPremiumVendor?: boolean
+  ratingAvg?: number
+  ratingCount?: number
 }
 
 export interface MenuItemCardProps {
