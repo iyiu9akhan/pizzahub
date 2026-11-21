@@ -16,8 +16,6 @@ import UserAvatar from "@/components/ui/UserAvatar"
 
 import { useSession, authClient } from "@/lib/auth-client"
 import { toastSuccess, toastError } from "@/lib/toast"
-import { getPendingOrdersCount } from "@/lib/api/items"
-import { getCustomerActiveOrdersCount } from "@/lib/api/orders"
 
 export interface NavBtnProps {
   className?: string
@@ -25,6 +23,7 @@ export interface NavBtnProps {
   cartOnly?: boolean
   authOnly?: boolean
   mobileActionsOnly?: boolean
+  orderCount?: number
   onLinkClick?: () => void
 }
 
@@ -41,6 +40,7 @@ const NavBtn: React.FC<NavBtnProps> = ({
   cartOnly = false,
   authOnly = false,
   mobileActionsOnly = false,
+  orderCount,
   onLinkClick,
 }) => {
   const { data: session, isPending } = useSession()
@@ -49,30 +49,7 @@ const NavBtn: React.FC<NavBtnProps> = ({
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Pending orders badge count for vendors — defaults to 0 if endpoint is not implemented
-  const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0)
-  // Active orders badge count for customers — fetched from the orders API
-  const [customerOrderCount, setCustomerOrderCount] = useState<number>(0)
-
   const role = session?.user?.role || "customer"
-
-  // Fetch pending orders count for vendors
-  useEffect(() => {
-    if (role === "vendor" && session) {
-      getPendingOrdersCount()
-        .then(setPendingOrdersCount)
-        .catch(() => setPendingOrdersCount(0))
-    }
-  }, [role, session])
-
-  // Fetch active order count for customers (powers the cart badge)
-  useEffect(() => {
-    if (role === "customer" && session?.user?.id) {
-      getCustomerActiveOrdersCount(session.user.id)
-        .then(setCustomerOrderCount)
-        .catch(() => setCustomerOrderCount(0))
-    }
-  }, [role, session])
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -118,19 +95,30 @@ const NavBtn: React.FC<NavBtnProps> = ({
     />
   )
 
-  // Vendor-only orders icon with notification badge
-  const ordersIcon = role === "vendor" && session && (
+  // Order icon for Customer and Vendor (Admin & Guest do not see it)
+  const isOrderRole = (role === "customer" || role === "vendor") && !!session
+  const orderHref =
+    role === "customer"
+      ? "/dashboard/customer/my-orders"
+      : "/dashboard/vendor/orders"
+  const orderAriaLabel =
+    role === "customer" ? "Customer orders" : "Vendor orders"
+  const orderTitle = role === "customer" ? "My Orders" : "Customer Orders"
+  const count = orderCount ?? 0
+
+  const orderIcon = isOrderRole && (
     <Link
-      href="/dashboard/vendor/orders"
-      aria-label="Vendor orders"
-      title="Customer orders"
-      className="relative flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface text-ink shadow-2xs transition-all hover:border-brand-muted hover:bg-brand-soft hover:text-brand-fg"
+      href={orderHref}
+      aria-label={orderAriaLabel}
+      title={orderTitle}
+      onClick={onLinkClick}
+      className="relative flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface text-ink shadow-2xs transition-all hover:border-brand-muted hover:bg-brand-soft hover:text-brand-fg cursor-pointer"
     >
       <ClipboardList className="h-4 w-4" />
-      {/* Badge: visible only when pending count is greater than 0 */}
-      {pendingOrdersCount > 0 && (
+      {/* Badge: visible only when order count is greater than 0 */}
+      {count > 0 && (
         <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-heading font-bold text-white shadow-xs">
-          {pendingOrdersCount}
+          {count}
         </span>
       )}
     </Link>
@@ -249,16 +237,15 @@ const NavBtn: React.FC<NavBtnProps> = ({
   )
 
   if (cartOnly) {
-    return <CartBtn count={customerOrderCount} className={className} />
+    return <CartBtn count={count} className={className} />
   }
 
   if (mobileActionsOnly) {
     return (
       <div className={`flex items-center gap-2 ${className}`}>
         <ThemeToggle />
-        {/* Customer: show cart. Vendor: show orders icon. Admin/guest: neither. */}
-        {role === "customer" && session && <CartBtn count={customerOrderCount} />}
-        {role === "vendor" && session && ordersIcon}
+        {/* Customer and Vendor: clipboard orders icon. Admin/guest: neither. */}
+        {orderIcon}
       </div>
     )
   }
@@ -274,9 +261,8 @@ const NavBtn: React.FC<NavBtnProps> = ({
       } ${className}`}
     >
       <ThemeToggle />
-      {/* Customer sees cart; Vendor sees orders icon; Admin/guest sees neither */}
-      {role === "customer" && session && <CartBtn count={customerOrderCount} />}
-      {role === "vendor" && session && ordersIcon}
+      {/* Customer and Vendor: clipboard orders icon. Admin/guest: neither. */}
+      {orderIcon}
       {session && (
         <span className="mx-0.5 hidden h-5 w-px bg-line sm:block" />
       )}

@@ -4,19 +4,14 @@
 // Supports photo preview, ImgBB upload, session cache invalidation, and role-specific fields.
 "use client"
 
-import React, { useRef, useState } from "react"
+import React, { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Camera, X } from "lucide-react"
 
 import { authClient } from "@/lib/auth-client"
 import { toastSuccess, toastError } from "@/lib/toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import LoadingButton from "@/components/ui/LoadingButton"
-import UserAvatar from "@/components/ui/UserAvatar"
-
-// Allowed image MIME types and maximum file size
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"]
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024 // 5 MB
+import ProfileAvatarUploader from "@/components/dashboard/profile/ProfileAvatarUploader"
 
 // Role badge visual indicator
 const RoleBadge = ({ role }: { role: string }) => (
@@ -54,72 +49,21 @@ export interface ProfileSettingsFormProps {
 
 export default function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
   const router = useRouter()
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Local state initialized with current user data
   const [name, setName] = useState(user.name ?? "")
   const [businessName, setBusinessName] = useState(user.businessName ?? "")
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [currentImage, setCurrentImage] = useState<string | null | undefined>(user.image)
   const [isSaving, setIsSaving] = useState(false)
-  const [imageError, setImageError] = useState("")
 
   const role = user.role ?? "customer"
 
-  // Handle image file selection with validation
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      setImageError("Only JPG, PNG, or WEBP images are allowed.")
-      return
-    }
-    if (file.size > MAX_IMAGE_SIZE) {
-      setImageError("Image must be smaller than 5 MB.")
-      return
-    }
-
-    setImageError("")
-    setImageFile(file)
-    setImagePreview(URL.createObjectURL(file))
-  }
-
-  // Remove the selected image preview and reset input
-  const handleRemoveImage = () => {
-    setImageFile(null)
-    setImagePreview(null)
-    setImageError("")
-    if (fileInputRef.current) fileInputRef.current.value = ""
-  }
-
-  // Save changes: upload image to ImgBB via route handler, update Better Auth user, and refresh session
+  // Save changes: update Better Auth user and refresh session
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSaving(true)
 
     try {
-      let uploadedImageUrl: string | undefined
-
-      // Upload image via server proxy if a new file was chosen
-      if (imageFile) {
-        const formData = new FormData()
-        formData.append("file", imageFile)
-
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        })
-        const uploadData = await uploadRes.json()
-
-        if (!uploadRes.ok || !uploadData.url) {
-          toastError("Image upload failed", uploadData.error || "Please try again.")
-          setIsSaving(false)
-          return
-        }
-        uploadedImageUrl = uploadData.url as string
-      }
-
       // Payload contains only allowed editable fields (never email, role, or subscription)
       const updatePayload: Record<string, unknown> = {
         name: name.trim(),
@@ -127,10 +71,6 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsFormProps) 
 
       if (role === "vendor") {
         updatePayload.businessName = businessName.trim()
-      }
-
-      if (uploadedImageUrl) {
-        updatePayload.image = uploadedImageUrl
       }
 
       const { error } = await authClient.updateUser(updatePayload)
@@ -150,8 +90,6 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsFormProps) 
       }
 
       toastSuccess("Profile updated.")
-      setImageFile(null)
-      setImagePreview(null)
       router.refresh()
     } catch {
       toastError("Failed to save profile. Please try again.")
@@ -165,68 +103,12 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsFormProps) 
       onSubmit={handleSave}
       className="w-full max-w-2xl space-y-6 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6"
     >
-      {/* Profile image upload with preview and remove buttons */}
-      <div className="flex flex-col items-center gap-3">
-        <div className="relative">
-          {imagePreview ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={imagePreview}
-              alt="Profile preview"
-              className="h-28 w-28 rounded-full border-4 border-line object-cover"
-            />
-          ) : (
-            <UserAvatar
-              src={user.image}
-              name={user.name ?? "User"}
-              size="lg"
-              className="h-28 w-28 border-4 border-line"
-            />
-          )}
-
-          {/* Camera icon button to open file selector */}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            title="Change profile image"
-            aria-label="Change profile image"
-            className="absolute bottom-1 right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-brand text-white shadow-md transition-transform hover:scale-110"
-          >
-            <Camera className="h-4 w-4" />
-          </button>
-
-          {/* Remove preview button */}
-          {imagePreview && (
-            <button
-              type="button"
-              onClick={handleRemoveImage}
-              title="Remove image preview"
-              aria-label="Remove image preview"
-              className="absolute -right-1 -top-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-600 text-white shadow transition-transform hover:scale-110"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-
-        {/* Hidden file input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          className="sr-only"
-          onChange={handleImageChange}
-        />
-
-        {imageError && (
-          <p role="alert" className="text-xs text-red-500">
-            {imageError}
-          </p>
-        )}
-        <p className="font-text text-xs text-ink-muted">
-          JPG, PNG or WEBP · Max 5 MB
-        </p>
-      </div>
+      {/* Shared profile image uploader with preview and Better Auth update */}
+      <ProfileAvatarUploader
+        currentImage={currentImage}
+        userName={name || user.name || "User"}
+        onImageUpdated={(url) => setCurrentImage(url)}
+      />
 
       {/* Full name input */}
       <div>

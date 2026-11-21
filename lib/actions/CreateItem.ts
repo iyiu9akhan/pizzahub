@@ -1,6 +1,8 @@
 // Server-side action that creates a menu item.
 // Uploads new image Files to ImgBB first, then sends ONE merged images[] to the API.
 import { AddMenuItemFormValues } from "@/types/AddMenuItemDataType"
+import { getPremiumVendorById } from "@/lib/api/users"
+import { getItemCount } from "@/lib/api/items"
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
@@ -26,6 +28,17 @@ async function uploadFileToImgBB(file: File): Promise<string> {
 // Uploads any new File images first, then merges with existing URL images.
 // Sends only `images: string[]` to the backend — never sends `existingImages`.
 export const createItem = async (data: AddMenuItemFormValues) => {
+  // Server-side limit check: skip limit when vendor is premium
+  if (data.vendorId) {
+    const { isVendor, premium } = await getPremiumVendorById(data.vendorId)
+    if (isVendor && !premium) {
+      const count = await getItemCount({ vendorId: data.vendorId })
+      if (count >= 3) {
+        throw new Error("LIMIT_REACHED: Free plan limit reached. Upgrade to Premium.")
+      }
+    }
+  }
+
   // Upload new File images in parallel
   const uploadedUrls = await Promise.all(data.images.map(uploadFileToImgBB))
 

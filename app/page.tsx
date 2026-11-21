@@ -1,4 +1,6 @@
 // Landing Home page — hero, featured menu, categories, benefits, how-it-works, footer.
+export const dynamic = "force-dynamic"
+
 import Navbar from "@/components/header/navbar/Navbar"
 import HeroBanner from "@/components/home/HeroBanner"
 import FeatureMenu from "@/components/feature-menu/FeatureMenu"
@@ -6,11 +8,14 @@ import PizzaCategories from "@/components/home/PizzaCategories"
 import WhyChooseUs from "@/components/home/WhyChooseUs"
 import HowItWorks from "@/components/home/HowItWorks"
 import Footer from "@/components/home/Footer"
+import { getHeaderOrderCount } from "@/lib/core/server"
 
-export default function Home() {
+export default async function Home() {
+  const orderCount = await getHeaderOrderCount()
+
   return (
     <div className="min-h-screen bg-page flex flex-col transition-colors duration-300">
-      <Navbar />
+      <Navbar orderCount={orderCount} />
       <main className="flex-1">
         {/* 1. Hero banner */}
         <HeroBanner />

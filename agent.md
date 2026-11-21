@@ -25,7 +25,7 @@
 ## 5. Data Models & Relations
 - **Item**: `{ _id, itemName, description, price, category, images[], vendorId, vendorName, status }`
 - **Order**: `{ _id, customerId, customerName, customerEmail, customerPhone, deliveryAddress, items[], totalAmount, status, fulfillmentStatus, vendorName, createdAt }`
-- **User**: `{ id, name, email, image, role: "admin" | "vendor" | "customer" }`
+- **User**: `{ id, name, email, image, role: "admin" | "vendor" | "customer", businessName?, premium?: boolean }`
 - **Relations**: `Item.vendorId === User.id`, `Order.customerId === User.id`. Orders live in ONE collection.
 - **Status values**: `status`: `pending` | `accepted` | `rejected` | `cancelled`. `fulfillmentStatus`: `cooking` | `on_the_way` | `delivered`.
 
@@ -38,7 +38,8 @@
 - **Vendor own items**: `app/dashboard/vendor/menu-items/page.tsx` filters `item.vendorId === session.user.id`.
 - **Customer own orders**: `my-orders/page.tsx` filters `order.customerId === session.user.id`.
 - **Status sync**: All orders in one DB collection. Pages use `dynamic = "force-dynamic"` & `cache: "no-store"`.
-- **Header badge**: `CartBtn` links to `/dashboard/customer/my-orders`. `NavBtn` loads `getCustomerActiveOrdersCount`.
+- **Header badge**: `ClipboardList` in header links to `/dashboard/customer/my-orders` (pending count) or `/dashboard/vendor/orders` (undelivered count). Fetched in Server Components and passed as prop.
+- **Vendor premium**: Free tier has 3-item limit. Premium vendors have unlimited items and active plan badge.
 
 ## 8. Coding Conventions
 - Currency: `formatBDT()` from `lib/format.tsx` everywhere. Never use `alert()` (use `lib/toast.ts`).
@@ -53,3 +54,6 @@
 - 2026-11-20: Updated DashboardSidebar customer links and connected CartBtn with real active order count badge.
 - 2026-11-20: Fixed client mount hydration in menu item details using useSyncExternalStore; ESLint passes clean.
 - 2026-11-20: Vendor menu items filter by vendorId (String comparison), getItems({ vendorId }) added, vendorId saved on item creation.
+- 2026-11-21: Vendor premium flag (Better Auth user.additionalFields, Stripe payment success DB update, unlimited items limit check).
+- 2026-11-21: Shared ProfileAvatarUploader for admin, vendor, customer profile pages with type/size validation and cache refresh.
+- 2026-11-21: Unified header order icon (ClipboardList) with role-specific badge counts passed down from Server Components.

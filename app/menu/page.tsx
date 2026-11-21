@@ -1,9 +1,12 @@
+export const dynamic = "force-dynamic"
+
 import React, { Suspense } from "react"
 import Navbar from "@/components/header/navbar/Navbar"
 import Footer from "@/components/home/Footer"
 import MenuBrowser from "@/components/menu/browse/MenuBrowser"
 import MenuLoading from "@/app/menu/loading"
 import { getItems } from "@/lib/api/items"
+import { getHeaderOrderCount } from "@/lib/core/server"
 import type { MenuItem } from "@/types/menu"
 
 export const metadata = {
@@ -13,6 +16,7 @@ export const metadata = {
 }
 
 export default async function MenuPage() {
+  const orderCount = await getHeaderOrderCount()
   let initialItems: MenuItem[] = []
   let initialError: string | null = null
 
@@ -41,7 +45,7 @@ export default async function MenuPage() {
 
   return (
     <div className="min-h-screen bg-page flex flex-col transition-colors duration-300">
-      <Navbar />
+      <Navbar orderCount={orderCount} />
       <main className="flex-1">
         <Suspense fallback={<MenuLoading />}>
           <MenuBrowser

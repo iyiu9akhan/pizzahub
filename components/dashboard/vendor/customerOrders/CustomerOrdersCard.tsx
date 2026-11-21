@@ -14,7 +14,7 @@ import {
   Pizza,
   X,
 } from "lucide-react"
-import { formatBDT } from "@/lib/format"
+import { formatUSD } from "@/lib/format"
 import UserAvatar from "@/components/ui/UserAvatar"
 
 export type OrderStatus = "pending" | "accepted" | "rejected" | "cancelled"
@@ -457,7 +457,7 @@ return (
                           </p>
                         </td>
                         <td className="px-5 py-4 align-middle font-heading text-sm font-bold text-ink">
-                          {formatBDT(order.totalAmount)}
+                          {formatUSD(order.totalAmount)}
                         </td>
                         <td className="px-5 py-4 align-middle">
                           <StatusBadge stage={stage} />
@@ -502,7 +502,7 @@ return (
 
                   <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
                     <p className="font-heading text-base font-extrabold text-ink">
-                      {formatBDT(order.totalAmount)}
+                      {formatUSD(order.totalAmount)}
                     </p>
                     {renderActions(order)}
                   </div>

@@ -12,7 +12,7 @@ import {
   Star,
   X,
 } from "lucide-react"
-import { formatBDT } from "@/lib/format"
+import { formatUSD } from "@/lib/format"
 import { AddMenuItemFormValues } from "@/types/AddMenuItemDataType"
 import LoadingButton from "@/components/ui/LoadingButton"
 
@@ -42,8 +42,6 @@ const LOCATIONS = [
   "Khulna",
 ]
 
-
-
 export interface AddMenuItemFormProps {
   mode?: "create" | "edit"
   defaultValues?: Partial<
@@ -55,12 +53,7 @@ export interface AddMenuItemFormProps {
 }
 
 type FieldKey =
-  | "itemName"
-  | "category"
-  | "description"
-  | "price"
-  | "location"
-  | "images"
+  "itemName" | "category" | "description" | "price" | "location" | "images"
 type FormErrors = Partial<Record<FieldKey, string>>
 
 interface ImageEntry {
@@ -253,7 +246,9 @@ const AddMenuItemForm: React.FC<AddMenuItemFormProps> = ({
       price: Number(price),
       location: location.trim(),
       images: imageList.filter((i) => i.file).map((i) => i.file as File),
-      existingImages: imageList.filter((i) => i.url).map((i) => i.url as string),
+      existingImages: imageList
+        .filter((i) => i.url)
+        .map((i) => i.url as string),
     })
   }
 
@@ -376,16 +371,16 @@ const AddMenuItemForm: React.FC<AddMenuItemFormProps> = ({
             <CardTitle
               icon={Banknote}
               title="Pricing & location"
-              hint="All prices are in Bangladeshi Taka (BDT)."
+              hint="All prices are in US Dollars (USD)."
             />
             <div className="grid grid-cols-1 gap-5 @2xl:grid-cols-2">
               <div>
                 <label htmlFor="price" className={labelCls}>
-                  Price (BDT) <span className="text-red-500">*</span>
+                  Price (USD) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-text text-sm font-semibold text-ink-muted">
-                    ৳
+                  <span className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 font-text text-sm font-semibold text-ink-muted">
+                    $
                   </span>
                   <input
                     id="price"
@@ -396,7 +391,7 @@ const AddMenuItemForm: React.FC<AddMenuItemFormProps> = ({
                     step="1"
                     value={price}
                     disabled={isSubmitting}
-                    placeholder="e.g. 850"
+                    placeholder="e.g. 50"
                     onChange={(e) => {
                       setPrice(e.target.value)
                       clearError("price")
@@ -408,7 +403,7 @@ const AddMenuItemForm: React.FC<AddMenuItemFormProps> = ({
                   <p className="mt-1.5 font-text text-xs text-ink-muted">
                     Customers will see{" "}
                     <span className="font-semibold text-ink">
-                      {formatBDT(priceNumber)}
+                      {formatUSD(priceNumber)}
                     </span>
                   </p>
                 )}
@@ -477,7 +472,7 @@ const AddMenuItemForm: React.FC<AddMenuItemFormProps> = ({
                     className="h-full w-full object-cover"
                   />
                   {index === 0 && (
-                    <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-brand px-2 py-0.5 font-heading text-[10px] font-bold text-white">
+                    <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-brand px-2 py-0.5 font-heading text-[10px] font-bold text-white">
                       <Star className="h-3 w-3 fill-white" />
                       Cover
                     </span>
@@ -487,7 +482,7 @@ const AddMenuItemForm: React.FC<AddMenuItemFormProps> = ({
                     onClick={() => removeImage(img.id)}
                     disabled={isSubmitting}
                     aria-label={`Remove image ${index + 1}`}
-                    className="absolute right-2 top-2 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-brand"
+                    className="absolute top-2 right-2 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-brand"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -622,7 +617,7 @@ const AddMenuItemForm: React.FC<AddMenuItemFormProps> = ({
                   </div>
                 )}
                 {category && (
-                  <span className="absolute left-3 top-3 max-w-[85%] truncate rounded-full bg-white/95 px-3 py-1 font-heading text-[11px] font-bold text-brand-fg shadow">
+                  <span className="absolute top-3 left-3 max-w-[85%] truncate rounded-full bg-white/95 px-3 py-1 font-heading text-[11px] font-bold text-brand-fg shadow">
                     {category}
                   </span>
                 )}
@@ -630,20 +625,22 @@ const AddMenuItemForm: React.FC<AddMenuItemFormProps> = ({
 
               <div className="space-y-2 p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <h4 className="min-w-0 wrap-break-word font-heading text-base font-extrabold text-ink">
+                  <h4 className="min-w-0 font-heading text-base font-extrabold wrap-break-word text-ink">
                     {itemName.trim() || "Item name"}
                   </h4>
                   <span className="shrink-0 font-heading text-lg font-extrabold text-brand-fg">
-                    {priceNumber > 0 ? formatBDT(priceNumber) : "৳ 0"}
+                    {priceNumber > 0 ? formatUSD(priceNumber) : "৳ 0"}
                   </span>
                 </div>
-                <p className="line-clamp-2 wrap-break-word font-text text-xs leading-relaxed text-ink-muted">
+                <p className="line-clamp-2 font-text text-xs leading-relaxed wrap-break-word text-ink-muted">
                   {description.trim() ||
                     "Your item description will appear here."}
                 </p>
                 <div className="flex items-center gap-1.5 pt-1 font-text text-xs text-ink-muted">
                   <MapPin className="h-3.5 w-3.5 shrink-0 text-brand-fg" />
-                  <span className="truncate">{location.trim() || "Location"}</span>
+                  <span className="truncate">
+                    {location.trim() || "Location"}
+                  </span>
                 </div>
               </div>
             </div>

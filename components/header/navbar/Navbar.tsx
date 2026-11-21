@@ -29,9 +29,10 @@ import { cn } from "@/lib/utils"
 
 export interface NavbarProps {
   className?: string
+  orderCount?: number
 }
 
-const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
+const Navbar: React.FC<NavbarProps> = ({ className = "", orderCount }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isScrolled, setIsScrolled] = useState<boolean>(false)
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false)
@@ -90,12 +91,12 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
           <nav aria-label="Main Navigation" className="flex items-center">
             <Navitems />
           </nav>
-          <NavBtn />
+          <NavBtn orderCount={orderCount} />
         </div>
 
         {/* Mobile Right: Actions (Theme toggle, cart/orders) and Sheet hamburger trigger */}
         <div className="flex items-center gap-2 lg:hidden">
-          <NavBtn mobileActionsOnly />
+          <NavBtn mobileActionsOnly orderCount={orderCount} />
 
           <button
             type="button"

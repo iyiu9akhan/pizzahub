@@ -14,7 +14,7 @@ import {
 } from "lucide-react"
 
 import { useSession } from "@/lib/auth-client"
-import { formatBDT } from "@/lib/format"
+import { formatUSD } from "@/lib/format"
 
 import type { MenuItem } from "@/types/menu"
 
@@ -114,7 +114,7 @@ export default function MenuItemDetails({
 
             <div className="mt-4 flex items-center gap-4">
               <span className="font-heading text-3xl font-extrabold text-brand-fg">
-                {formatBDT(item.price)}
+                {formatUSD(item.price)}
               </span>
 
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">

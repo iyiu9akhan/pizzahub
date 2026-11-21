@@ -3,7 +3,7 @@ import { MongoClient } from "mongodb"
 import { mongodbAdapter } from "@better-auth/mongo-adapter"
 
 const client = new MongoClient(process.env.MONGODB_URI as string)
-const db = client.db("pizzahub") // db name
+export const db = client.db("pizzahub") // db name
 
 export const auth = betterAuth({
   // Email + password sign-in
@@ -23,6 +23,12 @@ export const auth = betterAuth({
         type: "string",
         input: true,
         defaultValue: "",
+      },
+      // Vendor premium subscription status — client must never set it directly
+      premium: {
+        type: "boolean",
+        input: false,
+        defaultValue: false,
       },
     },
   },

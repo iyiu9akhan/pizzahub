@@ -29,6 +29,42 @@ export async function getOrdersByCustomerId(customerId: string) {
   return response.json()
 }
 
+// Get count of pending orders for a customer (used for customer header order badge)
+export async function getCustomerPendingOrdersCount(
+  customerId: string
+): Promise<number> {
+  try {
+    const orders = await getOrdersByCustomerId(customerId)
+    if (!Array.isArray(orders)) return 0
+    return orders.filter(
+      (o: { customerId?: string; status?: string }) => {
+        if (o.customerId && o.customerId !== customerId) return false
+        return o.status === "pending"
+      }
+    ).length
+  } catch {
+    return 0
+  }
+}
+
+// Get count of active undelivered orders for a vendor (used for vendor header order badge)
+export async function getVendorActiveOrdersCount(
+  vendorId: string
+): Promise<number> {
+  try {
+    const orders = await getOrders({ vendorId })
+    if (!Array.isArray(orders)) return 0
+    return orders.filter(
+      (o: { status?: string; fulfillmentStatus?: string }) => {
+        if (o.status === "rejected" || o.status === "cancelled") return false
+        return o.fulfillmentStatus !== "delivered"
+      }
+    ).length
+  } catch {
+    return 0
+  }
+}
+
 // Get count of active orders for a customer (used by cart badge in navbar)
 // Active = not delivered and not rejected/cancelled
 export async function getCustomerActiveOrdersCount(

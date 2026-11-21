@@ -1,7 +1,7 @@
 // MyOrderCard — displays a single customer order with status, items, and total.
 // Pure UI component; receives order data as props.
 import React from "react"
-import { formatBDT } from "@/lib/format"
+import { formatUSD } from "@/lib/format"
 import { CustomerOrder, OrderStatus, FulfillmentStatus } from "@/types/order"
 import {
   Clock,
@@ -155,7 +155,7 @@ const MyOrderCard: React.FC<MyOrderCardProps> = ({ order }) => {
         {/* Total amount — top-right */}
         <div className="shrink-0 text-right">
           <p className="font-heading text-base font-bold text-ink">
-            {formatBDT(order.totalAmount)}
+            {formatUSD(order.totalAmount)}
           </p>
         </div>
       </div>

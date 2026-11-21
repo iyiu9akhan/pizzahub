@@ -5,7 +5,7 @@
 import React from "react"
 import Link from "next/link"
 import { MapPin, Pizza, Crown } from "lucide-react"
-import { formatBDT } from "@/lib/format"
+import { formatUSD } from "@/lib/format"
 import { Skeleton } from "@/components/ui/skeleton"
 
 // ----- Types ----------------------------------------------------------------
@@ -119,7 +119,7 @@ const MenuItemCard = ({
             {item.itemName}
           </h3>
           <span className="shrink-0 rounded-full bg-brand px-3 py-1 font-heading text-sm font-bold text-white">
-            {formatBDT(item.price)}
+            {formatUSD(item.price)}
           </span>
         </div>
 
