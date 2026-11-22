@@ -16,6 +16,7 @@ export interface CustomerWishlistProps {
 export default function CustomerWishlist({ items: initialItems }: CustomerWishlistProps) {
   const [items, setItems] = useState<WishlistItem[]>(initialItems)
   const [removingId, setRemovingId] = useState<string | null>(null)
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({})
 
   const handleRemove = async (itemId: string) => {
     setRemovingId(itemId)
@@ -95,12 +96,18 @@ export default function CustomerWishlist({ items: initialItems }: CustomerWishli
               >
                 {/* Image & Category */}
                 <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-brand-soft/40">
-                  {coverImage ? (
+                  {coverImage && !failedImages[item._id] ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={coverImage}
                       alt={item.itemName}
                       loading="lazy"
+                      onError={() =>
+                        setFailedImages((prev) => ({
+                          ...prev,
+                          [item._id]: true,
+                        }))
+                      }
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (

@@ -62,6 +62,7 @@ export default function MenuItemDetails({
   const { data: session, isPending } = useSession()
 
   const [activeImageIndex, setActiveImageIndex] = useState(0)
+  const [failedImages, setFailedImages] = useState<Record<number, boolean>>({})
   const [quantity, setQuantity] = useState(1)
   const [deliveryAddress, setDeliveryAddress] = useState("")
   const [customerPhone, setCustomerPhone] = useState("")
@@ -178,11 +179,17 @@ export default function MenuItemDetails({
         {/* Left column: Image gallery */}
         <div className="flex flex-col gap-4">
           <div className="relative aspect-4/3 w-full overflow-hidden rounded-3xl border border-line bg-surface shadow-md">
-            {activeImage ? (
+            {activeImage && !failedImages[activeImageIndex] ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={activeImage}
                 alt={item.itemName}
+                onError={() =>
+                  setFailedImages((prev) => ({
+                    ...prev,
+                    [activeImageIndex]: true,
+                  }))
+                }
                 className="h-full w-full object-cover transition-all duration-300"
               />
             ) : (
@@ -228,12 +235,24 @@ export default function MenuItemDetails({
                       : "border-line opacity-70 hover:opacity-100"
                   }`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={img}
-                    alt={`${item.itemName} view ${idx + 1}`}
-                    className="h-full w-full object-cover"
-                  />
+                  {failedImages[idx] ? (
+                    <div className="flex h-full w-full items-center justify-center bg-brand-soft/40 text-brand-fg/40">
+                      <Pizza className="h-6 w-6" />
+                    </div>
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={img}
+                      alt={`${item.itemName} view ${idx + 1}`}
+                      onError={() =>
+                        setFailedImages((prev) => ({
+                          ...prev,
+                          [idx]: true,
+                        }))
+                      }
+                      className="h-full w-full object-cover"
+                    />
+                  )}
                 </button>
               ))}
             </div>

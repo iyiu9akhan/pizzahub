@@ -25,10 +25,14 @@ export default function AddMenuItemClient({
 }: AddMenuItemClientProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [loadingText, setLoadingText] = useState("Adding item…")
 
   const handleCreate = async (values: AddMenuItemFormValues) => {
     setIsSubmitting(true)
     try {
+      if (values.images && values.images.length > 0) {
+        setLoadingText("Uploading images…")
+      }
       // 1. Upload new File images to /api/upload
       const uploadedUrls = await Promise.all(
         values.images.map((file) => uploadImageFile(file))
@@ -37,6 +41,7 @@ export default function AddMenuItemClient({
       // 2. Merge uploaded URLs with existing image URLs
       const allImages = [...(values.existingImages ?? []), ...uploadedUrls]
 
+      setLoadingText("Saving item…")
       // 3. Call server action (backend sets vendorId, vendorName, status)
       const res = await createItem({
         itemName: values.itemName,
@@ -108,6 +113,7 @@ export default function AddMenuItemClient({
           onSubmit={handleCreate}
           onCancel={() => router.push("/dashboard/vendor/menu-items")}
           isSubmitting={isSubmitting}
+          loadingText={loadingText}
         />
       )}
     </div>

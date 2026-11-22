@@ -64,3 +64,4 @@
 - 2026-11-22: Homepage featured menu premium filtering, MenuItemCard premium badge, review customer profile resolution.
 - 2026-11-22: Complete currency migration to USD (formatUSD, formatUSDCents), fixed LoginForm stray tag and unused imports.
 - 2026-11-22: Fixed Error 441/500/404, Recharts sizing, Google OAuth role preservation & account linking, protected /menu/[id].
+- 2026-11-22: Menu item images flow: 2MB limit, upload status feedback, safe fallback icons across cards, details, wishlist, orders, products.

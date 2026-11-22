@@ -51,6 +51,7 @@ export interface AddMenuItemFormProps {
   onSubmit: (values: AddMenuItemFormValues) => void | Promise<void>
   onCancel?: () => void
   isSubmitting?: boolean
+  loadingText?: string
 }
 
 type FieldKey =
@@ -65,7 +66,7 @@ interface ImageEntry {
 }
 
 const MAX_IMAGES = 4
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024
 const MAX_DESCRIPTION = 500
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"]
 
@@ -104,6 +105,7 @@ const AddMenuItemForm: React.FC<AddMenuItemFormProps> = ({
   onSubmit,
   onCancel,
   isSubmitting = false,
+  loadingText,
 }) => {
   const [itemName, setItemName] = useState(defaultValues?.itemName ?? "")
   const [category, setCategory] = useState(defaultValues?.category ?? "")
@@ -169,7 +171,7 @@ const AddMenuItemForm: React.FC<AddMenuItemFormProps> = ({
         continue
       }
       if (file.size > MAX_IMAGE_SIZE) {
-        errorMsg = "Each image must be smaller than 5MB"
+        errorMsg = "Each image must be smaller than 2MB"
         continue
       }
       accepted.push({ id: makeId(), file, preview: URL.createObjectURL(file) })
@@ -682,7 +684,10 @@ const menuItemZodSchema = z.object({
           <LoadingButton
             type="submit"
             isLoading={isSubmitting}
-            loadingText="Saving…"
+            loadingText={
+              loadingText ||
+              (mode === "create" ? "Adding item…" : "Saving changes…")
+            }
             className="inline-flex h-12 min-w-44 cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand px-7 font-heading text-sm font-semibold text-white shadow-lg shadow-brand/25 transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
           >
             {mode === "create" ? "Add menu item" : "Save changes"}

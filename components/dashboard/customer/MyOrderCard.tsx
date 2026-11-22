@@ -104,6 +104,7 @@ function formatDate(dateStr?: string): string {
 const MyOrderCard: React.FC<MyOrderCardProps> = ({ order, onCancelled }) => {
   const [isCancelling, setIsCancelling] = useState(false)
   const [currentStatus, setCurrentStatus] = useState<OrderStatus>(order.status)
+  const [imgError, setImgError] = useState(false)
 
   const stage = getStage(currentStatus, order.fulfillmentStatus)
   const stageStyle = STAGE_STYLES[stage]
@@ -135,11 +136,12 @@ const MyOrderCard: React.FC<MyOrderCardProps> = ({ order, onCancelled }) => {
       <div className="flex gap-4">
         {/* Item thumbnail */}
         <div className="shrink-0">
-          {thumbnail ? (
+          {thumbnail && !imgError ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={thumbnail}
               alt={firstItem?.itemName || firstItem?.name || "Order item"}
+              onError={() => setImgError(true)}
               className="h-20 w-20 rounded-xl object-cover"
             />
           ) : (

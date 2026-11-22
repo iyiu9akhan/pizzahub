@@ -57,6 +57,7 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
   const [itemToDelete, setItemToDelete] = useState<MenuItemData | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [actionId, setActionId] = useState<string | null>(null)
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({})
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
@@ -186,11 +187,17 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
                           <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-line bg-brand-soft/40">
-                            {item.images?.[0] ? (
+                            {item.images?.[0] && !failedImages[item._id] ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img
                                 src={item.images[0]}
                                 alt={item.itemName}
+                                onError={() =>
+                                  setFailedImages((prev) => ({
+                                    ...prev,
+                                    [item._id]: true,
+                                  }))
+                                }
                                 className="h-full w-full object-cover"
                               />
                             ) : (

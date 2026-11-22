@@ -79,6 +79,7 @@ const MenuItemCard = ({
   const { data: session } = useSession()
   const [favorite, setFavorite] = useState<boolean>(isFavorite)
   const [isWishlistLoading, setIsWishlistLoading] = useState<boolean>(false)
+  const [imgError, setImgError] = useState<boolean>(false)
 
   // Use first image from the already-merged images array
   const coverImage = item.images?.[0]
@@ -129,12 +130,13 @@ const MenuItemCard = ({
     <article className="group flex h-full flex-col rounded-3xl border border-line bg-surface p-3 shadow-2xs transition-shadow duration-300 hover:shadow-lg">
       {/* Image with category chip and optional status badge */}
       <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-brand-soft/40">
-        {coverImage ? (
+        {coverImage && !imgError ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={coverImage}
             alt={item.itemName}
             loading="lazy"
+            onError={() => setImgError(true)}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (

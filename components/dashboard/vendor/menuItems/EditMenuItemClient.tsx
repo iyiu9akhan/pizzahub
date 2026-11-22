@@ -28,10 +28,14 @@ export default function EditMenuItemClient({
 }: EditMenuItemClientProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [loadingText, setLoadingText] = useState("Saving changes…")
 
   const handleEdit = async (values: AddMenuItemFormValues) => {
     setIsSubmitting(true)
     try {
+      if (values.images && values.images.length > 0) {
+        setLoadingText("Uploading images…")
+      }
       // 1. Upload new File images to /api/upload
       const uploadedUrls = await Promise.all(
         values.images.map((file) => uploadImageFile(file))
@@ -40,6 +44,7 @@ export default function EditMenuItemClient({
       // 2. Merge uploaded URLs with existing image URLs
       const allImages = [...(values.existingImages ?? []), ...uploadedUrls]
 
+      setLoadingText("Saving changes…")
       // 3. Call server action
       const res = await editItem(id, {
         itemName: values.itemName,
@@ -102,6 +107,7 @@ export default function EditMenuItemClient({
         onSubmit={handleEdit}
         onCancel={() => router.push("/dashboard/vendor/menu-items")}
         isSubmitting={isSubmitting}
+        loadingText={loadingText}
       />
     </div>
   )
