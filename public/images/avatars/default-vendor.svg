@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%" fill="none">
+  <rect width="128" height="128" rx="64" fill="#FFEDD5"/>
+  {/* Chef Hat */}
+  <path d="M46 44c-4-8 1-16 10-16 2-6 12-8 16-2 4-6 14-4 16 2 9 0 14 8 10 16H46z" fill="#EA580C"/>
+  <rect x="46" y="44" width="36" height="6" rx="2" fill="#C2410C"/>
+  {/* Head */}
+  <circle cx="64" cy="58" r="16" fill="#EA580C"/>
+  {/* Shoulders */}
+  <path d="M28 110c0-18.778 16.118-34 36-34s36 15.222 36 34v2a64 64 0 0 1-72 0v-2z" fill="#EA580C"/>
+</svg>

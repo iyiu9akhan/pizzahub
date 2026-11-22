@@ -27,13 +27,6 @@ export interface NavBtnProps {
   onLinkClick?: () => void
 }
 
-// Fallback avatars by user role — used by UserAvatar via role-based default
-const ROLE_AVATARS: Record<string, string> = {
-  admin: "/images/profilePic/admin-demo.png",
-  vendor: "/images/profilePic/vendor-demo.png",
-  customer: "/images/profilePic/profile-demo.png",
-}
-
 const NavBtn: React.FC<NavBtnProps> = ({
   className = "",
   fullWidth = false,
@@ -88,10 +81,10 @@ const NavBtn: React.FC<NavBtnProps> = ({
   // Avatar size helper — maps button context to UserAvatar size prop
   const renderAvatar = (size: "sm" | "md" | "lg" = "md") => (
     <UserAvatar
-      src={session?.user?.image}
+      image={session?.user?.image}
+      role={role}
       name={session?.user?.name || role}
       size={size}
-      fallbackSrc={ROLE_AVATARS[role] || ROLE_AVATARS.customer}
     />
   )
 

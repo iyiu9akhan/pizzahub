@@ -1,6 +1,6 @@
 "use server"
 
-import { authFetch } from "@/lib/core/server"
+import { authFetch, getSession } from "@/lib/core/server"
 import { revalidatePath } from "next/cache"
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
@@ -11,9 +11,15 @@ export async function addReviewAction(data: {
   comment?: string
 }): Promise<{ success: boolean; message?: string; code?: string }> {
   try {
+    const session = await getSession()
+    const payload = {
+      ...data,
+      customerName: session?.user?.name,
+      customerImage: session?.user?.image,
+    }
     const res = await authFetch(`${BASE_URL}/reviews`, {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     })
 
     const result = await res.json().catch(() => ({}))

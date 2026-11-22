@@ -22,7 +22,6 @@ export default function RegisterPage() {
         name: formData.fullName,
         email: formData.email,
         password: formData.password,
-        image: "https://example.com/image.png",
         callbackURL: "/",
       })
 

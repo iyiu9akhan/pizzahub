@@ -16,6 +16,7 @@ import {
   Plus,
   Minus,
   Heart,
+  Crown,
 } from "lucide-react"
 
 const orderFormSchema = z.object({
@@ -316,11 +317,19 @@ export default function MenuItemDetails({
             </div>
 
             {item.vendorName && (
-              <div className="flex items-center gap-3 font-text text-sm text-ink">
-                <Store className="h-4 w-4 shrink-0 text-brand-fg" />
-                <span>
-                  Prepared by: <strong className="font-semibold">{item.vendorName}</strong>
-                </span>
+              <div className="flex flex-wrap items-center gap-3 font-text text-sm text-ink">
+                <div className="flex items-center gap-2">
+                  <Store className="h-4 w-4 shrink-0 text-brand-fg" />
+                  <span>
+                    Prepared by: <strong className="font-semibold">{item.vendorName}</strong>
+                  </span>
+                </div>
+                {item.isPremiumVendor && (
+                  <span className="flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-0.5 font-heading text-[10px] font-bold text-white shadow">
+                    <Crown className="h-3 w-3" />
+                    Premium Vendor
+                  </span>
+                )}
               </div>
             )}
           </div>

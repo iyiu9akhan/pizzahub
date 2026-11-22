@@ -353,7 +353,8 @@ return (
   const renderCustomer = (order: VendorOrder) => (
     <div className="flex min-w-0 items-center gap-3">
       <UserAvatar
-        src={order.customerImage}
+        image={order.customerImage}
+        role="customer"
         name={order.customerName}
         size="md"
       />

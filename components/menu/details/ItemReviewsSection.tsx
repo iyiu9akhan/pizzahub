@@ -13,9 +13,12 @@ import { addReviewAction, deleteReviewAction } from "@/lib/actions/ReviewActions
 export interface ReviewItem {
   _id: string
   itemId: string
-  userId: string
+  userId?: string
+  customerId?: string
   userName?: string
-  userImage?: string
+  customerName?: string
+  userImage?: string | null
+  customerImage?: string | null
   userEmail?: string
   rating: number
   comment?: string
@@ -116,12 +119,18 @@ export default function ItemReviewsSection({
 
       if (res.success) {
         toastSuccess("Review submitted successfully!")
+        const reviewerName = session.user.name || "Customer"
+        const reviewerImage = session.user.image || null
+
         const newReview: ReviewItem = {
           _id: `temp-${Date.now()}`,
           itemId,
           userId: currentUserId || "me",
-          userName: session.user.name || "Customer",
-          userImage: session.user.image || undefined,
+          customerId: currentUserId,
+          userName: reviewerName,
+          customerName: reviewerName,
+          userImage: reviewerImage,
+          customerImage: reviewerImage,
           rating,
           comment: comment.trim(),
           createdAt: new Date().toISOString(),
@@ -129,7 +138,9 @@ export default function ItemReviewsSection({
 
         // Upsert review in local state
         setReviews((prev) => {
-          const existingIdx = prev.findIndex((r) => r.userId === currentUserId)
+          const existingIdx = prev.findIndex(
+            (r) => (r.customerId || r.userId) === currentUserId
+          )
           if (existingIdx !== -1) {
             const next = [...prev]
             next[existingIdx] = newReview
@@ -243,10 +254,14 @@ export default function ItemReviewsSection({
           ) : (
             <div className="space-y-4">
               {reviews.map((rev) => {
-                const isOwner = rev.userId === currentUserId
+                const isOwner = (rev.customerId || rev.userId) === currentUserId
                 const isAdmin = userRole === "admin"
                 const canDelete = isOwner || isAdmin
                 const isDeleting = deletingId === rev._id
+
+                const reviewerName =
+                  rev.customerName || rev.userName || "Customer"
+                const reviewerImage = rev.customerImage || rev.userImage
 
                 return (
                   <article
@@ -256,13 +271,14 @@ export default function ItemReviewsSection({
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
                         <UserAvatar
-                          src={rev.userImage}
-                          name={rev.userName || "Customer"}
+                          image={reviewerImage}
+                          role="customer"
+                          name={reviewerName}
                           size="md"
                         />
                         <div>
                           <h4 className="font-heading text-sm font-bold text-ink">
-                            {rev.userName || "Verified Customer"}
+                            {reviewerName}
                           </h4>
                           {mounted && rev.createdAt && (
                             <p className="font-text text-[11px] text-ink-muted">

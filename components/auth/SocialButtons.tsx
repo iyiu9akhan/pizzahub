@@ -18,24 +18,25 @@ const SocialButtons: React.FC<SocialButtonsProps> = ({
   const [isLoading, setIsLoading] = useState(false)
 
   // Trigger Better Auth Google OAuth flow
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true)
-    try {
-      const { error } = await authClient.signIn.social({
-        provider: "google",
-        callbackURL: "/",
-      })
-      if (error) {
-        toastError("Google sign-in failed", error.message)
-        return
-      }
-      toastSuccess("Signed in with Google!")
-    } catch {
-      toastError("Google sign-in failed", "Please try again.")
-    } finally {
+// Trigger Better Auth Google OAuth flow
+const handleGoogleSignIn = async () => {
+  setIsLoading(true)
+
+  try {
+    const { error } = await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/",
+    })
+
+    if (error) {
+      toastError("Google sign-in failed", error.message)
       setIsLoading(false)
     }
+  } catch {
+    toastError("Google sign-in failed", "Please try again.")
+    setIsLoading(false)
   }
+}
 
   return (
     <div className={`w-full ${className}`}>

@@ -31,14 +31,19 @@ async function FeaturedItems() {
     wishlistIds = ids
     const list = Array.isArray(raw) ? raw : raw?.items || []
 
-    // Normalize images and take at most 4 for the featured grid
-    items = list.slice(0, 4).map((item: Record<string, unknown>) => ({
+    // Normalize images and filter exclusively for premium vendors
+    const allItems = list.map((item: Record<string, unknown>) => ({
       ...item,
       images: [
         ...((item.images as string[]) ?? []),
         ...((item.existingImages as string[]) ?? []),
       ],
     })) as MenuItemData[]
+
+    // Only menu items belonging to premium vendors appear in the Featured Menu
+    items = allItems
+      .filter((item) => Boolean(item.isPremiumVendor))
+      .slice(0, 4)
   } catch {
     // API unavailable — render empty state below
   }
@@ -50,7 +55,7 @@ async function FeaturedItems() {
           No featured items yet
         </p>
         <p className="mt-1 text-sm text-ink-muted">
-          Check back soon for delicious menu items.
+          Check back soon for delicious menu items from our featured premium vendors.
         </p>
       </div>
     )

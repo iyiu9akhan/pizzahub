@@ -164,7 +164,8 @@ export function DashboardSidebar() {
       <SidebarFooter className="border-t border-line p-3">
         <div className="flex items-center gap-3 rounded-xl bg-brand-soft/60 p-3">
           <UserAvatar
-            src={userImage}
+            image={userImage}
+            role={safeRole}
             name={userName}
             size="md"
           />

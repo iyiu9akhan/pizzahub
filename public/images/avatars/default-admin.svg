@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%" fill="none">
+  <rect width="128" height="128" rx="64" fill="#EDE9FE"/>
+  {/* Head */}
+  <circle cx="64" cy="46" r="20" fill="#6366F1"/>
+  {/* Crown/Star Accent */}
+  <path d="M54 22l4 8 6-6 6 6 4-8v10H54V22z" fill="#4F46E5"/>
+  {/* Shoulders */}
+  <path d="M26 108c0-20.987 17.013-38 38-38s38 17.013 38 38v4a64 64 0 0 1-76 0v-4z" fill="#6366F1"/>
+  {/* Shield on chest */}
+  <path d="M64 74l8 4v8c0 6-8 10-8 10s-8-4-8-10v-8l8-4z" fill="#EDE9FE"/>
+</svg>

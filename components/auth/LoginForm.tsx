@@ -144,6 +144,7 @@ const LoginForm: React.FC<LoginFormExtendedProps> = ({
             checked={rememberMe}
             onChange={setRememberMe}
           />
+          />
           <Link
             href="#"
             className="font-heading font-semibold text-brand-fg hover:text-brand-dark transition-colors text-xs sm:text-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand/40 rounded-sm cursor-pointer"

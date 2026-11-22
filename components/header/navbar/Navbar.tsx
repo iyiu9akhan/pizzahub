@@ -133,7 +133,8 @@ const Navbar: React.FC<NavbarProps> = ({ className = "", orderCount }) => {
                 {/* User summary card */}
                 <div className="flex items-center gap-3 rounded-xl bg-brand-soft/50 p-3">
                   <UserAvatar
-                    src={session.user.image}
+                    image={session.user.image}
+                    role={(session.user as { role?: string }).role || "customer"}
                     name={session.user.name || "User"}
                     size="md"
                   />

@@ -1,56 +1,100 @@
-// UserAvatar — reusable round avatar with fallback to a default profile image.
-// If `src` is null/empty or the image fails to load, shows the default profile picture.
-// Never persists the default image to the database — UI-only fallback.
+
 "use client"
 
 import { useState } from "react"
 
-// Size classes for the avatar
+export const DUMMY_AVATAR = "https://example.com/image.png"
+
+export const ROLE_DEFAULT_AVATARS: Record<string, string> = {
+  customer: "/images/avatars/default-customer.svg",
+  vendor: "/images/avatars/default-vendor.svg",
+  admin: "/images/avatars/default-admin.svg",
+}
+
+export const DEFAULT_AVATAR = ROLE_DEFAULT_AVATARS.customer
+
+/**
+ * Resolves an avatar URL.
+ * Returns the provided image if it is a valid URL.
+ * Returns the role's default SVG if image is null, empty,
+ * or the legacy dummy placeholder.
+ */
+export function resolveAvatar(
+  image?: string | null,
+  role?: string | null,
+): string {
+  if (
+    !image ||
+    typeof image !== "string" ||
+    !image.trim() ||
+    image.trim() === DUMMY_AVATAR
+  ) {
+    const normalizedRole = (role || "").toLowerCase().trim()
+
+    return ROLE_DEFAULT_AVATARS[normalizedRole] || DEFAULT_AVATAR
+  }
+
+  return image.trim()
+}
+
+// Avatar sizes
 const SIZE_MAP = {
   sm: "h-8 w-8",
   md: "h-10 w-10",
   lg: "h-14 w-14",
 }
 
-// Default fallback image path
-const DEFAULT_AVATAR = "/images/profilePic/profile-demo.png"
-
-interface UserAvatarProps {
-  src?: string | null
+export interface UserAvatarProps {
   name?: string
+  image?: string | null
+  src?: string | null
+  role?: string | null
   size?: "sm" | "md" | "lg"
-  /** Override the default fallback image path */
-  fallbackSrc?: string
   className?: string
 }
 
-// Reusable avatar component used in navbar, sidebar, and profile pages
+// Reusable avatar component
 export default function UserAvatar({
-  src,
   name = "User",
+  image,
+  src,
+  role,
   size = "md",
-  fallbackSrc = DEFAULT_AVATAR,
   className = "",
 }: UserAvatarProps) {
-  // Track previous src to reset errored state on change
-  const [prevSrc, setPrevSrc] = useState(src)
+  const rawImage = image ?? src
+
+  const defaultFallback = resolveAvatar(null, role)
+  const resolved = resolveAvatar(rawImage, role)
+
+  const [prevRaw, setPrevRaw] = useState(rawImage)
+  const [prevRole, setPrevRole] = useState(role)
   const [errored, setErrored] = useState(false)
 
-  if (src !== prevSrc) {
-    setPrevSrc(src)
+  if (rawImage !== prevRaw || role !== prevRole) {
+    setPrevRaw(rawImage)
+    setPrevRole(role)
     setErrored(false)
   }
 
-  // Use fallback if src is absent or image errored
-  const resolvedSrc = src && !errored ? src : fallbackSrc
+  const finalSrc = errored ? defaultFallback : resolved
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={resolvedSrc}
-      alt={name}
-      onError={() => setErrored(true)}
-      className={`${SIZE_MAP[size]} shrink-0 rounded-full border border-line object-cover ${className}`}
-    />
+    <div
+      className={`relative shrink-0 overflow-hidden rounded-full border border-line bg-surface ${SIZE_MAP[size]} ${className}`}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={finalSrc}
+        alt={name}
+        referrerPolicy="no-referrer"
+        onError={() => {
+          if (!errored) {
+            setErrored(true)
+          }
+        }}
+        className="absolute inset-0 h-full w-full rounded-full object-cover object-center"
+      />
+    </div>
   )
 }

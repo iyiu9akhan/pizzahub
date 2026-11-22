@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import UserAvatar from "@/components/ui/UserAvatar"
 import {
   Table,
   TableBody,
@@ -31,12 +31,7 @@ const cell = `py-3 ${pad}`
 
 const UserCell = ({ user }: { user: ManagedUser }) => (
   <div className="flex items-center gap-3">
-    <Avatar className="size-9">
-      <AvatarImage src={user.image ?? undefined} alt={user.name} />
-      <AvatarFallback className="bg-brand-soft text-xs font-semibold text-brand">
-        {user.name.slice(0, 2).toUpperCase()}
-      </AvatarFallback>
-    </Avatar>
+    <UserAvatar image={user.image} role={user.role} name={user.name} size="sm" />
     <div className="min-w-0">
       <p className="truncate font-heading text-sm font-semibold text-ink">
         {user.name}

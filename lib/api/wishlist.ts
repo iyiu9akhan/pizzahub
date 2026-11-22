@@ -1,5 +1,6 @@
 import "server-only"
 import { authFetch, getSession } from "@/lib/core/server"
+import { db } from "@/lib/auth"
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
@@ -34,8 +35,18 @@ export const getWishlist = async (): Promise<WishlistItem[]> => {
     const data = await res.json().catch(() => [])
     const list = Array.isArray(data) ? data : data?.items || []
 
+    const premiumVendors = await db
+      .collection("user")
+      .find({ role: "vendor", premium: true }, { projection: { _id: 1 } })
+      .toArray()
+      .catch(() => [])
+    const premiumVendorIds = new Set(premiumVendors.map((v) => v._id.toString()))
+
     return list.map((item: Record<string, unknown>) => ({
       ...item,
+      isPremiumVendor: item.vendorId
+        ? premiumVendorIds.has(String(item.vendorId))
+        : false,
       images: Array.from(
         new Set([
           ...(((item.images as string[]) || [])),

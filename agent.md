@@ -39,6 +39,8 @@
 - **Order management**: Vendor sees own orders, admin sees all orders via `GET /orders`. Customer sees own orders.
 - **Header badge**: `ClipboardList` in header links to customer orders or vendor orders with live count.
 - **Vendor premium**: Free tier capped at 3 items. Premium vendors have unlimited items.
+- **Featured Menu**: Exclusively shows items from premium vendors (`isPremiumVendor: true` checked via MongoDB `user.premium`).
+- **Reviews**: `getItemReviews` in `lib/api/items.ts` enriches reviews with real reviewer name & avatar from `user` collection.
 
 ## 8. Coding Conventions
 - Currency: `formatBDT()` from `lib/format.tsx` everywhere. Never use `alert()` (use `lib/toast.ts`).
@@ -58,3 +60,5 @@
 - 2026-11-22: Implemented Customer Wishlist (toggle, optimistic UI, dashboard page) & Reviews (stars, Zod validation, delete, 403 hint).
 - 2026-11-22: Dashboard statistics & Recharts for Admin, Vendor, Customer (daily area, status donut, topItems bar, users donut).
 - 2026-11-22: Custom 404/500/403 error pages, Zod validation on all forms, skeleton loaders, and payment verifying state.
+- 2026-11-22: Unified profile images (role SVGs, resolveAvatar, server upload helper, updateProfileImage action, ProfileImageUploader).
+- 2026-11-22: Homepage featured menu premium filtering, MenuItemCard premium badge, review customer profile resolution.
