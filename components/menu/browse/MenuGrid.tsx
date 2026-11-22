@@ -7,14 +7,18 @@ import type { MenuItem } from "@/types/menu"
 
 export interface MenuGridProps {
   items: MenuItem[]
+  wishlistIds?: string[]
 }
 
-export default function MenuGrid({ items }: MenuGridProps) {
+export default function MenuGrid({ items, wishlistIds = [] }: MenuGridProps) {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
       {items.map((item) => (
         <div key={item._id} className="h-full">
-          <MenuItemCard item={item} />
+          <MenuItemCard
+            item={item}
+            isFavorite={wishlistIds.includes(item._id)}
+          />
         </div>
       ))}
     </div>

@@ -57,7 +57,7 @@ const UsersTable = ({
 }: Props) => (
   <div className="overflow-hidden rounded-2xl border border-line bg-surface">
     {/* Scroll thakbe (mobile), kintu scrollbar hide */}
-    <div className="[&_[data-slot=table-container]]:[scrollbar-width:none] [&_[data-slot=table-container]::-webkit-scrollbar]:hidden">
+    <div className="**:data-[slot=table-container]:scrollbar-none [&_[data-slot=table-container]::-webkit-scrollbar]:hidden">
       <Table>
         <TableHeader>
           <TableRow className="border-line bg-brand-soft/40 hover:bg-brand-soft/40">

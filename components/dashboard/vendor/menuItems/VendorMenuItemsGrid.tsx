@@ -126,6 +126,7 @@ const VendorMenuItemsGrid = ({ initialItems }: Props) => {
             <MenuItemCard
               key={item._id}
               item={item}
+              showFavorite={false}
               actions={
                 // Vendor footer: status panel + Details, Edit, Delete
                 <div className="flex flex-col gap-3">

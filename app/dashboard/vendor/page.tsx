@@ -1,254 +1,184 @@
 // Vendor dashboard overview page: /dashboard/vendor
-// Displays vendor summary stats and subscription status (Free vs Premium).
 export const dynamic = "force-dynamic"
 
 import React from "react"
 import Link from "next/link"
-import { headers } from "next/headers"
 import {
   Package,
   ClipboardList,
   Crown,
   Sparkles,
   ArrowRight,
-  Clock,
   CheckCircle2,
+  TrendingUp,
 } from "lucide-react"
 
-import { auth } from "@/lib/auth"
+import { requireRole } from "@/lib/core/server"
+import { getStats } from "@/lib/api/stats"
 import { getPremiumVendorById } from "@/lib/api/premiumVendors"
 import { getItemCount } from "@/lib/api/items"
-import { getOrders } from "@/lib/api/orders"
-import { getToken, authFetch } from "@/lib/core/server" // tomar path onujayi
+import { formatBDT } from "@/lib/format"
+
+import OrdersAreaChart from "@/components/dashboard/charts/OrdersAreaChart"
+import OrdersStatusDonutChart from "@/components/dashboard/charts/OrdersStatusDonutChart"
+import TopItemsBarChart from "@/components/dashboard/charts/TopItemsBarChart"
 
 const FREE_LIMIT = 3
 
-// Stat card helper
-function StatCard({
-  label,
-  value,
-  icon,
-  color,
-}: {
-  label: string
-  value: number | string
-  icon: React.ReactNode
-  color: string
-}) {
-  return (
-    <div className="group flex items-center gap-4 rounded-2xl border border-line bg-surface p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      <span
-        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${color}`}
-      >
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <p className="font-heading text-2xl font-bold tracking-tight text-ink">
-          {value}
-        </p>
-        <p className="mt-0.5 text-sm font-medium text-ink-muted">{label}</p>
-      </div>
-    </div>
-  )
+export const metadata = {
+  title: "Vendor Overview - PizzaHub",
+  description: "Sales performance, store analytics, and orders overview.",
 }
 
-const VendorDashboardPage = async () => {
-  const session = await auth.api.getSession({ headers: await headers() })
-  const user = session?.user
-  const vendorId = user?.id
+export default async function VendorDashboardPage() {
+  const session = await requireRole("vendor")
+  const vendorId = session.user.id
 
-  // ===== TEMP TEST (token + backend middleware check, pore delete korbe) =====
-  try {
-    const token = await getToken()
-    console.log("TOKEN:", token ? token.slice(0, 10) + "..." : "NO TOKEN")
+  const [stats, itemCount, premiumData] = await Promise.all([
+    getStats("vendor"),
+    getItemCount().catch(() => 0),
+    getPremiumVendorById(vendorId).catch(() => ({
+      isVendor: false,
+      premium: false,
+    })),
+  ])
 
-    const res = await authFetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/whoami`
-    )
-    console.log("WHOAMI:", res.status, await res.json())
-  } catch (err) {
-    // redirect() er error ke ignore na kore rethrow korle bhalo, kintu test e log-i jothesto
-    console.log("WHOAMI ERROR:", err)
-  }
-  // ===== END TEMP TEST =====
+  const isPremium = Boolean(premiumData.isVendor && premiumData.premium)
+  const cards = stats?.cards || {}
+  const charts = stats?.charts || {}
 
-  // Defaults
-  let itemCount = 0
-  let isPremium = false
-  let totalOrders = 0
-  let pendingOrders = 0
-  let deliveredOrders = 0
+  const daily = charts.daily || []
+  const ordersByStatus = charts.ordersByStatus || {}
+  const topItems = charts.topItems || []
 
-  if (vendorId) {
-    const [count, premiumData, ordersData] = await Promise.all([
-      getItemCount({ vendorId }).catch(() => 0),
-      getPremiumVendorById(vendorId).catch(() => ({
-        isVendor: false,
-        premium: false,
-      })),
-      getOrders({ vendorId }).catch(() => []),
-    ])
+  const totalRevenue = cards.revenue ?? cards.totalRevenue ?? 0
+  const totalOrders = cards.orders ?? cards.totalOrders ?? 0
+  const deliveredOrders =
+    cards.deliveredOrders ??
+    ordersByStatus.delivered ??
+    0
 
-    itemCount = count
-    isPremium = Boolean(premiumData.isVendor && premiumData.premium)
-
-    if (Array.isArray(ordersData)) {
-      totalOrders = ordersData.length
-      pendingOrders = ordersData.filter((o) => o.status === "pending").length
-      deliveredOrders = ordersData.filter(
-        (o) => o.fulfillmentStatus === "delivered"
-      ).length
-    }
-  }
-
-  const usagePercent = Math.min((itemCount / FREE_LIMIT) * 100, 100)
+  const itemsRemaining = Math.max(0, FREE_LIMIT - itemCount)
 
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8">
-      {/* Header */}
-      <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="w-full space-y-8 p-4 sm:p-6 lg:p-8">
+      {/* Header with Subscription Status */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-            Welcome back, {user?.name || "Vendor"}
+            Vendor Dashboard
           </h1>
-          <p className="mt-2 text-sm text-ink-muted">
-            Manage your restaurant items, track customer orders, and view your
-            plan.
+          <p className="mt-1 font-text text-sm text-ink-muted">
+            Overview of your pizza kitchen performance, customer orders, and revenue.
           </p>
         </div>
 
-        {/* Current plan badge */}
-        {isPremium ? (
-          <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-amber-100 px-3.5 py-1.5 font-heading text-xs font-bold text-amber-800 sm:self-auto dark:bg-amber-500/20 dark:text-amber-300">
-            <Crown className="h-4 w-4" />
-            Premium Vendor
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1.5 self-start rounded-full border border-line bg-surface px-3.5 py-1.5 font-text text-xs text-ink-muted sm:self-auto">
-            Current plan:{" "}
-            <strong className="font-heading text-ink">Free Plan</strong>
-          </span>
-        )}
-      </div>
-
-      {/* Plan status card */}
-      <div className="mb-8 overflow-hidden rounded-3xl border border-line bg-surface p-6 shadow-xs">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <span
-              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
-                isPremium
-                  ? "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300"
-                  : "bg-brand-soft text-brand-fg"
-              }`}
-            >
-              <Crown className="h-6 w-6" />
+        {/* Subscription Pill */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          {isPremium ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3.5 py-1.5 font-heading text-xs font-semibold text-amber-800 shadow-2xs dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+              <Crown className="h-4 w-4 text-amber-500" />
+              <span>Premium Plan • Unlimited Items</span>
             </span>
-            <div>
-              <p className="font-heading text-base font-bold text-ink">
-                {isPremium
-                  ? "Premium Subscription Active"
-                  : "Free Subscription"}
-              </p>
-              <p className="font-text text-sm text-ink-muted">
-                {isPremium
-                  ? "You have unlocked unlimited menu items and homepage placement."
-                  : `${itemCount}/${FREE_LIMIT} menu items used. Upgrade to post unlimited items.`}
-              </p>
-            </div>
-          </div>
-
-          {/* Upgrade button only shown for free vendors */}
-          {!isPremium && (
+          ) : (
             <Link
               href="/dashboard/vendor/subscription"
-              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand px-5 py-2.5 font-heading text-xs font-bold text-white shadow-md shadow-brand/25 transition-all hover:-translate-y-0.5 hover:opacity-95"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-1.5 font-heading text-xs font-semibold text-ink shadow-2xs transition-transform hover:-translate-y-0.5 hover:border-brand"
             >
-              <Sparkles className="h-4 w-4" />
-              Upgrade to Premium
+              <Sparkles className="h-4 w-4 text-brand-fg" />
+              <span>Free Plan ({itemCount}/{FREE_LIMIT}) • Upgrade</span>
+              <ArrowRight className="h-3.5 w-3.5 text-ink-muted" />
             </Link>
           )}
         </div>
-
-        {/* Free plan usage bar */}
-        {!isPremium && (
-          <div className="mt-5 border-t border-line pt-5">
-            <div className="flex items-center justify-between font-text text-xs">
-              <span className="text-ink-muted">Free item limit</span>
-              <span className="font-heading font-bold text-ink">
-                {itemCount} / {FREE_LIMIT} used
-              </span>
-            </div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-line">
-              <div
-                className={`h-full rounded-full transition-all ${
-                  itemCount >= FREE_LIMIT ? "bg-amber-500" : "bg-brand"
-                }`}
-                style={{ width: `${usagePercent}%` }}
-              />
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Overview Stat Cards */}
+      {/* Stat Cards Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Active Menu Items"
-          value={
-            isPremium
-              ? `${itemCount} (Unlimited)`
-              : `${itemCount} / ${FREE_LIMIT}`
-          }
-          icon={<Package className="h-6 w-6" />}
-          color="bg-brand-soft text-brand-fg"
+        {/* Total Revenue */}
+        <div className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-xs transition-all hover:shadow-md">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-brand-fg">
+            <TrendingUp className="h-6 w-6" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-heading text-2xl font-extrabold text-ink truncate">
+              {formatBDT(totalRevenue)}
+            </p>
+            <p className="font-text text-xs text-ink-muted">Total Sales</p>
+          </div>
+        </div>
+
+        {/* Total Orders */}
+        <div className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-xs transition-all hover:shadow-md">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+            <ClipboardList className="h-6 w-6" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-heading text-2xl font-extrabold text-ink truncate">
+              {totalOrders}
+            </p>
+            <p className="font-text text-xs text-ink-muted">Customer Orders</p>
+          </div>
+        </div>
+
+        {/* Delivered Orders */}
+        <div className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-xs transition-all hover:shadow-md">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+            <CheckCircle2 className="h-6 w-6" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-heading text-2xl font-extrabold text-ink truncate">
+              {deliveredOrders}
+            </p>
+            <p className="font-text text-xs text-ink-muted">Delivered</p>
+          </div>
+        </div>
+
+        {/* Menu Items */}
+        <div className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-xs transition-all hover:shadow-md">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+            <Package className="h-6 w-6" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-heading text-2xl font-extrabold text-ink truncate">
+              {itemCount}
+              {!isPremium && (
+                <span className="font-text text-xs font-normal text-ink-muted ml-1">
+                  /{FREE_LIMIT}
+                </span>
+              )}
+            </p>
+            <p className="font-text text-xs text-ink-muted">
+              {isPremium ? "Unlimited Menu Items" : `${itemsRemaining} remaining`}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Daily orders trend */}
+        <OrdersAreaChart
+          data={daily}
+          title="Daily Orders Trend"
+          description="Your kitchen's daily order count over the last 7 days"
         />
-        <StatCard
-          label="Total Orders"
-          value={totalOrders}
-          icon={<ClipboardList className="h-6 w-6" />}
-          color="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-        />
-        <StatCard
-          label="Pending Orders"
-          value={pendingOrders}
-          icon={<Clock className="h-6 w-6" />}
-          color="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-        />
-        <StatCard
-          label="Delivered Orders"
-          value={deliveredOrders}
-          icon={<CheckCircle2 className="h-6 w-6" />}
-          color="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+
+        {/* Orders by Status */}
+        <OrdersStatusDonutChart
+          data={ordersByStatus}
+          title="Orders by Fulfillment Status"
         />
       </div>
 
-      {/* Quick navigation links */}
-      <div className="mt-8 flex flex-wrap gap-4">
-        <Link
-          href="/dashboard/vendor/menu-items"
-          className="inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2.5 font-heading text-xs font-semibold text-ink transition-all hover:border-brand hover:text-brand-fg"
-        >
-          Manage Menu Items
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
-        <Link
-          href="/dashboard/vendor/orders"
-          className="inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2.5 font-heading text-xs font-semibold text-ink transition-all hover:border-brand hover:text-brand-fg"
-        >
-          Review Customer Orders
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
-        <Link
-          href="/dashboard/vendor/subscription"
-          className="inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2.5 font-heading text-xs font-semibold text-ink transition-all hover:border-brand hover:text-brand-fg"
-        >
-          View Subscription Details
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
+      {/* Top Selling Items Bar Chart */}
+      <div className="w-full">
+        <TopItemsBarChart
+          data={topItems}
+          title="Top Selling Pizzas"
+          description="Your most popular items ordered by customers"
+        />
       </div>
     </div>
   )
 }
-
-export default VendorDashboardPage

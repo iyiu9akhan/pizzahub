@@ -15,31 +15,30 @@
 - `types/`: Shared TypeScript interfaces (`order.ts`, `menu.ts`, `OrderPizzaType.ts`)
 
 ## 3. Architecture Rules
-- Server Components fetch data via `lib/api/` and pass props to `components/`. No fetching in UI components.
-- Mutations use server actions in `lib/actions/`. Never edit backend server code or `.env`.
-- Do not restructure existing folders. Keep changes targeted and minimal.
+- Server Components fetch data via `lib/api/` (server-only) using `authFetch` for private routes. No fetching in UI components.
+- Mutations use server actions in `lib/actions/` returning `{ success, message?, code? }`. Never edit backend server code or `.env`.
+- Central 401/403 handler: 401 -> `/login`, 403 FORBIDDEN -> `/unauthorized`, 403 ACCOUNT_RESTRICTED -> sign out + `/restricted`.
+- No frontend filters for authorization; backend token enforces ownership.
 
 ## 4. Data Flow
-`DB (MongoDB)` ➔ `lib/api/` (GET fetch) ➔ `app/.../page.tsx` (fetch + filter by id) ➔ `components/...` (UI)
+`Express API / MongoDB` ➔ `lib/api/` (`authFetch` / `fetch`) ➔ `app/.../page.tsx` ➔ `components/...` (UI)
 
 ## 5. Data Models & Relations
-- **Item**: `{ _id, itemName, description, price, category, images[], vendorId, vendorName, status }`
-- **Order**: `{ _id, customerId, customerName, customerEmail, customerPhone, deliveryAddress, items[], totalAmount, status, fulfillmentStatus, vendorName, createdAt }`
+- **Item**: `{ _id, itemName, description, price, category, images[], vendorId, vendorName, status, ratingAvg, ratingCount }`
+- **Order**: `{ _id, customerId, customerName, customerEmail, customerPhone, deliveryAddress, items[], totalAmount, status, fulfillmentStatus, vendorId, vendorName, createdAt }`
 - **User**: `{ id, name, email, image, role: "admin" | "vendor" | "customer", businessName?, premium?: boolean }`
-- **Relations**: `Item.vendorId === User.id`, `Order.customerId === User.id`. Orders live in ONE collection.
 - **Status values**: `status`: `pending` | `accepted` | `rejected` | `cancelled`. `fulfillmentStatus`: `cooking` | `on_the_way` | `delivered`.
 
 ## 6. Role-Wise Dashboard Menus & Routes
-- **Customer**: `/dashboard/customer` (Overview), `/dashboard/customer/my-orders` (Orders), `/dashboard/customer/profile` (Profile)
-- **Vendor**: `/dashboard/vendor` (Overview), `/dashboard/vendor/menu-items` (Items), `/dashboard/vendor/add-menu-item` (Add), `/dashboard/vendor/orders` (Orders), `/dashboard/vendor/profile` (Profile)
-- **Admin**: `/dashboard/admin` (Overview), `/dashboard/admin/users`, `/dashboard/admin/vendors`, `/dashboard/admin/products`, `/dashboard/admin/orders`, `/dashboard/admin/profile`
+- **Customer**: `/dashboard/customer` (Overview), `/dashboard/customer/my-orders` (Orders), `/dashboard/customer/wishlist` (Wishlist), `/dashboard/customer/profile` (Profile)
+- **Vendor**: `/dashboard/vendor` (Overview), `/dashboard/vendor/menu-items` (Items), `/dashboard/vendor/add-menu-item` (Add), `/dashboard/vendor/orders` (Orders), `/dashboard/vendor/profile` (Profile), `/dashboard/vendor/subscription`
+- **Admin**: `/dashboard/admin` (Overview), `/dashboard/admin/users`, `/dashboard/admin/items` (Products), `/dashboard/admin/orders`, `/dashboard/admin/transactions`, `/dashboard/admin/profile`
 
 ## 7. Key Logic Notes
-- **Vendor own items**: `app/dashboard/vendor/menu-items/page.tsx` filters `item.vendorId === session.user.id`.
-- **Customer own orders**: `my-orders/page.tsx` filters `order.customerId === session.user.id`.
-- **Status sync**: All orders in one DB collection. Pages use `dynamic = "force-dynamic"` & `cache: "no-store"`.
-- **Header badge**: `ClipboardList` in header links to `/dashboard/customer/my-orders` (pending count) or `/dashboard/vendor/orders` (undelivered count). Fetched in Server Components and passed as prop.
-- **Vendor premium**: Free tier has 3-item limit. Premium vendors have unlimited items and active plan badge.
+- **Item management**: Vendor sees own items, admin sees all items via `GET /items/manage`.
+- **Order management**: Vendor sees own orders, admin sees all orders via `GET /orders`. Customer sees own orders.
+- **Header badge**: `ClipboardList` in header links to customer orders or vendor orders with live count.
+- **Vendor premium**: Free tier capped at 3 items. Premium vendors have unlimited items.
 
 ## 8. Coding Conventions
 - Currency: `formatBDT()` from `lib/format.tsx` everywhere. Never use `alert()` (use `lib/toast.ts`).
@@ -48,12 +47,14 @@
 
 ## 9. Changelog
 - 2026-11-20: Shared MenuItemCard, LoadingButton, UserAvatar, navbar rewrite, home sections, browse menu.
-- 2026-11-20: Filter vendor items by vendorId in menu-items/page.tsx.
-- 2026-11-20: Added getOrdersByCustomerId & getCustomerActiveOrdersCount in lib/api/orders.ts.
 - 2026-11-20: Created customer overview, my-orders page, loading.tsx, and MyOrderCard with stage badges.
-- 2026-11-20: Updated DashboardSidebar customer links and connected CartBtn with real active order count badge.
-- 2026-11-20: Fixed client mount hydration in menu item details using useSyncExternalStore; ESLint passes clean.
-- 2026-11-20: Vendor menu items filter by vendorId (String comparison), getItems({ vendorId }) added, vendorId saved on item creation.
 - 2026-11-21: Vendor premium flag (Better Auth user.additionalFields, Stripe payment success DB update, unlimited items limit check).
 - 2026-11-21: Shared ProfileAvatarUploader for admin, vendor, customer profile pages with type/size validation and cache refresh.
 - 2026-11-21: Unified header order icon (ClipboardList) with role-specific badge counts passed down from Server Components.
+- 2026-11-22: Data layer security: lib/api/ server-only with authFetch & handleApiResponse; removed frontend security filters.
+- 2026-11-22: Server actions in lib/actions/ for items, orders, user roles/restrictions, reviews, wishlist.
+- 2026-11-22: Updated item details with quantity, phone, address, and rating stars; Customer My Orders cancel button for pending orders.
+- 2026-11-22: Built Admin Manage Products, Manage Orders, Transactions table, and Overview stats & charts.
+- 2026-11-22: Implemented Customer Wishlist (toggle, optimistic UI, dashboard page) & Reviews (stars, Zod validation, delete, 403 hint).
+- 2026-11-22: Dashboard statistics & Recharts for Admin, Vendor, Customer (daily area, status donut, topItems bar, users donut).
+- 2026-11-22: Custom 404/500/403 error pages, Zod validation on all forms, skeleton loaders, and payment verifying state.

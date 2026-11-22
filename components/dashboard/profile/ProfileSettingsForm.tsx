@@ -6,12 +6,18 @@
 
 import React, { useState } from "react"
 import { useRouter } from "next/navigation"
+import { z } from "zod"
 
 import { authClient } from "@/lib/auth-client"
 import { toastSuccess, toastError } from "@/lib/toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import LoadingButton from "@/components/ui/LoadingButton"
 import ProfileAvatarUploader from "@/components/dashboard/profile/ProfileAvatarUploader"
+
+const profileSchema = z.object({
+  name: z.string().trim().min(2, "Full name must be at least 2 characters"),
+  businessName: z.string().trim().min(2, "Restaurant name must be at least 2 characters").optional().or(z.literal("")),
+})
 
 // Role badge visual indicator
 const RoleBadge = ({ role }: { role: string }) => (
@@ -55,12 +61,29 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsFormProps) 
   const [businessName, setBusinessName] = useState(user.businessName ?? "")
   const [currentImage, setCurrentImage] = useState<string | null | undefined>(user.image)
   const [isSaving, setIsSaving] = useState(false)
+  const [errors, setErrors] = useState<{ name?: string; businessName?: string }>({})
 
   const role = user.role ?? "customer"
 
   // Save changes: update Better Auth user and refresh session
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const validation = profileSchema.safeParse({
+      name: name.trim(),
+      businessName: role === "vendor" ? businessName.trim() : "",
+    })
+
+    if (!validation.success) {
+      const fieldErrors = validation.error.flatten().fieldErrors
+      setErrors({
+        name: fieldErrors.name?.[0],
+        businessName: fieldErrors.businessName?.[0],
+      })
+      return
+    }
+
+    setErrors({})
     setIsSaving(true)
 
     try {
@@ -123,10 +146,18 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsFormProps) 
           type="text"
           required
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value)
+            if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }))
+          }}
           disabled={isSaving}
-          className="h-12 w-full rounded-xl border border-line bg-surface px-4 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 disabled:opacity-60"
+          className={`h-12 w-full rounded-xl border bg-surface px-4 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 disabled:opacity-60 ${
+            errors.name ? "border-red-500" : "border-line"
+          }`}
         />
+        {errors.name && (
+          <p className="mt-1 font-text text-xs text-red-500">{errors.name}</p>
+        )}
       </div>
 
       {/* Restaurant (business) name input — vendor-only field */}
@@ -142,11 +173,22 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsFormProps) 
             id="prof-business"
             type="text"
             value={businessName}
-            onChange={(e) => setBusinessName(e.target.value)}
+            onChange={(e) => {
+              setBusinessName(e.target.value)
+              if (errors.businessName)
+                setErrors((prev) => ({ ...prev, businessName: undefined }))
+            }}
             disabled={isSaving}
             placeholder="e.g. Dhaka Pizza Co."
-            className="h-12 w-full rounded-xl border border-line bg-surface px-4 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 disabled:opacity-60"
+            className={`h-12 w-full rounded-xl border bg-surface px-4 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 disabled:opacity-60 ${
+              errors.businessName ? "border-red-500" : "border-line"
+            }`}
           />
+          {errors.businessName && (
+            <p className="mt-1 font-text text-xs text-red-500">
+              {errors.businessName}
+            </p>
+          )}
         </div>
       )}
 

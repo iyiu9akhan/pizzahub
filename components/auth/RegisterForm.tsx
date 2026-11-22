@@ -4,6 +4,7 @@
 
 import React, { useState } from "react"
 import Link from "next/link"
+import { z } from "zod"
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react"
 import SocialButtons from "@/components/auth/SocialButtons"
 import Checkbox from "@/components/ui/Checkbox"
@@ -12,8 +13,24 @@ import { UserRole } from "@/types/auth"
 import type { RegisterFormProps } from "@/types/registerDataType"
 import LoadingButton from "@/components/ui/LoadingButton"
 
+const registerSchema = z
+  .object({
+    fullName: z.string().trim().min(2, "Full name must be at least 2 characters"),
+    email: z.string().trim().email("Please enter a valid email address"),
+    phone: z.string().trim().min(8, "Phone number must be at least 8 digits"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string(),
+    agreeTerms: z.boolean().refine((val) => val === true, {
+      message: "You must agree to the Terms of Service",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  })
+
 const inputBase =
-  "h-11 sm:h-12 w-full rounded-xl border border-line bg-surface pl-11 pr-4 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-hidden focus:ring-2 focus:ring-brand/20 disabled:opacity-60"
+  "h-11 sm:h-12 w-full rounded-xl border bg-surface pl-11 pr-4 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-hidden focus:ring-2 focus:ring-brand/20 disabled:opacity-60"
 
 const labelBase =
   "block font-heading text-xs sm:text-sm font-semibold text-ink mb-1"
@@ -37,6 +54,7 @@ const RegisterForm: React.FC<RegisterFormExtendedProps> = ({
   const [role, setRole] = useState<UserRole>("customer")
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -53,11 +71,32 @@ const RegisterForm: React.FC<RegisterFormExtendedProps> = ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }))
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev }
+        delete next[name]
+        return next
+      })
+    }
   }
 
   // Collect form values and bubble up to parent
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    const result = registerSchema.safeParse(formData)
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {}
+      for (const issue of result.error.issues) {
+        const fieldName = issue.path[0] as string
+        if (fieldName && !fieldErrors[fieldName]) {
+          fieldErrors[fieldName] = issue.message
+        }
+      }
+      setErrors(fieldErrors)
+      return
+    }
+
+    setErrors({})
     if (onSubmit) {
       onSubmit({ role, ...formData })
     }
@@ -97,9 +136,12 @@ const RegisterForm: React.FC<RegisterFormExtendedProps> = ({
               onChange={handleChange}
               placeholder="John Doe"
               disabled={isLoading}
-              className={inputBase}
+              className={`${inputBase} ${errors.fullName ? "border-red-500" : "border-line"}`}
             />
           </div>
+          {errors.fullName && (
+            <p className="mt-1 font-text text-xs text-red-500">{errors.fullName}</p>
+          )}
         </div>
 
         {/* Email */}
@@ -120,9 +162,38 @@ const RegisterForm: React.FC<RegisterFormExtendedProps> = ({
               onChange={handleChange}
               placeholder="name@example.com"
               disabled={isLoading}
-              className={inputBase}
+              className={`${inputBase} ${errors.email ? "border-red-500" : "border-line"}`}
             />
           </div>
+          {errors.email && (
+            <p className="mt-1 font-text text-xs text-red-500">{errors.email}</p>
+          )}
+        </div>
+
+        {/* Phone */}
+        <div>
+          <label htmlFor="reg-phone" className={labelBase}>
+            Phone number
+          </label>
+          <div className="relative">
+            <div className={iconWrap}>
+              <User className="h-5 w-5" />
+            </div>
+            <input
+              id="reg-phone"
+              name="phone"
+              type="tel"
+              required
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="e.g. 01700000000"
+              disabled={isLoading}
+              className={`${inputBase} ${errors.phone ? "border-red-500" : "border-line"}`}
+            />
+          </div>
+          {errors.phone && (
+            <p className="mt-1 font-text text-xs text-red-500">{errors.phone}</p>
+          )}
         </div>
 
         {/* Password */}
@@ -143,7 +214,7 @@ const RegisterForm: React.FC<RegisterFormExtendedProps> = ({
               onChange={handleChange}
               placeholder="Create a strong password"
               disabled={isLoading}
-              className={`${inputBase} pr-11`}
+              className={`${inputBase} pr-11 ${errors.password ? "border-red-500" : "border-line"}`}
             />
             <button
               type="button"
@@ -158,6 +229,9 @@ const RegisterForm: React.FC<RegisterFormExtendedProps> = ({
               )}
             </button>
           </div>
+          {errors.password && (
+            <p className="mt-1 font-text text-xs text-red-500">{errors.password}</p>
+          )}
         </div>
 
         {/* Confirm Password */}
@@ -178,7 +252,7 @@ const RegisterForm: React.FC<RegisterFormExtendedProps> = ({
               onChange={handleChange}
               placeholder="Confirm your password"
               disabled={isLoading}
-              className={`${inputBase} pr-11`}
+              className={`${inputBase} pr-11 ${errors.confirmPassword ? "border-red-500" : "border-line"}`}
             />
             <button
               type="button"
@@ -195,6 +269,9 @@ const RegisterForm: React.FC<RegisterFormExtendedProps> = ({
               )}
             </button>
           </div>
+          {errors.confirmPassword && (
+            <p className="mt-1 font-text text-xs text-red-500">{errors.confirmPassword}</p>
+          )}
         </div>
 
         {/* Terms checkbox */}
@@ -225,6 +302,9 @@ const RegisterForm: React.FC<RegisterFormExtendedProps> = ({
               </span>
             }
           />
+          {errors.agreeTerms && (
+            <p className="mt-1 font-text text-xs text-red-500">{errors.agreeTerms}</p>
+          )}
         </div>
 
         {/* Submit button with spinner */}

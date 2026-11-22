@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { getItems } from "@/lib/api/items"
+import { getCustomerWishlistIds } from "@/lib/api/wishlist"
 import MenuItemCard, {
   MenuItemCardSkeleton,
   MenuItemData,
@@ -21,19 +22,17 @@ const FeaturedSkeleton = () => (
 // Async component that fetches and renders the first 4 items
 async function FeaturedItems() {
   let items: MenuItemData[] = []
+  let wishlistIds: string[] = []
   try {
-    const raw = await getItems()
-
-    // TODO(admin): re-enable approval filter after admin panel is built
-    // Same rule as /menu page: hide items whose status is set and not "approved".
-    // Items without a status field (legacy data) are still shown.
-    const visible = raw.filter(
-      (item: Record<string, unknown>) =>
-        !item.status || item.status === "approved"
-    )
+    const [raw, ids] = await Promise.all([
+      getItems(),
+      getCustomerWishlistIds(),
+    ])
+    wishlistIds = ids
+    const list = Array.isArray(raw) ? raw : raw?.items || []
 
     // Normalize images and take at most 4 for the featured grid
-    items = visible.slice(0, 4).map((item: Record<string, unknown>) => ({
+    items = list.slice(0, 4).map((item: Record<string, unknown>) => ({
       ...item,
       images: [
         ...((item.images as string[]) ?? []),
@@ -64,7 +63,10 @@ async function FeaturedItems() {
           key={item._id}
           className="animate-in duration-500 fade-in slide-in-from-bottom-4"
         >
-          <MenuItemCard item={item} />
+          <MenuItemCard
+            item={item}
+            isFavorite={wishlistIds.includes(item._id)}
+          />
         </div>
       ))}
     </div>

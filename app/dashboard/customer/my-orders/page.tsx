@@ -1,32 +1,22 @@
 // Customer my-orders page — /dashboard/customer/my-orders
 // Server component: fetches the logged-in customer's orders and renders a card per order.
-// Always fetches fresh data so vendor status updates are reflected immediately.
 export const dynamic = "force-dynamic"
 
-import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
-import { getOrdersByCustomerId } from "@/lib/api/orders"
+import { requireRole } from "@/lib/core/server"
+import { getOrders } from "@/lib/api/orders"
 import MyOrderCard from "@/components/dashboard/customer/MyOrderCard"
 import { CustomerOrder } from "@/types/order"
 import { ShoppingBag } from "lucide-react"
 
 const MyOrdersPage = async () => {
-  // Get the logged-in customer's id from the server session
-  const session = await auth.api.getSession({ headers: await headers() })
-  const customerId = session?.user?.id
+  await requireRole("customer")
 
   let orders: CustomerOrder[] = []
-
-  if (customerId) {
-    try {
-      const raw = await getOrdersByCustomerId(customerId)
-      const list: CustomerOrder[] = Array.isArray(raw) ? raw : []
-      // Show only orders where order.customerId matches the logged-in customer id
-      orders = list.filter((order) => order.customerId === customerId)
-    } catch {
-      // Show empty state on API error rather than crashing
-      orders = []
-    }
+  try {
+    const raw = await getOrders()
+    orders = Array.isArray(raw) ? raw : raw?.orders || []
+  } catch {
+    orders = []
   }
 
   return (
@@ -43,7 +33,6 @@ const MyOrdersPage = async () => {
 
       {/* Order list or empty state */}
       {orders.length === 0 ? (
-        // Empty state: shown when the customer has no orders yet
         <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-line bg-surface py-20 text-center">
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-soft text-brand-fg">
             <ShoppingBag className="h-8 w-8" />
@@ -58,7 +47,6 @@ const MyOrdersPage = async () => {
           </div>
         </div>
       ) : (
-        // Newest orders first
         <div className="flex flex-col gap-4">
           {[...orders]
             .sort(

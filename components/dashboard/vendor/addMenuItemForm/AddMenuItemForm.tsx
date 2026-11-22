@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
+import { z } from "zod"
 import {
   Banknote,
   Check,
@@ -203,16 +204,35 @@ const AddMenuItemForm: React.FC<AddMenuItemFormProps> = ({
     clearError("images")
   }
 
+const menuItemZodSchema = z.object({
+  itemName: z.string().trim().min(3, "Item name must be at least 3 characters"),
+  category: z.string().min(1, "Please select a category"),
+  description: z.string().trim().min(20, "Description must be at least 20 characters"),
+  price: z.number().positive("Price must be greater than 0"),
+  location: z.string().trim().min(1, "Location is required"),
+  imagesCount: z.number().min(1, "At least one image is required"),
+})
+
   const validate = (): FormErrors => {
     const e: FormErrors = {}
-    if (itemName.trim().length < 3)
-      e.itemName = "Item name must be at least 3 characters"
-    if (!category) e.category = "Please select a category"
-    if (description.trim().length < 20)
-      e.description = "Description must be at least 20 characters"
-    if (!price || Number(price) <= 0) e.price = "Price must be greater than 0"
-    if (!location.trim()) e.location = "Location is required"
-    if (imageList.length === 0) e.images = "At least one image is required"
+    const result = menuItemZodSchema.safeParse({
+      itemName: itemName.trim(),
+      category,
+      description: description.trim(),
+      price: price ? Number(price) : 0,
+      location: location.trim(),
+      imagesCount: imageList.length,
+    })
+
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors
+      if (fieldErrors.itemName) e.itemName = fieldErrors.itemName[0]
+      if (fieldErrors.category) e.category = fieldErrors.category[0]
+      if (fieldErrors.description) e.description = fieldErrors.description[0]
+      if (fieldErrors.price) e.price = fieldErrors.price[0]
+      if (fieldErrors.location) e.location = fieldErrors.location[0]
+      if (fieldErrors.imagesCount) e.images = fieldErrors.imagesCount[0]
+    }
     return e
   }
 

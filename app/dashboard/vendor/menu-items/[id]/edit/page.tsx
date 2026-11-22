@@ -2,8 +2,7 @@
 // Server component: loads item data on server and renders client edit form
 export const dynamic = "force-dynamic"
 
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import { notFound } from "next/navigation"
 import { getItemById } from "@/lib/api/items"
 import EditMenuItemClient from "@/components/dashboard/vendor/menuItems/EditMenuItemClient"
 import { requireRole } from "@/lib/core/server"
@@ -18,23 +17,7 @@ export default async function EditMenuItemPage({
   const item = await getItemById(id)
 
   if (!item) {
-    return (
-      <div className="flex w-full flex-col items-center justify-center gap-4 p-8 text-center">
-        <p className="font-heading text-xl font-bold text-ink">
-          Item not found
-        </p>
-        <p className="font-text text-sm text-ink-muted">
-          The menu item you are trying to edit does not exist or has been removed.
-        </p>
-        <Link
-          href="/dashboard/vendor/menu-items"
-          className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-5 py-2.5 font-heading text-sm font-semibold text-ink hover:bg-brand-soft/40"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to menu items
-        </Link>
-      </div>
-    )
+    notFound()
   }
 
   const rawImages = (item.images as string[] | undefined) ?? []

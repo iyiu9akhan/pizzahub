@@ -11,19 +11,19 @@ import MenuGrid from "@/components/menu/browse/MenuGrid"
 import MenuEmptyState from "@/components/menu/browse/MenuEmptyState"
 import ActiveFilterChips from "@/components/menu/browse/ActiveFilterChips"
 import { MenuItemCardSkeleton } from "@/components/menu/MenuItemCard"
-
-import { toastError } from "@/lib/toast"
 import type { MenuItem, SortOption } from "@/types/menu"
 import { RotateCcw } from "lucide-react"
 
 export interface MenuBrowserProps {
   initialItems?: MenuItem[]
   initialError?: string | null
+  wishlistIds?: string[]
 }
 
 export default function MenuBrowser({
   initialItems = [],
   initialError = null,
+  wishlistIds = [],
 }: MenuBrowserProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -35,7 +35,7 @@ export default function MenuBrowser({
   const sort = (searchParams.get("sort") as SortOption) || "default"
 
   // Raw items and loading/error states initialized from server props
-  const [items, setItems] = useState<MenuItem[]>(initialItems)
+  const items = initialItems
   const [isLoading, setIsLoading] = useState(false)
   const [fetchError, setFetchError] = useState<string | null>(initialError)
 
@@ -200,7 +200,7 @@ export default function MenuBrowser({
       ) : filteredItems.length === 0 ? (
         <MenuEmptyState onClearFilters={clearAllFilters} />
       ) : (
-        <MenuGrid items={filteredItems} />
+        <MenuGrid items={filteredItems} wishlistIds={wishlistIds} />
       )}
     </div>
   )

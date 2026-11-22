@@ -3,7 +3,8 @@
 import { toast } from "sonner"
 
 // Show a green success toast
-export const toastSuccess = (message: string) => toast.success(message)
+export const toastSuccess = (message: string, description?: string) =>
+  toast.success(message, { description })
 
 // Show a red error toast
 export const toastError = (message: string, description?: string) =>

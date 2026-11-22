@@ -8,7 +8,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 // Customer places an order (POST /order)
 // NEVER send customerId, price, total, vendorId, or status.
-export async function placeOrderAction(data: OrderPizzaInput): Promise<{
+export async function OrderPizza(data: OrderPizzaInput): Promise<{
   success: boolean
   message?: string
   code?: string
@@ -65,5 +65,6 @@ export async function placeOrderAction(data: OrderPizzaInput): Promise<{
   }
 }
 
-export const OrderPizza = placeOrderAction
-export default placeOrderAction
+export async function placeOrderAction(data: OrderPizzaInput) {
+  return OrderPizza(data)
+}

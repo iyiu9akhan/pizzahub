@@ -2,11 +2,17 @@
 // All three contexts pass the same `item` shape; only the footer `actions` differ.
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import Link from "next/link"
-import { MapPin, Pizza, Crown, Star } from "lucide-react"
+import { MapPin, Pizza, Crown, Star, Heart } from "lucide-react"
 import { formatBDT } from "@/lib/format"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useSession } from "@/lib/auth-client"
+import { toastInfo, toastSuccess, toastError } from "@/lib/toast"
+import {
+  addToWishlistAction,
+  removeFromWishlistAction,
+} from "@/lib/actions/WishlistActions"
 
 // ----- Types ----------------------------------------------------------------
 
@@ -33,8 +39,10 @@ export interface MenuItemCardProps {
   item: MenuItemData
   /** If passed, renders a status badge on the image */
   status?: MenuItemStatus
-  /** Show a heart/favorite icon button (default false) */
+  /** Show a heart/favorite icon button (default true) */
   showFavorite?: boolean
+  /** Initial favorite state */
+  isFavorite?: boolean
   /** Custom footer content; if omitted, a "View Details" link is shown */
   actions?: React.ReactNode
 }
@@ -64,13 +72,58 @@ const STATUS_STYLES: Record<MenuItemStatus, { label: string; cls: string }> = {
 const MenuItemCard = ({
   item,
   status,
+  showFavorite = true,
+  isFavorite = false,
   actions,
 }: MenuItemCardProps) => {
+  const { data: session } = useSession()
+  const [favorite, setFavorite] = useState<boolean>(isFavorite)
+  const [isWishlistLoading, setIsWishlistLoading] = useState<boolean>(false)
+
   // Use first image from the already-merged images array
   const coverImage = item.images?.[0]
 
   // Resolve status badge if prop is passed
   const statusBadge = status ? STATUS_STYLES[status] : null
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!session?.user) {
+      toastInfo("Please sign in as a customer to save items to your wishlist.")
+      return
+    }
+
+    const userRole =
+      (session.user as { role?: string } | undefined)?.role || "customer"
+    if (userRole !== "customer") {
+      toastInfo("Only customer accounts can use the wishlist.")
+      return
+    }
+
+    const nextState = !favorite
+    setFavorite(nextState)
+    setIsWishlistLoading(true)
+
+    try {
+      const res = nextState
+        ? await addToWishlistAction(item._id)
+        : await removeFromWishlistAction(item._id)
+
+      if (res.success) {
+        toastSuccess(nextState ? "Added to wishlist" : "Removed from wishlist")
+      } else {
+        setFavorite(!nextState)
+        toastError("Wishlist update failed", res.message || "Could not update wishlist.")
+      }
+    } catch {
+      setFavorite(!nextState)
+      toastError("Wishlist update failed", "An error occurred while updating wishlist.")
+    } finally {
+      setIsWishlistLoading(false)
+    }
+  }
 
   return (
     <article className="group flex h-full flex-col rounded-3xl border border-line bg-surface p-3 shadow-2xs transition-shadow duration-300 hover:shadow-lg">
@@ -111,6 +164,27 @@ const MenuItemCard = ({
             Premium
           </span>
         )}
+
+        {/* Wishlist Heart Toggle Button */}
+        {showFavorite && (
+          <button
+            type="button"
+            onClick={handleToggleFavorite}
+            disabled={isWishlistLoading}
+            aria-label={favorite ? "Remove from wishlist" : "Add to wishlist"}
+            className={`absolute z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-xs transition-transform hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 dark:bg-surface/90 ${
+              item.isPremiumVendor ? "right-3 top-10" : "right-3 top-3"
+            }`}
+          >
+            <Heart
+              className={`h-4 w-4 transition-colors ${
+                favorite
+                  ? "fill-red-500 text-red-500"
+                  : "text-ink-muted hover:text-red-500"
+              }`}
+            />
+          </button>
+        )}
       </div>
 
       {/* Card body */}
@@ -121,8 +195,21 @@ const MenuItemCard = ({
             {item.itemName}
           </h3>
           <span className="shrink-0 rounded-full bg-brand px-3 py-1 font-heading text-sm font-bold text-white">
-            {formatUSD(item.price)}
+            {formatBDT(item.price)}
           </span>
+        </div>
+
+        {/* Rating stars & reviews */}
+        <div className="mt-1 flex items-center gap-1.5 text-xs text-amber-500">
+          <Star className="h-3.5 w-3.5 fill-current" />
+          <span className="font-heading font-bold text-ink">
+            {typeof item.ratingAvg === "number" && item.ratingAvg > 0
+              ? item.ratingAvg.toFixed(1)
+              : "New"}
+          </span>
+          {typeof item.ratingCount === "number" && item.ratingCount > 0 && (
+            <span className="text-ink-muted">({item.ratingCount})</span>
+          )}
         </div>
 
         {/* 2-line description */}

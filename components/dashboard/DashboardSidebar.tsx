@@ -24,7 +24,6 @@ import {
   LayoutDashboard,
   ShoppingBag,
   User,
-  Store,
   Package,
   Plus,
   ClipboardList,
@@ -33,6 +32,7 @@ import {
   CreditCard,
   Crown,
   Pizza,
+  Heart,
 } from "lucide-react"
 
 // Navigation items configuration split by role
@@ -41,6 +41,7 @@ const menuItemsByRole = {
     { id: "home", name: "Home", url: "/", icon: House },
     { id: "overview", name: "Overview", url: "/dashboard/customer", icon: LayoutDashboard },
     { id: "my-orders", name: "My Orders", url: "/dashboard/customer/my-orders", icon: ShoppingBag },
+    { id: "wishlist", name: "Wishlist", url: "/dashboard/customer/wishlist", icon: Heart },
     { id: "profile", name: "Profile Settings", url: "/dashboard/customer/profile", icon: User },
   ],
 

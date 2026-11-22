@@ -1,8 +1,12 @@
-// MyOrderCard — displays a single customer order with status, items, and total.
-// Pure UI component; receives order data as props.
-import React from "react"
-import { formatUSD } from "@/lib/format"
+// MyOrderCard — displays a single customer order with status, items, total, and cancel action.
+"use client"
+
+import React, { useState } from "react"
+import { formatBDT } from "@/lib/format"
 import { CustomerOrder, OrderStatus, FulfillmentStatus } from "@/types/order"
+import { cancelOrderAction } from "@/lib/actions/OrderStatus"
+import { toastSuccess, toastError } from "@/lib/toast"
+import LoadingButton from "@/components/ui/LoadingButton"
 import {
   Clock,
   CheckCircle2,
@@ -13,13 +17,14 @@ import {
   MapPin,
   Calendar,
   Store,
+  Ban,
 } from "lucide-react"
 
 interface MyOrderCardProps {
   order: CustomerOrder
+  onCancelled?: (orderId: string) => void
 }
 
-// Determine a single display "stage" from status + fulfillmentStatus
 type Stage =
   | "pending"
   | "accepted"
@@ -42,7 +47,6 @@ function getStage(
   return "pending"
 }
 
-// Visual style and label for each stage
 const STAGE_STYLES: Record<
   Stage,
   { label: string; icon: React.ReactNode; badge: string }
@@ -84,7 +88,6 @@ const STAGE_STYLES: Record<
   },
 }
 
-// Format a date string to a readable label
 function formatDate(dateStr?: string): string {
   if (!dateStr) return "—"
   try {
@@ -98,13 +101,33 @@ function formatDate(dateStr?: string): string {
   }
 }
 
-const MyOrderCard: React.FC<MyOrderCardProps> = ({ order }) => {
-  const stage = getStage(order.status, order.fulfillmentStatus)
+const MyOrderCard: React.FC<MyOrderCardProps> = ({ order, onCancelled }) => {
+  const [isCancelling, setIsCancelling] = useState(false)
+  const [currentStatus, setCurrentStatus] = useState<OrderStatus>(order.status)
+
+  const stage = getStage(currentStatus, order.fulfillmentStatus)
   const stageStyle = STAGE_STYLES[stage]
 
-  // Show the first item's image as the card thumbnail
   const firstItem = order.items?.[0]
   const thumbnail = firstItem?.image
+
+  const handleCancel = async () => {
+    setIsCancelling(true)
+    try {
+      const res = await cancelOrderAction(order._id)
+      if (res.success) {
+        setCurrentStatus("cancelled")
+        toastSuccess("Order cancelled.")
+        onCancelled?.(order._id)
+      } else {
+        toastError("Cancel failed", res.message || "Failed to cancel order.")
+      }
+    } catch {
+      toastError("Cancel failed", "Unexpected error.")
+    } finally {
+      setIsCancelling(false)
+    }
+  }
 
   return (
     <div className="rounded-2xl border border-line bg-surface p-4 shadow-xs transition-shadow hover:shadow-md">
@@ -152,11 +175,25 @@ const MyOrderCard: React.FC<MyOrderCardProps> = ({ order }) => {
           </span>
         </div>
 
-        {/* Total amount — top-right */}
-        <div className="shrink-0 text-right">
+        {/* Total amount + cancel button */}
+        <div className="shrink-0 flex flex-col items-end justify-between">
           <p className="font-heading text-base font-bold text-ink">
-            {formatUSD(order.totalAmount)}
+            {formatBDT(order.totalAmount)}
           </p>
+
+          {/* Cancel button: only visible when order is pending */}
+          {currentStatus === "pending" && (
+            <LoadingButton
+              type="button"
+              isLoading={isCancelling}
+              loadingText="Cancelling…"
+              onClick={handleCancel}
+              className="mt-2 inline-flex items-center gap-1 rounded-lg border border-red-300 bg-surface px-2.5 py-1 font-heading text-xs font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 cursor-pointer"
+            >
+              <Ban className="h-3 w-3" />
+              <span>Cancel</span>
+            </LoadingButton>
+          )}
         </div>
       </div>
 

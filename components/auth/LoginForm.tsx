@@ -4,11 +4,17 @@
 
 import React, { useState } from "react"
 import Link from "next/link"
+import { z } from "zod"
 import { Mail, Lock, Eye, EyeOff } from "lucide-react"
 import SocialButtons from "@/components/auth/SocialButtons"
 import Checkbox from "@/components/ui/Checkbox"
 import type { LoginFormProps } from "@/types/loginFormType"
 import LoadingButton from "@/components/ui/LoadingButton"
+
+const loginSchema = z.object({
+  email: z.string().trim().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+})
 
 // Extended props: add isLoading for the spinner
 interface LoginFormExtendedProps extends LoginFormProps {
@@ -24,10 +30,22 @@ const LoginForm: React.FC<LoginFormExtendedProps> = ({
   const [email, setEmail] = useState<string>("")
   const [password, setPassword] = useState<string>("")
   const [rememberMe, setRememberMe] = useState<boolean>(false)
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
 
   // Collect form values and bubble up to parent handler
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    const result = loginSchema.safeParse({ email, password })
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors
+      setErrors({
+        email: fieldErrors.email?.[0],
+        password: fieldErrors.password?.[0],
+      })
+      return
+    }
+
+    setErrors({})
     if (onSubmit) {
       onSubmit({ email, password, rememberMe })
     }
@@ -62,12 +80,20 @@ const LoginForm: React.FC<LoginFormExtendedProps> = ({
               type="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value)
+                if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }))
+              }}
               placeholder="name@example.com"
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-line bg-surface pl-11 pr-4 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-hidden focus:ring-2 focus:ring-brand/20 disabled:opacity-60"
+              className={`h-12 w-full rounded-xl border bg-surface pl-11 pr-4 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-hidden focus:ring-2 focus:ring-brand/20 disabled:opacity-60 ${
+                errors.email ? "border-red-500" : "border-line"
+              }`}
             />
           </div>
+          {errors.email && (
+            <p className="mt-1 font-text text-xs text-red-500">{errors.email}</p>
+          )}
         </div>
 
         {/* Password Input */}
@@ -87,10 +113,15 @@ const LoginForm: React.FC<LoginFormExtendedProps> = ({
               type={showPassword ? "text" : "password"}
               required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }))
+              }}
               placeholder="Enter your password"
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-line bg-surface pl-11 pr-11 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-hidden focus:ring-2 focus:ring-brand/20 disabled:opacity-60"
+              className={`h-12 w-full rounded-xl border bg-surface pl-11 pr-11 font-text text-sm text-ink placeholder:text-ink-muted/60 transition-all focus:border-brand focus:outline-hidden focus:ring-2 focus:ring-brand/20 disabled:opacity-60 ${
+                errors.password ? "border-red-500" : "border-line"
+              }`}
             />
             <button
               type="button"
@@ -101,6 +132,9 @@ const LoginForm: React.FC<LoginFormExtendedProps> = ({
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
           </div>
+          {errors.password && (
+            <p className="mt-1 font-text text-xs text-red-500">{errors.password}</p>
+          )}
         </div>
 
         <div className="flex items-center justify-between pt-1 text-xs sm:text-sm">

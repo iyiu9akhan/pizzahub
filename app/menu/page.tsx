@@ -7,6 +7,7 @@ import MenuBrowser from "@/components/menu/browse/MenuBrowser"
 import MenuLoading from "@/app/menu/loading"
 import { getItems } from "@/lib/api/items"
 import { getHeaderOrderCount } from "@/lib/core/server"
+import { getCustomerWishlistIds } from "@/lib/api/wishlist"
 import type { MenuItem } from "@/types/menu"
 
 export const metadata = {
@@ -16,7 +17,10 @@ export const metadata = {
 }
 
 export default async function MenuPage() {
-  const orderCount = await getHeaderOrderCount()
+  const [orderCount, wishlistIds] = await Promise.all([
+    getHeaderOrderCount(),
+    getCustomerWishlistIds(),
+  ])
   let initialItems: MenuItem[] = []
   let initialError: string | null = null
 
@@ -51,6 +55,7 @@ export default async function MenuPage() {
           <MenuBrowser
             initialItems={initialItems}
             initialError={initialError}
+            wishlistIds={wishlistIds}
           />
         </Suspense>
       </main>

@@ -4,21 +4,17 @@ export const dynamic = "force-dynamic"
 import React from "react"
 import { getOrders } from "@/lib/api/orders"
 import VendorOrdersClient from "@/components/dashboard/vendor/customerOrders/VendorOrdersClient"
-import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
+import { requireRole } from "@/lib/core/server"
 
-// Fetch orders on the server and pass them to the client component
 const VendorOrdersPage = async () => {
-  // Get the logged-in vendor's id from the server session
-  const session = await auth.api.getSession({ headers: await headers() })
-  const vendorId = session?.user?.id
+  await requireRole("vendor")
 
   let orders = []
   let hasError = false
 
   try {
-    // Only this vendor's orders (order.vendorId === vendorId)
-    orders = await getOrders({ vendorId })
+    const raw = await getOrders()
+    orders = Array.isArray(raw) ? raw : raw?.orders || []
   } catch (error) {
     console.error("Failed to fetch orders:", error)
     hasError = true
@@ -31,7 +27,7 @@ const VendorOrdersPage = async () => {
           Customer Orders
         </h1>
         <p className="mt-2 text-sm text-ink-muted">
-          Review incoming orders and accept or reject them.
+          Review incoming orders and update their status.
         </p>
       </div>
 

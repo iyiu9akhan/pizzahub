@@ -100,7 +100,7 @@ const VendorSubscriptionPage = async ({
 
   if (vendorId) {
     const [count, premiumData] = await Promise.all([
-      getItemCount({ vendorId }).catch(() => 0),
+      getItemCount().catch(() => 0),
       getPremiumVendorById(vendorId).catch(() => ({
         isVendor: false,
         premium: false,

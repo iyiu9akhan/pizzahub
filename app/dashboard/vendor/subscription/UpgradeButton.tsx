@@ -39,7 +39,7 @@ const UpgradeButton = () => {
       ) : (
         <Crown className="h-4 w-4" />
       )}
-      {isLoading ? "Redirecting to checkout..." : "Upgrade to Premium"}
+      {isLoading ? "Processing payment..." : "Upgrade to Premium"}
     </button>
   )
 }
