@@ -9,34 +9,39 @@ import LoadingButton from "@/components/ui/LoadingButton"
 export interface SocialButtonsProps {
   label?: string
   className?: string
+  role?: "customer" | "vendor"
 }
 
 const SocialButtons: React.FC<SocialButtonsProps> = ({
   label = "Continue with Google",
   className = "",
+  role,
 }) => {
   const [isLoading, setIsLoading] = useState(false)
 
   // Trigger Better Auth Google OAuth flow
-// Trigger Better Auth Google OAuth flow
-const handleGoogleSignIn = async () => {
-  setIsLoading(true)
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true)
 
-  try {
-    const { error } = await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/",
-    })
+    if (role) {
+      document.cookie = `pizzahub_signup_role=${role === "vendor" ? "vendor" : "customer"}; path=/; max-age=600; SameSite=Lax`
+    }
 
-    if (error) {
-      toastError("Google sign-in failed", error.message)
+    try {
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/dashboard",
+      })
+
+      if (error) {
+        toastError("Google sign-in failed", error.message || "Please try again.")
+        setIsLoading(false)
+      }
+    } catch {
+      toastError("Google sign-in failed", "Please try again.")
       setIsLoading(false)
     }
-  } catch {
-    toastError("Google sign-in failed", "Please try again.")
-    setIsLoading(false)
   }
-}
 
   return (
     <div className={`w-full ${className}`}>

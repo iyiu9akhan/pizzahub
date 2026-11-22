@@ -124,7 +124,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Row 1 Charts: Orders Trend & Orders by Status */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 min-h-[340px]">
         <OrdersAreaChart
           data={daily}
           title="Platform Orders Trend"
@@ -137,7 +137,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Row 2 Charts: Users by Role & Items by Status */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 min-h-[340px]">
         <UsersByRoleDonutChart data={usersByRole} />
         <ItemsByStatusChart data={itemsByStatus} />
       </div>

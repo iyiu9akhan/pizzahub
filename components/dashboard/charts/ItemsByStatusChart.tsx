@@ -34,7 +34,7 @@ export default function ItemsByStatusChart({ data = {} }: ItemsByStatusChartProp
   const hasData = chartData.some((d) => d.count > 0)
 
   return (
-    <div className="flex h-full flex-col justify-between rounded-3xl border border-line bg-surface p-6 shadow-xs">
+    <div className="flex h-full min-w-0 flex-col justify-between rounded-3xl border border-line bg-surface p-6 shadow-xs">
       <div>
         <div className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
@@ -56,7 +56,7 @@ export default function ItemsByStatusChart({ data = {} }: ItemsByStatusChartProp
             </p>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={256}>
             <BarChart data={chartData} margin={{ top: 15, right: 15, left: -15, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-line/50" vertical={false} />
               <XAxis

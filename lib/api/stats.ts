@@ -28,7 +28,16 @@ export const getStats = async (
     const res = await authFetch(`${BASE_URL}/stats/${role}`)
     if (!res.ok) return null
     return res.json()
-  } catch {
+  } catch (err: unknown) {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "digest" in err &&
+      typeof (err as { digest: unknown }).digest === "string" &&
+      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT"))
+    ) {
+      throw err
+    }
     return null
   }
 }

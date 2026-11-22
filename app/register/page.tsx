@@ -15,6 +15,19 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   const handleRegisterSubmit = async (formData: RegisterFormData) => {
+    if (
+      !formData.password ||
+      formData.password.length < 6 ||
+      !/[A-Z]/.test(formData.password) ||
+      !/[a-z]/.test(formData.password)
+    ) {
+      toastError(
+        "Registration failed",
+        "Password must be at least 6 characters with at least 1 uppercase and 1 lowercase letter."
+      )
+      return
+    }
+
     setIsLoading(true)
     try {
       // role signup e pathano jabe na (admin() plugin block kore)
@@ -35,7 +48,7 @@ export default function RegisterPage() {
       await setSignupRole(formData.role as "customer" | "vendor")
 
       toastSuccess("Account created! Welcome to PizzaHub.")
-      router.push("/")
+      router.push("/dashboard")
       router.refresh()
     } finally {
       setIsLoading(false)

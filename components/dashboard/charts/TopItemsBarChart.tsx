@@ -31,7 +31,7 @@ export default function TopItemsBarChart({
   const hasData = data && data.length > 0 && data.some((i) => i.sold > 0)
 
   return (
-    <div className="flex h-full flex-col justify-between rounded-3xl border border-line bg-surface p-6 shadow-xs">
+    <div className="flex h-full min-w-0 flex-col justify-between rounded-3xl border border-line bg-surface p-6 shadow-xs">
       <div>
         <div className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
@@ -54,7 +54,7 @@ export default function TopItemsBarChart({
             </p>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={256}>
             <BarChart
               data={data.slice(0, 5)}
               layout="vertical"

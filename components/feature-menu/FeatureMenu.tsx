@@ -12,14 +12,14 @@ import { Suspense } from "react"
 
 // Grid skeleton shown while items are loading (Suspense fallback)
 const FeaturedSkeleton = () => (
-  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-    {Array.from({ length: 4 }).map((_, i) => (
+  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    {Array.from({ length: 6 }).map((_, i) => (
       <MenuItemCardSkeleton key={i} />
     ))}
   </div>
 )
 
-// Async component that fetches and renders the first 4 items
+// Async component that fetches and renders featured items (at least 6, prioritizing premium vendors)
 async function FeaturedItems() {
   let items: MenuItemData[] = []
   let wishlistIds: string[] = []
@@ -31,7 +31,7 @@ async function FeaturedItems() {
     wishlistIds = ids
     const list = Array.isArray(raw) ? raw : raw?.items || []
 
-    // Normalize images and filter exclusively for premium vendors
+    // Normalize images and filter for approved/active items
     const allItems = list.map((item: Record<string, unknown>) => ({
       ...item,
       images: [
@@ -40,10 +40,13 @@ async function FeaturedItems() {
       ],
     })) as MenuItemData[]
 
-    // Only menu items belonging to premium vendors appear in the Featured Menu
-    items = allItems
-      .filter((item) => Boolean(item.isPremiumVendor))
-      .slice(0, 4)
+    // Prioritize items from premium vendors, then other approved items to show at least 6
+    const premiumItems = allItems.filter((item) => Boolean(item.isPremiumVendor))
+    const regularItems = allItems.filter((item) => !item.isPremiumVendor)
+    items =
+      premiumItems.length >= 6
+        ? premiumItems.slice(0, 8)
+        : [...premiumItems, ...regularItems].slice(0, 6)
   } catch {
     // API unavailable — render empty state below
   }
@@ -62,7 +65,7 @@ async function FeaturedItems() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {items.map((item) => (
         <div
           key={item._id}

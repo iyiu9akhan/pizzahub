@@ -1,3 +1,5 @@
+"use client"
+
 import { Users, Store, ShoppingBag, ShieldOff } from "lucide-react"
 import type { ManagedUser } from "@/types/user"
 

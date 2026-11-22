@@ -95,7 +95,7 @@ export default function ManageOrders({ initialOrders }: ManageOrdersProps) {
         (o.customerEmail?.toLowerCase() || "").includes(search.toLowerCase()) ||
         (o.vendorName?.toLowerCase() || "").includes(search.toLowerCase()) ||
         (o.deliveryAddress?.toLowerCase() || "").includes(search.toLowerCase()) ||
-        o.items.some((i) =>
+        (o.items || []).some((i) =>
           (i.itemName || i.name || "").toLowerCase().includes(search.toLowerCase())
         )
 
@@ -217,7 +217,7 @@ export default function ManageOrders({ initialOrders }: ManageOrdersProps) {
                       {order.customerPhone && (
                         <span>📞 {order.customerPhone}</span>
                       )}
-                      {order.createdAt && (
+                      {order.createdAt && !isNaN(new Date(order.createdAt).getTime()) && (
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3.5 w-3.5 shrink-0" />
                           {new Date(order.createdAt).toLocaleDateString("en-US", {
@@ -233,12 +233,12 @@ export default function ManageOrders({ initialOrders }: ManageOrdersProps) {
                     <p className="font-text text-xs text-ink">
                       Items:{" "}
                       <span className="font-medium">
-                        {order.items
+                        {(order.items || [])
                           .map(
                             (i) =>
                               `${i.itemName || i.name || "Item"} (×${i.quantity || 1})`
                           )
-                          .join(", ")}
+                          .join(", ") || "No items listed"}
                       </span>
                     </p>
                   </div>

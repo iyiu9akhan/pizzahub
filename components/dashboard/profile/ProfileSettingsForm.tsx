@@ -127,32 +127,23 @@ export default function ProfileSettingsForm({
     e.target.value = ""
   }
 
-  // Upload image to ImgBB
+  // Upload image via server route /api/upload
   const uploadImage = async (file: File): Promise<string> => {
-    const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY
-
-    if (!apiKey) {
-      throw new Error("ImgBB API key is missing.")
-    }
-
     const formData = new FormData()
-    formData.append("image", file)
+    formData.append("file", file)
 
-    const response = await fetch(
-      `https://api.imgbb.com/1/upload?key=${apiKey}`,
-      {
-        method: "POST",
-        body: formData,
-      },
-    )
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    })
 
     const result = await response.json()
 
-    if (!response.ok || !result.success) {
-      throw new Error("Failed to upload profile image.")
+    if (!response.ok || !result.url) {
+      throw new Error(result.error || "Failed to upload profile image.")
     }
 
-    return result.data.url
+    return result.url
   }
 
   // Save profile changes

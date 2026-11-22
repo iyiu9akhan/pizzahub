@@ -35,7 +35,7 @@ export default function CustomerSpendingChart({ data = [] }: CustomerSpendingCha
       const parts = item.date.split("-")
       if (parts.length === 3) {
         const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]))
-        label = d.toLocaleDateString(undefined, { month: "short", day: "numeric" })
+        label = d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
       }
     } catch {
       label = item.date
@@ -48,7 +48,7 @@ export default function CustomerSpendingChart({ data = [] }: CustomerSpendingCha
   })
 
   return (
-    <div className="flex h-full flex-col justify-between rounded-3xl border border-line bg-surface p-6 shadow-xs">
+    <div className="flex h-full min-w-0 flex-col justify-between rounded-3xl border border-line bg-surface p-6 shadow-xs">
       <div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -81,7 +81,7 @@ export default function CustomerSpendingChart({ data = [] }: CustomerSpendingCha
             </p>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={256}>
             <AreaChart data={formattedData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <defs>
                 <linearGradient id="spendingGrad" x1="0" y1="0" x2="0" y2="1">

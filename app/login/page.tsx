@@ -19,7 +19,7 @@ export default function LoginPage() {
         email: formData.email,
         password: formData.password,
         rememberMe: formData.rememberMe,
-        callbackURL: "/",
+        callbackURL: "/dashboard",
       })
 
       if (error) {
@@ -34,7 +34,8 @@ export default function LoginPage() {
       }
 
       toastSuccess("Logged in. Welcome back!")
-      router.push("/")
+      router.push("/dashboard")
+      router.refresh()
     } finally {
       setIsLoading(false)
     }

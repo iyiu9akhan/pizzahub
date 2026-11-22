@@ -27,7 +27,7 @@ export default function UsersByRoleDonutChart({ data = {} }: UsersByRoleDonutCha
   const totalUsers = chartData.reduce((acc, curr) => acc + curr.value, 0)
 
   return (
-    <div className="flex h-full flex-col justify-between rounded-3xl border border-line bg-surface p-6 shadow-xs">
+    <div className="flex h-full min-w-0 flex-col justify-between rounded-3xl border border-line bg-surface p-6 shadow-xs">
       <div>
         <div className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
@@ -51,7 +51,7 @@ export default function UsersByRoleDonutChart({ data = {} }: UsersByRoleDonutCha
         ) : (
           <>
             <div className="relative h-56 w-56 shrink-0">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={224}>
                 <PieChart>
                   <Tooltip
                     content={({ active, payload }) => {

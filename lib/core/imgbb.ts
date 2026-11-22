@@ -17,7 +17,7 @@ export async function uploadToImgBB(file: File): Promise<string> {
     throw new Error("Invalid image type or size")
   }
 
-  const apiKey = process.env.IMGBB_API_KEY
+  const apiKey = process.env.IMGBB_API_KEY || process.env.NEXT_PUBLIC_IMGBB_API_KEY
   if (!apiKey) {
     throw new Error("Image host key is missing")
   }

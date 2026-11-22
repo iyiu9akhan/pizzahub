@@ -9,15 +9,29 @@ export async function getOrders(options?: {
   customerId?: string
   status?: string
 }) {
-  const params = new URLSearchParams()
-  if (options?.vendorId) params.append("vendorId", options.vendorId)
-  if (options?.customerId) params.append("customerId", options.customerId)
-  if (options?.status) params.append("status", options.status)
-  const qs = params.toString() ? `?${params.toString()}` : ""
+  try {
+    const params = new URLSearchParams()
+    if (options?.vendorId) params.append("vendorId", options.vendorId)
+    if (options?.customerId) params.append("customerId", options.customerId)
+    if (options?.status) params.append("status", options.status)
+    const qs = params.toString() ? `?${params.toString()}` : ""
 
-  const response = await authFetch(`${BASE_URL}/orders${qs}`)
-  if (!response.ok) throw new Error("Failed to fetch orders")
-  return response.json()
+    const response = await authFetch(`${BASE_URL}/orders${qs}`)
+    if (!response.ok) return []
+    const data = await response.json()
+    return Array.isArray(data) ? data : data?.orders || []
+  } catch (err: unknown) {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "digest" in err &&
+      typeof (err as { digest: unknown }).digest === "string" &&
+      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT"))
+    ) {
+      throw err
+    }
+    return []
+  }
 }
 
 // Customer header badge: pending order count

@@ -18,7 +18,11 @@ const registerSchema = z
     fullName: z.string().trim().min(2, "Full name must be at least 2 characters"),
     email: z.string().trim().email("Please enter a valid email address"),
     phone: z.string().trim().min(8, "Phone number must be at least 8 digits"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    password: z
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .regex(/[A-Z]/, "Password must contain at least 1 uppercase letter")
+      .regex(/[a-z]/, "Password must contain at least 1 lowercase letter"),
     confirmPassword: z.string(),
     agreeTerms: z.boolean().refine((val) => val === true, {
       message: "You must agree to the Terms of Service",
@@ -327,7 +331,10 @@ const RegisterForm: React.FC<RegisterFormExtendedProps> = ({
         </div>
       </div>
 
-      <SocialButtons label="Sign up with Google" />
+      <SocialButtons
+        label="Sign up with Google"
+        role={role === "vendor" ? "vendor" : "customer"}
+      />
 
       <p className="mt-6 text-center font-text text-sm text-ink-muted">
         Already have an account?{" "}

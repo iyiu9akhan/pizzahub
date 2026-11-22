@@ -54,7 +54,16 @@ export const getWishlist = async (): Promise<WishlistItem[]> => {
         ])
       ),
     })) as WishlistItem[]
-  } catch {
+  } catch (err: unknown) {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "digest" in err &&
+      typeof (err as { digest: unknown }).digest === "string" &&
+      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT"))
+    ) {
+      throw err
+    }
     return []
   }
 }
@@ -66,7 +75,16 @@ export const getCustomerWishlistIds = async (): Promise<string[]> => {
     return list
       .map((item) => item._id)
       .filter((id): id is string => Boolean(id))
-  } catch {
+  } catch (err: unknown) {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "digest" in err &&
+      typeof (err as { digest: unknown }).digest === "string" &&
+      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT"))
+    ) {
+      throw err
+    }
     return []
   }
 }

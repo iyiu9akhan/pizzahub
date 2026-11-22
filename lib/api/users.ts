@@ -14,13 +14,21 @@ export const getUsers = async () => {
 }
 
 // Fixed locale + UTC: server/client same output (hydration safe)
-const formatDate = (d: Date | string) =>
-  new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(d))
+const formatDate = (d?: Date | string | null) => {
+  if (!d) return ""
+  try {
+    const date = new Date(d)
+    if (isNaN(date.getTime())) return ""
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC",
+    }).format(date)
+  } catch {
+    return ""
+  }
+}
 
 export const getManagedUsers = async (): Promise<ManagedUser[]> => {
   try {
@@ -47,15 +55,24 @@ export const getManagedUsers = async (): Promise<ManagedUser[]> => {
         role: (u.role as UserRole) ?? "customer",
         restricted: Boolean(u.restricted || u.banned),
         emailVerified: Boolean(u.emailVerified),
-        joinedAt: u.createdAt ? formatDate(u.createdAt) : "",
+        joinedAt: formatDate(u.createdAt),
       }))
     }
-  } catch {
+  } catch (err: unknown) {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "digest" in err &&
+      typeof (err as { digest: unknown }).digest === "string" &&
+      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT"))
+    ) {
+      throw err
+    }
     // Fallback to Better Auth local user collection if backend endpoint is unavailable
   }
 
   const { users } = await getUsers()
-  return users.map((u) => ({
+  return (users || []).map((u) => ({
     id: u.id,
     name: u.name,
     email: u.email,
