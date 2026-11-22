@@ -2,15 +2,7 @@
 
 import React, { useState, useMemo } from "react"
 import Link from "next/link"
-import {
-  Check,
-  X,
-  Trash2,
-  Pencil,
-  Search,
-  Pizza,
-  Eye,
-} from "lucide-react"
+import { Check, X, Trash2, Pencil, Search, Pizza, Eye, Ban } from "lucide-react"
 import { MenuItemData, MenuItemStatus } from "@/components/menu/MenuItemCard"
 import { formatUSD } from "@/lib/format"
 import { updateItemStatus, deleteItem } from "@/lib/actions/ItemActions"
@@ -72,17 +64,17 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
     })
   }, [items, search, statusFilter])
 
-  const handleStatusChange = async (
-    id: string,
-    status: "approved" | "rejected"
-  ) => {
+  const handleStatusChange = async (id: string, status: MenuItemStatus) => {
     setActionId(id)
+
     try {
       const res = await updateItemStatus(id, status)
+
       if (res.success) {
         setItems((prev) =>
           prev.map((i) => (i._id === id ? { ...i, status } : i))
         )
+
         toastSuccess(`Item marked as ${status}.`)
       } else {
         toastError("Status update failed", res.message)
@@ -128,13 +120,13 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
       {/* Filters Toolbar */}
       <div className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 sm:max-w-xs">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+          <Search className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-ink-muted" />
           <input
             type="text"
             placeholder="Search item, category, vendor…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-line bg-surface py-2 pl-9 pr-3.5 font-text text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none"
+            className="w-full rounded-xl border border-line bg-surface py-2 pr-3.5 pl-9 font-text text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none"
           />
         </div>
 
@@ -144,10 +136,11 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
               key={tab}
               type="button"
               onClick={() => setStatusFilter(tab)}
-              className={`rounded-xl px-3.5 py-1.5 font-heading text-xs font-semibold capitalize transition-colors ${statusFilter === tab
-                ? "bg-brand text-white"
-                : "border border-line bg-surface text-ink hover:bg-brand-soft"
-                }`}
+              className={`rounded-xl px-3.5 py-1.5 font-heading text-xs font-semibold capitalize transition-colors ${
+                statusFilter === tab
+                  ? "bg-brand text-white"
+                  : "border border-line bg-surface text-ink hover:bg-brand-soft"
+              }`}
             >
               {tab}
             </button>
@@ -160,7 +153,7 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
         <div className="overflow-x-auto">
           <table className="w-full min-w-160 text-left">
             <thead>
-              <tr className="border-b border-line bg-brand-soft/40 font-heading text-xs uppercase tracking-wider text-ink-muted">
+              <tr className="border-b border-line bg-brand-soft/40 font-heading text-xs tracking-wider text-ink-muted uppercase">
                 <th className="px-5 py-3.5">Item</th>
                 <th className="px-4 py-3.5">Category</th>
                 <th className="px-4 py-3.5">Price</th>
@@ -172,18 +165,25 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
             <tbody className="divide-y divide-line">
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-sm text-ink-muted">
+                  <td
+                    colSpan={6}
+                    className="py-12 text-center text-sm text-ink-muted"
+                  >
                     No products match the selected criteria.
                   </td>
                 </tr>
               ) : (
                 filteredItems.map((item) => {
                   const statusKey = (item.status as MenuItemStatus) || "pending"
-                  const badge = STATUS_BADGES[statusKey] || STATUS_BADGES.pending
+                  const badge =
+                    STATUS_BADGES[statusKey] || STATUS_BADGES.pending
                   const isUpdating = actionId === item._id
 
                   return (
-                    <tr key={item._id} className="transition-colors hover:bg-muted/30">
+                    <tr
+                      key={item._id}
+                      className="transition-colors hover:bg-muted/30"
+                    >
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
                           <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-line bg-brand-soft/40">
@@ -235,50 +235,125 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
                       </td>
                       <td className="px-5 py-3.5 text-right">
                         <div className="flex items-center justify-end gap-1.5">
-                          {statusKey !== "approved" && (
-                            <button
-                              type="button"
-                              onClick={() => handleStatusChange(item._id, "approved")}
-                              disabled={isUpdating}
-                              title="Approve item"
-                              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-emerald-300 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-500/10 disabled:opacity-40"
-                            >
-                              <Check className="h-4 w-4" />
-                            </button>
+                          {/* Pending: Approve & Reject */}
+                          {statusKey === "pending" && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleStatusChange(item._id, "approved")
+                                }
+                                disabled={isUpdating}
+                                title="Approve item"
+                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-emerald-300 text-emerald-600 transition-colors hover:bg-emerald-50 disabled:opacity-40 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                              >
+                                <Check className="h-4 w-4" />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleStatusChange(item._id, "rejected")
+                                }
+                                disabled={isUpdating}
+                                title="Reject item"
+                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-red-300 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-40 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </>
                           )}
-                          {statusKey !== "rejected" && (
-                            <button
-                              type="button"
-                              onClick={() => handleStatusChange(item._id, "rejected")}
-                              disabled={isUpdating}
-                              title="Reject item"
-                              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-amber-300 text-amber-600 hover:bg-amber-50 dark:border-amber-500/40 dark:text-amber-400 dark:hover:bg-amber-500/10 disabled:opacity-40"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
+
+                          {/* Approved: View, Edit, Ban & Delete */}
+                          {statusKey === "approved" && (
+                            <>
+                              <Link
+                                href={`/menu/${item._id}`}
+                                title="View Public Details"
+                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-line text-ink transition-colors hover:bg-brand-soft"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Link>
+
+                              <Link
+                                href={`/dashboard/vendor/menu-items/${item._id}/edit`}
+                                title="Edit item"
+                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-line text-ink transition-colors hover:bg-brand-soft"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Link>
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleStatusChange(item._id, "rejected")
+                                }
+                                disabled={isUpdating}
+                                title="Ban item"
+                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-amber-300 text-amber-600 transition-colors hover:bg-amber-50 disabled:opacity-40 dark:border-amber-500/40 dark:text-amber-400 dark:hover:bg-amber-500/10"
+                              >
+                                <Ban className="h-4 w-4" />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setItemToDelete(item)}
+                                title="Delete item"
+                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-red-300 text-red-600 transition-colors hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </>
                           )}
-                          <Link
-                            href={`/menu/${item._id}`}
-                            title="View Public Details"
-                            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-line text-ink hover:bg-brand-soft"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Link>
-                          <Link
-                            href={`/dashboard/vendor/menu-items/${item._id}/edit`}
-                            title="Edit item"
-                            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-line text-ink hover:bg-brand-soft"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={() => setItemToDelete(item)}
-                            title="Delete item"
-                            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+
+                          {/* Inactive / Banned: View, Edit, Unban & Delete */}
+                          {statusKey === "inactive" && (
+                            <>
+                              <Link
+                                href={`/menu/${item._id}`}
+                                title="View Item"
+                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-line text-ink transition-colors hover:bg-brand-soft"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Link>
+
+                              <Link
+                                href={`/dashboard/vendor/menu-items/${item._id}/edit`}
+                                title="Edit item"
+                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-line text-ink transition-colors hover:bg-brand-soft"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Link>
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleStatusChange(item._id, "approved")
+                                }
+                                disabled={isUpdating}
+                                title="Unban item"
+                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-emerald-300 text-emerald-600 transition-colors hover:bg-emerald-50 disabled:opacity-40 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                              >
+                                <Check className="h-4 w-4" />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setItemToDelete(item)}
+                                title="Delete item"
+                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-red-300 text-red-600 transition-colors hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </>
+                          )}
+
+                          {/* Rejected: No actions */}
+                          {statusKey === "rejected" && (
+                            <span className="text-xs text-ink-muted">
+                              No actions available
+                            </span>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -301,8 +376,8 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete menu item?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &ldquo;{itemToDelete?.itemName}&rdquo;?
-              This cannot be undone.
+              Are you sure you want to delete &ldquo;{itemToDelete?.itemName}
+              &rdquo;? This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

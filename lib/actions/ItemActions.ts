@@ -48,7 +48,7 @@ export async function createItem(data: MenuItemPayload): Promise<{
       err !== null &&
       "digest" in err &&
       typeof (err as { digest: unknown }).digest === "string" &&
-      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT"))
+      (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")
     ) {
       throw err
     }
@@ -92,7 +92,7 @@ export async function editItem(
       err !== null &&
       "digest" in err &&
       typeof (err as { digest: unknown }).digest === "string" &&
-      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT"))
+      (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")
     ) {
       throw err
     }
@@ -132,7 +132,7 @@ export async function deleteItem(id: string): Promise<{
       err !== null &&
       "digest" in err &&
       typeof (err as { digest: unknown }).digest === "string" &&
-      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT"))
+      (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")
     ) {
       throw err
     }
@@ -142,7 +142,7 @@ export async function deleteItem(id: string): Promise<{
 
 export async function updateItemStatus(
   id: string,
-  status: "pending" | "approved" | "rejected"
+  status: "pending" | "approved" | "rejected" | "inactive"
 ): Promise<{
   success: boolean
   message?: string
@@ -177,7 +177,7 @@ export async function updateItemStatus(
       err !== null &&
       "digest" in err &&
       typeof (err as { digest: unknown }).digest === "string" &&
-      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT"))
+      (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")
     ) {
       throw err
     }

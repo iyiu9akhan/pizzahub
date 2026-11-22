@@ -30,7 +30,7 @@ const SocialButtons: React.FC<SocialButtonsProps> = ({
     try {
       const { error } = await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/dashboard",
+        callbackURL: "/",
       })
 
       if (error) {

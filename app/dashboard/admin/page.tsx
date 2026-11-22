@@ -57,7 +57,7 @@ export default async function AdminDashboardPage() {
 
       {/* Stat Cards Grid (5 cards) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {/* Order Revenue (USD) */}
+        {/*Food Order Revenue (USD) */}
         <div className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-xs transition-all hover:shadow-md">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-brand-fg">
             <TrendingUp className="h-6 w-6" />
@@ -79,7 +79,7 @@ export default async function AdminDashboardPage() {
             <p className="font-heading text-xl font-extrabold text-ink truncate">
               {formatUSD(subscriptionRevenue)}
             </p>
-            <p className="font-text text-xs text-ink-muted">Sub Revenue</p>
+            <p className="font-text text-xs text-ink-muted">Subscription Revenue</p>
           </div>
         </div>
 
@@ -124,7 +124,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Row 1 Charts: Orders Trend & Orders by Status */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 min-h-[340px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 min-h-85">
         <OrdersAreaChart
           data={daily}
           title="Platform Orders Trend"
@@ -137,7 +137,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Row 2 Charts: Users by Role & Items by Status */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 min-h-[340px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 min-h-85">
         <UsersByRoleDonutChart data={usersByRole} />
         <ItemsByStatusChart data={itemsByStatus} />
       </div>

@@ -48,7 +48,7 @@ export default function RegisterPage() {
       await setSignupRole(formData.role as "customer" | "vendor")
 
       toastSuccess("Account created! Welcome to PizzaHub.")
-      router.push("/dashboard")
+      router.push("/")
       router.refresh()
     } finally {
       setIsLoading(false)
