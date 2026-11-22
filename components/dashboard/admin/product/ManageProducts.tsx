@@ -12,7 +12,7 @@ import {
   Eye,
 } from "lucide-react"
 import { MenuItemData, MenuItemStatus } from "@/components/menu/MenuItemCard"
-import { formatBDT } from "@/lib/format"
+import { formatUSD } from "@/lib/format"
 import { updateItemStatus, deleteItem } from "@/lib/actions/ItemActions"
 import { toastSuccess, toastError } from "@/lib/toast"
 import {
@@ -213,7 +213,7 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
                         {item.category}
                       </td>
                       <td className="px-4 py-3.5 font-heading text-sm font-bold text-brand-fg">
-                        {formatBDT(item.price)}
+                        {formatUSD(item.price)}
                       </td>
                       <td className="px-4 py-3.5 font-text text-xs text-ink-muted">
                         {item.vendorName || "—"}

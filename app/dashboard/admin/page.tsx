@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic"
 import React from "react"
 import { requireRole } from "@/lib/core/server"
 import { getStats } from "@/lib/api/stats"
-import { formatBDT, formatUSD } from "@/lib/format"
+import { formatUSD } from "@/lib/format"
 import {
   TrendingUp,
   CreditCard,
@@ -35,7 +35,7 @@ export default async function AdminDashboardPage() {
   const usersByRole = charts.usersByRole || {}
   const itemsByStatus = charts.itemsByStatus || {}
 
-  // Order revenue is in BDT
+  // Order revenue is in USD
   const orderRevenue = cards.orderRevenue ?? cards.revenue ?? cards.totalRevenue ?? 0
   // Subscription revenue is in USD
   const subscriptionRevenue = cards.subscriptionRevenue ?? cards.subRevenue ?? 0
@@ -57,14 +57,14 @@ export default async function AdminDashboardPage() {
 
       {/* Stat Cards Grid (5 cards) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {/* Order Revenue (BDT) */}
+        {/* Order Revenue (USD) */}
         <div className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-xs transition-all hover:shadow-md">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-brand-fg">
             <TrendingUp className="h-6 w-6" />
           </span>
           <div className="min-w-0">
             <p className="font-heading text-xl font-extrabold text-ink truncate">
-              {formatBDT(orderRevenue)}
+              {formatUSD(orderRevenue)}
             </p>
             <p className="font-text text-xs text-ink-muted">Order Revenue</p>
           </div>

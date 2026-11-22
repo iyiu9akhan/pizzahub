@@ -3,7 +3,7 @@
 
 import React, { useState } from "react"
 import { authClient } from "@/lib/auth-client"
-import { toastError, toastSuccess } from "@/lib/toast"
+import { toastError } from "@/lib/toast"
 import LoadingButton from "@/components/ui/LoadingButton"
 
 export interface SocialButtonsProps {

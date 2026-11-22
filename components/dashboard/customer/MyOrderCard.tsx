@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { formatBDT } from "@/lib/format"
+import { formatUSD } from "@/lib/format"
 import { CustomerOrder, OrderStatus, FulfillmentStatus } from "@/types/order"
 import { cancelOrderAction } from "@/lib/actions/OrderStatus"
 import { toastSuccess, toastError } from "@/lib/toast"
@@ -91,7 +91,7 @@ const STAGE_STYLES: Record<
 function formatDate(dateStr?: string): string {
   if (!dateStr) return "—"
   try {
-    return new Date(dateStr).toLocaleDateString("en-BD", {
+    return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -178,7 +178,7 @@ const MyOrderCard: React.FC<MyOrderCardProps> = ({ order, onCancelled }) => {
         {/* Total amount + cancel button */}
         <div className="shrink-0 flex flex-col items-end justify-between">
           <p className="font-heading text-base font-bold text-ink">
-            {formatBDT(order.totalAmount)}
+            {formatUSD(order.totalAmount)}
           </p>
 
           {/* Cancel button: only visible when order is pending */}

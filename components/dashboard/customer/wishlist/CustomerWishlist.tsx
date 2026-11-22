@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import Link from "next/link"
 import { Heart, Trash2, ArrowRight, Pizza, MapPin, Store, Star } from "lucide-react"
-import { formatBDT } from "@/lib/format"
+import { formatUSD } from "@/lib/format"
 import { toastSuccess, toastError } from "@/lib/toast"
 import { removeFromWishlistAction } from "@/lib/actions/WishlistActions"
 import LoadingButton from "@/components/ui/LoadingButton"
@@ -121,7 +121,7 @@ export default function CustomerWishlist({ items: initialItems }: CustomerWishli
                       {item.itemName}
                     </h3>
                     <span className="shrink-0 rounded-full bg-brand px-3 py-1 font-heading text-sm font-bold text-white">
-                      {formatBDT(item.price)}
+                      {formatUSD(item.price)}
                     </span>
                   </div>
 

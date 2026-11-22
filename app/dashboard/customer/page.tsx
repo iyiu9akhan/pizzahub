@@ -15,7 +15,7 @@ import {
 import { requireRole } from "@/lib/core/server"
 import { getStats } from "@/lib/api/stats"
 import { getOrders } from "@/lib/api/orders"
-import { formatBDT } from "@/lib/format"
+import { formatUSD } from "@/lib/format"
 import type { CustomerOrder } from "@/types/order"
 
 import CustomerSpendingChart from "@/components/dashboard/charts/CustomerSpendingChart"
@@ -94,7 +94,7 @@ export default async function CustomerDashboardPage() {
           </span>
           <div className="min-w-0">
             <p className="font-heading text-2xl font-extrabold text-ink truncate">
-              {formatBDT(totalSpent)}
+              {formatUSD(totalSpent)}
             </p>
             <p className="font-text text-xs text-ink-muted">Total Spent</p>
           </div>
@@ -212,7 +212,7 @@ export default async function CustomerDashboardPage() {
 
                   <div className="flex items-center gap-4">
                     <span className="font-heading text-sm font-bold text-ink">
-                      {formatBDT(order.totalAmount)}
+                      {formatUSD(order.totalAmount)}
                     </span>
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-heading text-[11px] font-semibold capitalize ${

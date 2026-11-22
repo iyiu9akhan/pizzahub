@@ -115,7 +115,7 @@ export default function CustomerSpendingChart({ data = [] }: CustomerSpendingCha
                       <div className="rounded-xl border border-line bg-surface p-3 shadow-lg">
                         <p className="font-heading text-xs font-bold text-ink">{row.displayDate}</p>
                         <p className="mt-1 font-text text-xs text-emerald-600 dark:text-emerald-400">
-                          Spent: ৳{row.amount.toLocaleString()}
+                          Spent: ${row.amount.toLocaleString("en-US")}
                         </p>
                         <p className="font-text text-xs text-ink-muted">
                           Orders: <strong className="font-bold text-ink">{row.orders}</strong>

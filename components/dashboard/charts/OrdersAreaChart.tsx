@@ -115,12 +115,12 @@ export default function OrdersAreaChart({
                         </p>
                         {typeof row.revenue === "number" && row.revenue > 0 && (
                           <p className="font-text text-xs text-emerald-600 dark:text-emerald-400">
-                            Revenue: ৳{row.revenue.toLocaleString()}
+                            Revenue: <strong className="font-bold">${row.revenue.toLocaleString("en-US")}</strong>
                           </p>
                         )}
                         {typeof row.spending === "number" && row.spending > 0 && (
                           <p className="font-text text-xs text-emerald-600 dark:text-emerald-400">
-                            Spent: ৳{row.spending.toLocaleString()}
+                            Spent: <strong className="font-bold">${row.spending.toLocaleString("en-US")}</strong>
                           </p>
                         )}
                       </div>

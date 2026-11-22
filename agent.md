@@ -43,7 +43,7 @@
 - **Reviews**: `getItemReviews` in `lib/api/items.ts` enriches reviews with real reviewer name & avatar from `user` collection.
 
 ## 8. Coding Conventions
-- Currency: `formatBDT()` from `lib/format.tsx` everywhere. Never use `alert()` (use `lib/toast.ts`).
+- Currency: `formatUSD()` and `formatUSDCents()` from `lib/format.tsx` everywhere. Never use `alert()` (use `lib/toast.ts`).
 - Tokens: `text-ink`, `text-ink-muted`, `bg-surface`, `border-line`, `bg-brand`, `bg-brand-soft`, `font-heading`, `font-text`.
 - Hydration: Use `useSyncExternalStore` for mount check, never synchronous `setState` in `useEffect`.
 
@@ -62,3 +62,4 @@
 - 2026-11-22: Custom 404/500/403 error pages, Zod validation on all forms, skeleton loaders, and payment verifying state.
 - 2026-11-22: Unified profile images (role SVGs, resolveAvatar, server upload helper, updateProfileImage action, ProfileImageUploader).
 - 2026-11-22: Homepage featured menu premium filtering, MenuItemCard premium badge, review customer profile resolution.
+- 2026-11-22: Complete currency migration to USD (formatUSD, formatUSDCents), fixed LoginForm stray tag and unused imports.

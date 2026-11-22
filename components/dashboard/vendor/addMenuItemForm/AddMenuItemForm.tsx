@@ -649,7 +649,7 @@ const menuItemZodSchema = z.object({
                     {itemName.trim() || "Item name"}
                   </h4>
                   <span className="shrink-0 font-heading text-lg font-extrabold text-brand-fg">
-                    {priceNumber > 0 ? formatUSD(priceNumber) : "৳ 0"}
+                    {priceNumber > 0 ? formatUSD(priceNumber) : "$0"}
                   </span>
                 </div>
                 <p className="line-clamp-2 font-text text-xs leading-relaxed wrap-break-word text-ink-muted">

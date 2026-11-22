@@ -32,7 +32,7 @@ const orderFormSchema = z.object({
 })
 
 import { useSession } from "@/lib/auth-client"
-import { formatBDT } from "@/lib/format"
+import { formatUSD } from "@/lib/format"
 import { OrderPizza } from "@/lib/actions/OrderPizza"
 import { toastSuccess, toastError, toastInfo } from "@/lib/toast"
 import {
@@ -270,7 +270,7 @@ export default function MenuItemDetails({
 
             <div className="mt-4 flex flex-wrap items-center gap-4">
               <span className="font-heading text-3xl font-extrabold text-brand-fg">
-                {formatBDT(item.price)}
+                {formatUSD(item.price)}
               </span>
 
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
@@ -439,7 +439,7 @@ export default function MenuItemDetails({
                 <div className="flex items-center justify-between border-t border-line pt-2 text-sm">
                   <span className="font-text text-ink-muted">Total Payable:</span>
                   <span className="font-heading text-xl font-extrabold text-brand-fg">
-                    {formatBDT(item.price * quantity)}
+                    {formatUSD(item.price * quantity)}
                   </span>
                 </div>
 

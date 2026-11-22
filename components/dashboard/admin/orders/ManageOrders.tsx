@@ -13,7 +13,7 @@ import {
   MapPin,
   Calendar,
 } from "lucide-react"
-import { formatBDT } from "@/lib/format"
+import { formatUSD } from "@/lib/format"
 import { updateOrderStatus } from "@/lib/actions/OrderStatus"
 import { toastSuccess, toastError } from "@/lib/toast"
 import LoadingButton from "@/components/ui/LoadingButton"
@@ -220,7 +220,7 @@ export default function ManageOrders({ initialOrders }: ManageOrdersProps) {
                       {order.createdAt && (
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3.5 w-3.5 shrink-0" />
-                          {new Date(order.createdAt).toLocaleDateString("en-BD", {
+                          {new Date(order.createdAt).toLocaleDateString("en-US", {
                             day: "numeric",
                             month: "short",
                             year: "numeric",
@@ -247,7 +247,7 @@ export default function ManageOrders({ initialOrders }: ManageOrdersProps) {
                   <div className="flex flex-wrap items-center gap-4 lg:justify-end">
                     <div className="text-right">
                       <p className="font-heading text-lg font-extrabold text-brand-fg">
-                        {formatBDT(order.totalAmount)}
+                        {formatUSD(order.totalAmount)}
                       </p>
                       <span className="inline-block rounded-full bg-brand-soft px-2.5 py-0.5 font-heading text-[10px] font-bold text-brand-fg capitalize">
                         {order.status === "accepted"

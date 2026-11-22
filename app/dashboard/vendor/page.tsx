@@ -17,7 +17,7 @@ import { requireRole } from "@/lib/core/server"
 import { getStats } from "@/lib/api/stats"
 import { getPremiumVendorById } from "@/lib/api/premiumVendors"
 import { getItemCount } from "@/lib/api/items"
-import { formatBDT } from "@/lib/format"
+import { formatUSD } from "@/lib/format"
 
 import OrdersAreaChart from "@/components/dashboard/charts/OrdersAreaChart"
 import OrdersStatusDonutChart from "@/components/dashboard/charts/OrdersStatusDonutChart"
@@ -102,7 +102,7 @@ export default async function VendorDashboardPage() {
           </span>
           <div className="min-w-0">
             <p className="font-heading text-2xl font-extrabold text-ink truncate">
-              {formatBDT(totalRevenue)}
+              {formatUSD(totalRevenue)}
             </p>
             <p className="font-text text-xs text-ink-muted">Total Sales</p>
           </div>

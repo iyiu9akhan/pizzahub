@@ -4,7 +4,7 @@ import React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ShoppingCart, Star, Clock, ArrowRight } from "lucide-react"
-import { formatBDT } from "@/lib/format"
+import { formatUSD } from "@/lib/format"
 
 export interface BannerProps {
   className?: string
@@ -102,7 +102,7 @@ const Banner: React.FC<BannerProps> = ({ className = "" }) => {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-6 lg:justify-start">
               <div className="flex flex-col items-start">
                 <span className="font-heading text-4xl font-extrabold leading-none text-brand-fg xl:text-5xl">
-                  {formatBDT(599)}
+                  {formatUSD(599)}
                 </span>
                 <span className="mt-1.5 font-text text-xs tracking-wide text-ink-muted">
                   total payable
