@@ -54,13 +54,23 @@ export default function TopItemsBarChart({
             </p>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={256}>
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            minWidth={0}
+            minHeight={256}
+            initialDimension={{ width: 320, height: 256 }}
+          >
             <BarChart
               data={data.slice(0, 5)}
               layout="vertical"
               margin={{ top: 10, right: 20, left: 20, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" className="stroke-line/50" horizontal={false} />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                className="stroke-line/50"
+                horizontal={false}
+              />
               <XAxis
                 type="number"
                 stroke="currentColor"
@@ -87,9 +97,12 @@ export default function TopItemsBarChart({
                     const row = payload[0].payload as TopItem
                     return (
                       <div className="rounded-xl border border-line bg-surface p-2.5 shadow-lg">
-                        <p className="font-heading text-xs font-bold text-ink">{row.name}</p>
+                        <p className="font-heading text-xs font-bold text-ink">
+                          {row.name}
+                        </p>
                         <p className="mt-0.5 font-text text-xs text-brand-fg">
-                          Units Sold: <strong className="font-bold">{row.sold}</strong>
+                          Units Sold:{" "}
+                          <strong className="font-bold">{row.sold}</strong>
                         </p>
                       </div>
                     )
@@ -97,7 +110,12 @@ export default function TopItemsBarChart({
                   return null
                 }}
               />
-              <Bar dataKey="sold" fill="#e11d48" radius={[0, 8, 8, 0]} barSize={20} />
+              <Bar
+                dataKey="sold"
+                fill="#e11d48"
+                radius={[0, 8, 8, 0]}
+                barSize={20}
+              />
             </BarChart>
           </ResponsiveContainer>
         )}

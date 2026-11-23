@@ -1,5 +1,3 @@
-// Dashboard sidebar navigation component for customer, vendor, and admin roles.
-// Renders role-specific navigation links, branding, and current user profile details.
 "use client"
 
 import Link from "next/link"
@@ -39,36 +37,115 @@ import {
 const menuItemsByRole = {
   customer: [
     { id: "home", name: "Home", url: "/", icon: House },
-    { id: "overview", name: "Overview", url: "/dashboard/customer", icon: LayoutDashboard },
-    { id: "my-orders", name: "My Orders", url: "/dashboard/customer/my-orders", icon: ShoppingBag },
-    { id: "wishlist", name: "Wishlist", url: "/dashboard/customer/wishlist", icon: Heart },
-    { id: "profile", name: "Profile Settings", url: "/dashboard/customer/profile", icon: User },
+    {
+      id: "overview",
+      name: "Overview",
+      url: "/dashboard/customer",
+      icon: LayoutDashboard,
+    },
+    {
+      id: "my-orders",
+      name: "My Orders",
+      url: "/dashboard/customer/my-orders",
+      icon: ShoppingBag,
+    },
+    {
+      id: "wishlist",
+      name: "Wishlist",
+      url: "/dashboard/customer/wishlist",
+      icon: Heart,
+    },
+    {
+      id: "profile",
+      name: "Profile Settings",
+      url: "/dashboard/customer/profile",
+      icon: User,
+    },
   ],
 
   vendor: [
     { id: "home", name: "Home", url: "/", icon: House },
-    { id: "overview", name: "Overview", url: "/dashboard/vendor", icon: LayoutDashboard },
-    { id: "menu-items", name: "My Menu Items", url: "/dashboard/vendor/menu-items", icon: Package },
-    { id: "add-menu-item", name: "Add Menu Item", url: "/dashboard/vendor/add-menu-item", icon: Plus },
-    { id: "orders", name: "Customer Orders", url: "/dashboard/vendor/orders", icon: ClipboardList },
-    { id: "subscription", name: "Subscription", url: "/dashboard/vendor/subscription", icon: Crown },
-    { id: "profile", name: "Profile Settings", url: "/dashboard/vendor/profile", icon: Settings },
+    {
+      id: "overview",
+      name: "Overview",
+      url: "/dashboard/vendor",
+      icon: LayoutDashboard,
+    },
+    {
+      id: "menu-items",
+      name: "My Menu Items",
+      url: "/dashboard/vendor/menu-items",
+      icon: Package,
+    },
+    {
+      id: "add-menu-item",
+      name: "Add Menu Item",
+      url: "/dashboard/vendor/add-menu-item",
+      icon: Plus,
+    },
+    {
+      id: "orders",
+      name: "Customer Orders",
+      url: "/dashboard/vendor/orders",
+      icon: ClipboardList,
+    },
+    {
+      id: "subscription",
+      name: "Subscription",
+      url: "/dashboard/vendor/subscription",
+      icon: Crown,
+    },
+    {
+      id: "profile",
+      name: "Profile Settings",
+      url: "/dashboard/vendor/profile",
+      icon: Settings,
+    },
   ],
 
   admin: [
     { id: "home", name: "Home", url: "/", icon: House },
-    { id: "overview", name: "Overview", url: "/dashboard/admin", icon: LayoutDashboard },
-    { id: "users", name: "Manage Users", url: "/dashboard/admin/users", icon: Users },
-    { id: "items", name: "Manage Items", url: "/dashboard/admin/items", icon: Package },
-    { id: "orders", name: "Manage Orders", url: "/dashboard/admin/orders", icon: ClipboardList },
-    { id: "transactions", name: "Transactions", url: "/dashboard/admin/transactions", icon: CreditCard },
-    { id: "profile", name: "Profile Settings", url: "/dashboard/admin/profile", icon: User },
+    {
+      id: "overview",
+      name: "Overview",
+      url: "/dashboard/admin",
+      icon: LayoutDashboard,
+    },
+    {
+      id: "users",
+      name: "Manage Users",
+      url: "/dashboard/admin/users",
+      icon: Users,
+    },
+    {
+      id: "items",
+      name: "Manage Items",
+      url: "/dashboard/admin/items",
+      icon: Package,
+    },
+    {
+      id: "orders",
+      name: "Manage Orders",
+      url: "/dashboard/admin/orders",
+      icon: ClipboardList,
+    },
+    {
+      id: "transactions",
+      name: "Transactions",
+      url: "/dashboard/admin/transactions",
+      icon: CreditCard,
+    },
+    {
+      id: "profile",
+      name: "Profile Settings",
+      url: "/dashboard/admin/profile",
+      icon: User,
+    },
   ],
 }
 
 type Role = keyof typeof menuItemsByRole
 
-// Human-readable labels for each role
 const ROLE_LABEL: Record<Role, string> = {
   customer: "Customer",
   vendor: "Vendor",
@@ -93,7 +170,7 @@ export function DashboardSidebar() {
     return pathname === url || pathname.startsWith(`${url}/`)
   }
 
-  if (isPending) return null
+  // if (isPending) return null
 
   // User display info
   const userName = session?.user?.name ?? "Guest"
@@ -122,11 +199,15 @@ export function DashboardSidebar() {
       {/* Navigation menu items */}
       <SidebarContent className="px-2 py-3">
         <SidebarGroup>
-          <SidebarGroupLabel className="mb-1 px-3 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
+          <SidebarGroupLabel className="mb-1 px-3 font-heading text-[11px] font-semibold tracking-[0.14em] text-ink-muted uppercase">
             Navigation
           </SidebarGroupLabel>
 
-          <SidebarMenu className="gap-1">
+          <SidebarMenu
+            className={`gap-1 transition-opacity duration-200 ${
+              isPending ? "opacity-0" : "opacity-100"
+            }`}
+          >
             {menuItems.map((item) => {
               const active = isActive(item.url)
               return (
@@ -162,7 +243,11 @@ export function DashboardSidebar() {
 
       {/* Footer: User profile info with avatar fallback */}
       <SidebarFooter className="border-t border-line p-3">
-        <div className="flex items-center gap-3 rounded-xl bg-brand-soft/60 p-3">
+        <div
+          className={`flex items-center gap-3 rounded-xl bg-brand-soft/60 p-3 transition-opacity duration-200 ${
+            isPending ? "opacity-0" : "opacity-100"
+          }`}
+        >
           <UserAvatar
             image={userImage}
             role={safeRole}

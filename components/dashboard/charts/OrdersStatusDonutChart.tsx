@@ -62,7 +62,7 @@ export default function OrdersStatusDonutChart({
         ) : (
           <>
             <div className="relative h-56 w-56 shrink-0">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={224}>
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={224} initialDimension={{ width: 224, height: 224 }}>
                 <PieChart>
                   <Tooltip
                     content={({ active, payload }) => {

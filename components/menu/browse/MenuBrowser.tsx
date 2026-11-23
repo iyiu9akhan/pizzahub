@@ -20,6 +20,20 @@ export interface MenuBrowserProps {
   wishlistIds?: string[]
 }
 
+type Filters = {
+  q: string
+  category: string
+  location: string
+  sort: SortOption
+}
+
+const EMPTY_FILTERS: Filters = {
+  q: "",
+  category: "",
+  location: "",
+  sort: "default" as SortOption,
+}
+
 export default function MenuBrowser({
   initialItems = [],
   initialError = null,
@@ -28,18 +42,19 @@ export default function MenuBrowser({
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // Read active filter states from URL search params
-  const query = searchParams.get("q") || ""
-  const category = searchParams.get("category") || ""
-  const location = searchParams.get("location") || ""
-  const sort = (searchParams.get("sort") as SortOption) || "default"
+  const [filters, setFilters] = useState<Filters>({
+    q: searchParams.get("q") || "",
+    category: searchParams.get("category") || "",
+    location: searchParams.get("location") || "",
+    sort: (searchParams.get("sort") as SortOption) || ("default" as SortOption),
+  })
 
-  // Raw items and loading/error states initialized from server props
+  const { q: query, category, location, sort } = filters
+
   const items = initialItems
   const [isLoading, setIsLoading] = useState(false)
   const [fetchError, setFetchError] = useState<string | null>(initialError)
 
-  // Explicit retry handler refreshes server data
   const handleRetry = () => {
     setIsLoading(true)
     setFetchError(null)
@@ -49,7 +64,6 @@ export default function MenuBrowser({
     }, 500)
   }
 
-  // Extract unique locations from loaded items
   const uniqueLocations = useMemo(() => {
     const locSet = new Set<string>()
     items.forEach((item) => {
@@ -60,48 +74,44 @@ export default function MenuBrowser({
     return Array.from(locSet).sort()
   }, [items])
 
-  // Update URL search parameters without page scroll jumps
-  const setFilter = useCallback(
-    (key: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString())
+  // URL update করে, কিন্তু server request করে না
+  const syncUrl = (next: Filters) => {
+    const params = new URLSearchParams()
+    Object.entries(next).forEach(([key, value]) => {
       if (value && value !== "default" && value !== "All") {
         params.set(key, value)
-      } else {
-        params.delete(key)
       }
-      router.replace(`/menu?${params.toString()}`, { scroll: false })
-    },
-    [router, searchParams]
-  )
+    })
+    const qs = params.toString()
+    window.history.replaceState(null, "", qs ? `/menu?${qs}` : "/menu")
+  }
 
-  // Clear all filters from URL
+  const setFilter = (key: keyof Filters, value: string) => {
+    const next = { ...filters, [key]: value } as Filters
+    setFilters(next)
+    syncUrl(next)
+  }
+
   const clearAllFilters = useCallback(() => {
-    router.replace("/menu", { scroll: false })
-  }, [router])
+    setFilters(EMPTY_FILTERS)
+    window.history.replaceState(null, "", "/menu")
+  }, [])
 
-  // Filter and sort items according to criteria
   const filteredItems = useMemo(() => {
     return items
       .filter((item) => {
-        // Status check: if item has status field, only show when approved.
-        // If status field is missing (legacy backend items), include it.
-        // NOTE: This will become strictly status === "approved" once backend adds status to all records.
-        // TODO(admin): re-enable approval filter after admin panel is built
         if (item.status && item.status !== "approved") {
           return false
         }
 
-        // Category filter
         if (category && category !== "All" && item.category !== category) {
           return false
         }
 
-        // Location filter
         if (location && item.location !== location) {
           return false
         }
 
-        // Search text matching item name, category, and location
         if (query.trim()) {
           const qLower = query.toLowerCase().trim()
           const nameMatch = item.itemName?.toLowerCase().includes(qLower)
@@ -115,24 +125,17 @@ export default function MenuBrowser({
         return true
       })
       .sort((a, b) => {
-        if (sort === "price-asc") {
-          return a.price - b.price
-        }
-        if (sort === "price-desc") {
-          return b.price - a.price
-        }
+        if (sort === "price-asc") return a.price - b.price
+        if (sort === "price-desc") return b.price - a.price
         return 0
       })
   }, [items, query, category, location, sort])
 
   return (
     <div className="mx-auto max-w-7xl px-6 pb-20">
-      {/* 1. Page header */}
       <MenuHero />
 
-      {/* 2. Top bar: search, location and sort (sticky under the navbar) */}
-      {/* 2. Top bar: search, location and sort (sticky under the navbar) */}
-      <div className="sticky top-20 z-30 mb-5 rounded-2xl border border-line bg-surface/90 p-3 shadow-sm backdrop-blur-md sm:p-4">
+     <div className="sticky top-20 z-30 mb-5 rounded-b-2xl border border-line bg-surface/90 p-3 shadow-sm backdrop-blur-md sm:p-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_220px_220px]">
           <div className="sm:col-span-2 lg:col-span-1">
             <MenuSearchBar
@@ -150,7 +153,6 @@ export default function MenuBrowser({
         </div>
       </div>
 
-      {/* 3. Category capsules (below the top bar) */}
       <div className="mb-5">
         <MenuCategoryChips
           selectedCategory={category}
@@ -158,7 +160,6 @@ export default function MenuBrowser({
         />
       </div>
 
-      {/* 4. Result count and active filter chips */}
       {!isLoading && !fetchError && (
         <div className="mb-6">
           <ActiveFilterChips
@@ -176,7 +177,6 @@ export default function MenuBrowser({
         </div>
       )}
 
-      {/* 5. Main content: loading skeleton, error state, empty state, or grid */}
       {isLoading ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (

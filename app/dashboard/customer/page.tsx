@@ -141,7 +141,7 @@ export default async function CustomerDashboardPage() {
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 min-h-[340px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 min-h-85">
         <CustomerSpendingChart data={daily} />
         <OrdersStatusDonutChart
           data={ordersByStatus}
