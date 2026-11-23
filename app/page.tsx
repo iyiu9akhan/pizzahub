@@ -18,7 +18,10 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-screen flex-col bg-page transition-colors duration-300">
+
       {/* <Navbar orderCount={orderCount} /> */}
+
+      <Navbar orderCount={orderCount} />
       <main className="flex-1">
         <HeroBanner />
         <FeatureMenu />

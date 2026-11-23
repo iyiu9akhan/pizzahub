@@ -213,10 +213,11 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
               key={tab}
               type="button"
               onClick={() => setStatusFilter(tab)}
-              className={`rounded-xl px-3.5 py-1.5 font-heading text-xs font-semibold capitalize transition-colors ${statusFilter === tab
-                ? "bg-brand text-white"
-                : "border border-line bg-surface text-ink hover:bg-brand-soft"
-                }`}
+              className={`rounded-xl px-3.5 py-1.5 font-heading text-xs font-semibold capitalize transition-colors ${
+                statusFilter === tab
+                  ? "bg-brand text-white"
+                  : "border border-line bg-surface text-ink hover:bg-brand-soft"
+              }`}
             >
               {tab}
             </button>
@@ -319,13 +320,13 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
                           {/* View public page */}
                           {(statusKey === "approved" ||
                             statusKey === "inactive") && (
-                              <ActionLink
-                                href={`/menu/${item._id}`}
-                                title="View public details"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </ActionLink>
-                            )}
+                            <ActionLink
+                              href={`/menu/${item._id}`}
+                              title="View public details"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </ActionLink>
+                          )}
 
                           {/* Pending: approve or reject */}
                           {statusKey === "pending" && (
@@ -384,21 +385,21 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
                           {/* Inactive / Rejected: restore to approved */}
                           {(statusKey === "inactive" ||
                             statusKey === "rejected") && (
-                              <ActionButton
-                                title={
-                                  statusKey === "rejected"
-                                    ? "Restore item"
-                                    : "Reactivate item"
-                                }
-                                tone="success"
-                                disabled={isUpdating}
-                                onClick={() =>
-                                  handleStatusChange(item._id, "approved")
-                                }
-                              >
-                                <RotateCcw className="h-4 w-4" />
-                              </ActionButton>
-                            )}
+                            <ActionButton
+                              title={
+                                statusKey === "rejected"
+                                  ? "Restore item"
+                                  : "Reactivate item"
+                              }
+                              tone="success"
+                              disabled={isUpdating}
+                              onClick={() =>
+                                handleStatusChange(item._id, "approved")
+                              }
+                            >
+                              <RotateCcw className="h-4 w-4" />
+                            </ActionButton>
+                          )}
 
                           {/* Delete: any status */}
                           <ActionButton
