@@ -20,9 +20,28 @@ async function getPremiumVendorIds(): Promise<Set<string>> {
   }
 }
 
+export interface GetItemsParams {
+  q?: string
+  category?: string
+  location?: string
+  sort?: string
+  vendorId?: string
+}
+
 // Public read: fetch all approved items, enriched with vendor premium status
-export const getItems = async () => {
-  const res = await fetch(`${BASE_URL}/items`, { cache: "no-store" })
+export const getItems = async (params?: GetItemsParams) => {
+  const searchParams = new URLSearchParams()
+  if (params?.q) searchParams.set("q", params.q)
+  if (params?.category && params.category !== "All") {
+    searchParams.set("category", params.category)
+  }
+  if (params?.location) searchParams.set("location", params.location)
+  if (params?.sort) searchParams.set("sort", params.sort)
+  if (params?.vendorId) searchParams.set("vendorId", params.vendorId)
+
+  const qs = searchParams.toString()
+  const url = `${BASE_URL}/items${qs ? `?${qs}` : ""}`
+  const res = await fetch(url, { cache: "no-store" })
   if (!res.ok) throw new Error("Failed to fetch items")
   const data = await res.json()
   const list = Array.isArray(data) ? data : data?.items || []
@@ -33,6 +52,18 @@ export const getItems = async () => {
     ...item,
     isPremiumVendor: item.vendorId ? premiumVendorIds.has(String(item.vendorId)) : false,
   }))
+}
+
+// Public read: distinct locations of approved items
+export const getItemLocations = async (): Promise<string[]> => {
+  try {
+    const res = await fetch(`${BASE_URL}/items/locations`, { cache: "no-store" })
+    if (!res.ok) return []
+    const data = await res.json()
+    return Array.isArray(data) ? data : []
+  } catch {
+    return []
+  }
 }
 
 // Public read: fetch a single approved item by ID, enriched with vendor premium status

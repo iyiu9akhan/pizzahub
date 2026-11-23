@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useMemo, useState } from "react"
+import React, { useCallback, useMemo, useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
 import MenuHero from "@/components/menu/browse/MenuHero"
@@ -18,28 +18,62 @@ export interface MenuBrowserProps {
   initialItems?: MenuItem[]
   initialError?: string | null
   wishlistIds?: string[]
+  serverLocations?: string[]
+}
+
+type Filters = {
+  q: string
+  category: string
+  location: string
+  sort: SortOption
+}
+
+const EMPTY_FILTERS: Filters = {
+  q: "",
+  category: "",
+  location: "",
+  sort: "default" as SortOption,
 }
 
 export default function MenuBrowser({
   initialItems = [],
   initialError = null,
   wishlistIds = [],
+  serverLocations = [],
 }: MenuBrowserProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [isPending, startTransition] = useTransition()
 
-  // Read active filter states from URL search params
-  const query = searchParams.get("q") || ""
-  const category = searchParams.get("category") || ""
-  const location = searchParams.get("location") || ""
-  const sort = (searchParams.get("sort") as SortOption) || "default"
+  const parseSortParam = useCallback((param: string | null): SortOption => {
+    if (param === "price_asc" || param === "price-asc") return "price-asc"
+    if (param === "price_desc" || param === "price-desc") return "price-desc"
+    return "default"
+  }, [])
 
-  // Raw items and loading/error states initialized from server props
-  const items = initialItems
+  const currentParamsKey = searchParams.toString()
+  const [prevParamsKey, setPrevParamsKey] = useState(currentParamsKey)
+  const [filters, setFilters] = useState<Filters>(() => ({
+    q: searchParams.get("q") || "",
+    category: searchParams.get("category") || "",
+    location: searchParams.get("location") || "",
+    sort: parseSortParam(searchParams.get("sort")),
+  }))
+
+  if (currentParamsKey !== prevParamsKey) {
+    setPrevParamsKey(currentParamsKey)
+    setFilters({
+      q: searchParams.get("q") || "",
+      category: searchParams.get("category") || "",
+      location: searchParams.get("location") || "",
+      sort: parseSortParam(searchParams.get("sort")),
+    })
+  }
+
+  const { q: query, category, location, sort } = filters
   const [isLoading, setIsLoading] = useState(false)
   const [fetchError, setFetchError] = useState<string | null>(initialError)
 
-  // Explicit retry handler refreshes server data
   const handleRetry = () => {
     setIsLoading(true)
     setFetchError(null)
@@ -49,90 +83,62 @@ export default function MenuBrowser({
     }, 500)
   }
 
-  // Extract unique locations from loaded items
-  const uniqueLocations = useMemo(() => {
+  const fallbackLocations = useMemo(() => {
     const locSet = new Set<string>()
-    items.forEach((item) => {
+    initialItems.forEach((item) => {
       if (item.location?.trim()) {
         locSet.add(item.location.trim())
       }
     })
     return Array.from(locSet).sort()
-  }, [items])
+  }, [initialItems])
 
-  // Update URL search parameters without page scroll jumps
-  const setFilter = useCallback(
-    (key: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-      if (value && value !== "default" && value !== "All") {
-        params.set(key, value)
-      } else {
-        params.delete(key)
-      }
-      router.replace(`/menu?${params.toString()}`, { scroll: false })
-    },
-    [router, searchParams]
-  )
+  const locations =
+    serverLocations.length > 0 ? serverLocations : fallbackLocations
 
-  // Clear all filters from URL
+  const updateFilters = (next: Filters) => {
+    setFilters(next)
+    const params = new URLSearchParams()
+    if (next.q.trim()) params.set("q", next.q.trim())
+    if (next.category && next.category !== "All") {
+      params.set("category", next.category)
+    }
+    if (next.location) params.set("location", next.location)
+    if (next.sort && next.sort !== "default") {
+      const mappedSort =
+        next.sort === "price-asc"
+          ? "price_asc"
+          : next.sort === "price-desc"
+            ? "price_desc"
+            : next.sort
+      params.set("sort", mappedSort)
+    }
+
+    const qs = params.toString()
+    startTransition(() => {
+      router.replace(qs ? `/menu?${qs}` : "/menu", { scroll: false })
+    })
+  }
+
+  const setFilter = (key: keyof Filters, value: string) => {
+    const next = { ...filters, [key]: value } as Filters
+    updateFilters(next)
+  }
+
   const clearAllFilters = useCallback(() => {
-    router.replace("/menu", { scroll: false })
+    setFilters(EMPTY_FILTERS)
+    startTransition(() => {
+      router.replace("/menu", { scroll: false })
+    })
   }, [router])
 
-  // Filter and sort items according to criteria
-  const filteredItems = useMemo(() => {
-    return items
-      .filter((item) => {
-        // Status check: if item has status field, only show when approved.
-        // If status field is missing (legacy backend items), include it.
-        // NOTE: This will become strictly status === "approved" once backend adds status to all records.
-        // TODO(admin): re-enable approval filter after admin panel is built
-        if (item.status && item.status !== "approved") {
-          return false
-        }
-
-        // Category filter
-        if (category && category !== "All" && item.category !== category) {
-          return false
-        }
-
-        // Location filter
-        if (location && item.location !== location) {
-          return false
-        }
-
-        // Search text matching item name, category, and location
-        if (query.trim()) {
-          const qLower = query.toLowerCase().trim()
-          const nameMatch = item.itemName?.toLowerCase().includes(qLower)
-          const catMatch = item.category?.toLowerCase().includes(qLower)
-          const locMatch = item.location?.toLowerCase().includes(qLower)
-          if (!nameMatch && !catMatch && !locMatch) {
-            return false
-          }
-        }
-
-        return true
-      })
-      .sort((a, b) => {
-        if (sort === "price-asc") {
-          return a.price - b.price
-        }
-        if (sort === "price-desc") {
-          return b.price - a.price
-        }
-        return 0
-      })
-  }, [items, query, category, location, sort])
+  const showLoading = isLoading || isPending
 
   return (
     <div className="mx-auto max-w-7xl px-6 pb-20">
-      {/* 1. Page header */}
       <MenuHero />
 
-      {/* 2. Top bar: search, location and sort (sticky under the navbar) */}
-      {/* 2. Top bar: search, location and sort (sticky under the navbar) */}
-      <div className="sticky top-20 z-30 mb-5 rounded-2xl border border-line bg-surface/90 p-3 shadow-sm backdrop-blur-md sm:p-4">
+      <div className="sticky top-20 z-30 mb-5 rounded-b-2xl border border-line bg-surface/90 p-3 shadow-sm backdrop-blur-md sm:p-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_220px_220px]">
           <div className="sm:col-span-2 lg:col-span-1">
             <MenuSearchBar
@@ -143,14 +149,13 @@ export default function MenuBrowser({
           <MenuFilters
             selectedLocation={location}
             onLocationChange={(loc) => setFilter("location", loc)}
-            locations={uniqueLocations}
+            locations={locations}
             selectedSort={sort}
             onSortChange={(s) => setFilter("sort", s)}
           />
         </div>
       </div>
 
-      {/* 3. Category capsules (below the top bar) */}
       <div className="mb-5">
         <MenuCategoryChips
           selectedCategory={category}
@@ -158,11 +163,10 @@ export default function MenuBrowser({
         />
       </div>
 
-      {/* 4. Result count and active filter chips */}
-      {!isLoading && !fetchError && (
+      {!showLoading && !fetchError && (
         <div className="mb-6">
           <ActiveFilterChips
-            totalCount={filteredItems.length}
+            totalCount={initialItems.length}
             query={query}
             onClearQuery={() => setFilter("q", "")}
             category={category}
@@ -176,8 +180,7 @@ export default function MenuBrowser({
         </div>
       )}
 
-      {/* 5. Main content: loading skeleton, error state, empty state, or grid */}
-      {isLoading ? (
+      {showLoading ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <MenuItemCardSkeleton key={i} />
@@ -197,10 +200,10 @@ export default function MenuBrowser({
             <span>Try again</span>
           </button>
         </div>
-      ) : filteredItems.length === 0 ? (
+      ) : initialItems.length === 0 ? (
         <MenuEmptyState onClearFilters={clearAllFilters} />
       ) : (
-        <MenuGrid items={filteredItems} wishlistIds={wishlistIds} />
+        <MenuGrid items={initialItems} wishlistIds={wishlistIds} />
       )}
     </div>
   )

@@ -14,7 +14,9 @@ const ROLE_COLORS: Record<string, string> = {
   admin: "#e11d48", // Rose
 }
 
-export default function UsersByRoleDonutChart({ data = {} }: UsersByRoleDonutChartProps) {
+export default function UsersByRoleDonutChart({
+  data = {},
+}: UsersByRoleDonutChartProps) {
   const chartData = Object.entries(data)
     .filter(([, count]) => count > 0)
     .map(([role, count]) => ({
@@ -33,14 +35,16 @@ export default function UsersByRoleDonutChart({ data = {} }: UsersByRoleDonutCha
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
             <Users className="h-4 w-4" />
           </span>
-          <h3 className="font-heading text-base font-bold text-ink">Users by Role</h3>
+          <h3 className="font-heading text-base font-bold text-ink">
+            Users by Role
+          </h3>
         </div>
         <p className="mt-1 font-text text-xs text-ink-muted">
           Platform accounts breakdown across roles
         </p>
       </div>
 
-      <div className="mt-6 flex flex-col items-center justify-center sm:flex-row gap-6">
+      <div className="mt-6 flex flex-col items-center justify-center gap-6 sm:flex-row">
         {totalUsers === 0 ? (
           <div className="flex h-56 w-full flex-col items-center justify-center rounded-2xl border border-dashed border-line p-6 text-center">
             <Users className="h-8 w-8 text-ink-muted/40" />
@@ -51,7 +55,13 @@ export default function UsersByRoleDonutChart({ data = {} }: UsersByRoleDonutCha
         ) : (
           <>
             <div className="relative h-56 w-56 shrink-0">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={224}>
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+                minWidth={0}
+                minHeight={224}
+                initialDimension={{ width: 224, height: 224 }}
+              >
                 <PieChart>
                   <Tooltip
                     content={({ active, payload }) => {
@@ -84,14 +94,20 @@ export default function UsersByRoleDonutChart({ data = {} }: UsersByRoleDonutCha
                     dataKey="value"
                   >
                     {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
+                        stroke="none"
+                      />
                     ))}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-                <span className="font-heading text-xl font-black text-ink">{totalUsers}</span>
-                <span className="font-text text-[10px] uppercase tracking-wider text-ink-muted">
+                <span className="font-heading text-xl font-black text-ink">
+                  {totalUsers}
+                </span>
+                <span className="font-text text-[10px] tracking-wider text-ink-muted uppercase">
                   Users
                 </span>
               </div>
@@ -104,7 +120,9 @@ export default function UsersByRoleDonutChart({ data = {} }: UsersByRoleDonutCha
                     className="h-2.5 w-2.5 shrink-0 rounded-full"
                     style={{ backgroundColor: item.color }}
                   />
-                  <span className="font-text text-xs text-ink-muted">{item.name}</span>
+                  <span className="font-text text-xs text-ink-muted">
+                    {item.name}
+                  </span>
                   <span className="ml-auto font-heading text-xs font-bold text-ink">
                     {item.value}
                   </span>

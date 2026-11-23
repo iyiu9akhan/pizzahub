@@ -8,6 +8,8 @@ import MenuItemCard, {
   MenuItemCardSkeleton,
   MenuItemData,
 } from "@/components/menu/MenuItemCard"
+import PremiumBadge from "@/components/ui/PremiumBadge"
+import { StaggerGroup, StaggerItem } from "@/components/motion"
 import { Suspense } from "react"
 
 // Grid skeleton shown while items are loading (Suspense fallback)
@@ -41,8 +43,12 @@ async function FeaturedItems() {
     })) as MenuItemData[]
 
     // Prioritize items from premium vendors, then other approved items to show at least 6
-    const premiumItems = allItems.filter((item) => Boolean(item.isPremiumVendor))
-    const regularItems = allItems.filter((item) => !item.isPremiumVendor)
+    const premiumItems = allItems.filter((item) =>
+      Boolean(item.isPremiumVendor || item.vendorPremium)
+    )
+    const regularItems = allItems.filter(
+      (item) => !(item.isPremiumVendor || item.vendorPremium)
+    )
     items =
       premiumItems.length >= 6
         ? premiumItems.slice(0, 8)
@@ -65,19 +71,17 @@ async function FeaturedItems() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <StaggerGroup className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {items.map((item) => (
-        <div
-          key={item._id}
-          className="animate-in duration-500 fade-in slide-in-from-bottom-4"
-        >
+        <StaggerItem key={item._id}>
           <MenuItemCard
             item={item}
             isFavorite={wishlistIds.includes(item._id)}
+            showFeaturedLabel
           />
-        </div>
+        </StaggerItem>
       ))}
-    </div>
+    </StaggerGroup>
   )
 }
 
@@ -89,9 +93,12 @@ const FeatureMenu = () => {
         {/* Section heading */}
         <div className="mb-10 flex flex-col gap-4 pt-12 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="font-heading text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
-              Featured Menu Items
-            </h2>
+            <div className="flex items-center gap-2.5">
+              <h2 className="font-heading text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
+                Featured Menu Items
+              </h2>
+              <PremiumBadge />
+            </div>
             <p className="mt-2 font-text text-sm text-ink-muted">
               Fresh, delicious pizzas made by our top-rated vendors — ready to
               order now.

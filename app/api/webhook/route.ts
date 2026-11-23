@@ -12,6 +12,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
   }
 
+  // Only non-banned vendors may create a checkout session
+  if (
+    userSession.user.role !== "vendor" ||
+    (userSession.user as { banned?: boolean }).banned
+  ) {
+    return NextResponse.json({ message: "Forbidden" }, { status: 403 })
+  }
+
   try {
     const origin = process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin
 
@@ -28,7 +36,7 @@ export async function POST(req: Request) {
         },
       ],
       // The webhook uses this to know which vendor paid
-      metadata: { vendorId: userSession.user.id },
+      metadata: { vendorId: userSession.user.id, plan: "premium" },
       customer_email: userSession.user.email,
       success_url: `${origin}/dashboard/vendor/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/dashboard/vendor/payment-cancel`,

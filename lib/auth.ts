@@ -109,6 +109,8 @@ export const auth = betterAuth({
     additionalFields: {
       businessName: { type: "string", input: true, defaultValue: "" },
       premium: { type: "boolean", input: false, defaultValue: false },
+      subscriptionPlan: { type: "string", input: false, defaultValue: "free" },
+      subscriptionExpiresAt: { type: "date", input: false, defaultValue: null },
     },
   },
   databaseHooks: {
@@ -125,8 +127,25 @@ export const auth = betterAuth({
               ...user,
               role: chosenRole === "vendor" ? "vendor" : "customer",
               premium: false,
+              subscriptionPlan: "free",
+              subscriptionExpiresAt: null,
               businessName: user.businessName || "",
             },
+          }
+        },
+      },
+      update: {
+        before: async (user) => {
+          const safeData = { ...user } as Record<string, unknown>
+          delete safeData.role
+          delete safeData.premium
+          delete safeData.subscriptionPlan
+          delete safeData.subscriptionExpiresAt
+          delete safeData.banned
+          delete safeData.banReason
+          delete safeData.banExpires
+          return {
+            data: safeData,
           }
         },
       },

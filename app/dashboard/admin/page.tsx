@@ -39,6 +39,7 @@ export default async function AdminDashboardPage() {
   const orderRevenue = cards.orderRevenue ?? cards.revenue ?? cards.totalRevenue ?? 0
   // Subscription revenue is in USD
   const subscriptionRevenue = cards.subscriptionRevenue ?? cards.subRevenue ?? 0
+  const totalTransactions = cards.totalTransactions ?? cards.subscriptions ?? 0
   const totalOrders = cards.orders ?? cards.totalOrders ?? 0
   const registeredUsers = cards.users ?? cards.totalUsers ?? 0
   const activeItems = cards.items ?? cards.totalItems ?? 0
@@ -55,8 +56,8 @@ export default async function AdminDashboardPage() {
         </p>
       </div>
 
-      {/* Stat Cards Grid (5 cards) */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      {/* Stat Cards Grid */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {/*Food Order Revenue (USD) */}
         <div className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-xs transition-all hover:shadow-md">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-brand-fg">
@@ -80,6 +81,19 @@ export default async function AdminDashboardPage() {
               {formatUSD(subscriptionRevenue)}
             </p>
             <p className="font-text text-xs text-ink-muted">Subscription Revenue</p>
+          </div>
+        </div>
+
+        {/* Total Transactions */}
+        <div className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-xs transition-all hover:shadow-md">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
+            <CreditCard className="h-6 w-6" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-heading text-xl font-extrabold text-ink truncate">
+              {totalTransactions}
+            </p>
+            <p className="font-text text-xs text-ink-muted">Transactions</p>
           </div>
         </div>
 

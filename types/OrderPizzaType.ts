@@ -9,6 +9,8 @@ export interface OrderPizzaInput {
   items: OrderItemInput[]
   deliveryAddress: string
   customerPhone: string
+  deliveryDate: string
+  message?: string
 }
 
 export interface OrderItemDetails {
@@ -30,6 +32,8 @@ export interface Order {
   customerEmail?: string
   customerPhone?: string
   deliveryAddress?: string
+  deliveryDate?: string
+  message?: string
   items: OrderItemDetails[]
   totalAmount: number
   vendorId?: string

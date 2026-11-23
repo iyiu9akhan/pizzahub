@@ -16,11 +16,28 @@ import {
   Plus,
   Minus,
   Heart,
-  Crown,
+  X,
+  Calendar,
+  MessageSquare,
+  Phone,
 } from "lucide-react"
+
+const todayStr = new Date().toISOString().split("T")[0]
 
 const orderFormSchema = z.object({
   quantity: z.number().int().min(1, "Quantity must be at least 1"),
+  deliveryDate: z
+    .string()
+    .min(1, "Please select a delivery date")
+    .refine((val) => {
+      const d = new Date(val)
+      if (isNaN(d.getTime())) return false
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const target = new Date(d)
+      target.setHours(0, 0, 0, 0)
+      return target >= today
+    }, "Delivery date cannot be in the past"),
   deliveryAddress: z
     .string()
     .trim()
@@ -29,6 +46,10 @@ const orderFormSchema = z.object({
     .string()
     .trim()
     .min(8, "Please enter a valid phone number (at least 8 digits)"),
+  message: z
+    .string()
+    .max(500, "Message cannot exceed 500 characters")
+    .optional(),
 })
 
 import { useSession } from "@/lib/auth-client"
@@ -40,6 +61,7 @@ import {
   removeFromWishlistAction,
 } from "@/lib/actions/WishlistActions"
 import LoadingButton from "@/components/ui/LoadingButton"
+import PremiumBadge from "@/components/ui/PremiumBadge"
 import ItemReviewsSection, {
   ReviewItem,
 } from "@/components/menu/details/ItemReviewsSection"
@@ -64,17 +86,32 @@ export default function MenuItemDetails({
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [failedImages, setFailedImages] = useState<Record<number, boolean>>({})
   const [quantity, setQuantity] = useState(1)
+  const [deliveryDate, setDeliveryDate] = useState(todayStr)
   const [deliveryAddress, setDeliveryAddress] = useState("")
   const [customerPhone, setCustomerPhone] = useState("")
+  const [message, setMessage] = useState("")
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [orderErrors, setOrderErrors] = useState<{
+    deliveryDate?: string
     deliveryAddress?: string
     customerPhone?: string
+    message?: string
   }>({})
 
   // Wishlist state
   const [isWishlisted, setIsWishlisted] = useState<boolean>(isFavorite)
   const [isWishlistLoading, setIsWishlistLoading] = useState<boolean>(false)
+
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOrderModalOpen(false)
+    }
+    if (isOrderModalOpen) {
+      window.addEventListener("keydown", handleKeyDown)
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isOrderModalOpen])
 
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false)
 
@@ -128,15 +165,19 @@ export default function MenuItemDetails({
 
     const validation = orderFormSchema.safeParse({
       quantity,
+      deliveryDate,
       deliveryAddress: deliveryAddress.trim(),
       customerPhone: customerPhone.trim(),
+      message: message.trim(),
     })
 
     if (!validation.success) {
       const fieldErrors = validation.error.flatten().fieldErrors
       setOrderErrors({
+        deliveryDate: fieldErrors.deliveryDate?.[0],
         deliveryAddress: fieldErrors.deliveryAddress?.[0],
         customerPhone: fieldErrors.customerPhone?.[0],
+        message: fieldErrors.message?.[0],
       })
       return
     }
@@ -146,11 +187,14 @@ export default function MenuItemDetails({
     try {
       const res = await OrderPizza({
         items: [{ itemId: item._id, quantity }],
+        deliveryDate,
         deliveryAddress: deliveryAddress.trim(),
         customerPhone: customerPhone.trim(),
+        message: message.trim(),
       })
 
       if (res.success) {
+        setIsOrderModalOpen(false)
         toastSuccess("Order placed successfully!", "You can track your order status in My Orders.")
         router.push("/dashboard/customer/my-orders")
         router.refresh()
@@ -343,17 +387,12 @@ export default function MenuItemDetails({
                     Prepared by: <strong className="font-semibold">{item.vendorName}</strong>
                   </span>
                 </div>
-                {item.isPremiumVendor && (
-                  <span className="flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-0.5 font-heading text-[10px] font-bold text-white shadow">
-                    <Crown className="h-3 w-3" />
-                    Premium Vendor
-                  </span>
-                )}
+                {item.isPremiumVendor && <PremiumBadge />}
               </div>
             )}
           </div>
 
-          {/* Order Action Form */}
+          {/* Order Action Area */}
           <div className="border-t border-line pt-6">
             {!mounted || isPending ? (
               <div className="h-28 w-full animate-pulse rounded-2xl bg-brand-soft" />
@@ -370,8 +409,30 @@ export default function MenuItemDetails({
                   Please log in as a customer to place orders.
                 </p>
               </div>
-            ) : role === "customer" ? (
-              <form onSubmit={handleOrder} className="flex flex-col gap-4">
+            ) : session.user.id === item.vendorId ? (
+              <div className="flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-900 dark:text-amber-200">
+                <Info className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+                <p className="font-text text-sm font-medium">
+                  You cannot order your own menu items.
+                </p>
+              </div>
+            ) : role !== "customer" ? (
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  disabled
+                  className="flex h-12 w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-brand/40 px-6 font-heading text-base font-semibold text-white/70"
+                >
+                  <ShoppingBag className="h-5 w-5" />
+                  <span>Order Now</span>
+                </button>
+                <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
+                  <Info className="h-4 w-4 shrink-0" />
+                  <span>Vendors and admins cannot place orders.</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
                 {/* Quantity selector */}
                 <div className="flex items-center justify-between rounded-2xl border border-line bg-surface p-3.5">
                   <span className="font-heading text-sm font-semibold text-ink">Quantity</span>
@@ -398,62 +459,6 @@ export default function MenuItemDetails({
                   </div>
                 </div>
 
-                {/* Delivery address */}
-                <div>
-                  <label htmlFor="delivery-address" className="mb-1.5 block font-heading text-xs font-semibold text-ink">
-                    Delivery Address <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="delivery-address"
-                    type="text"
-                    required
-                    value={deliveryAddress}
-                    onChange={(e) => {
-                      setDeliveryAddress(e.target.value)
-                      if (orderErrors.deliveryAddress)
-                        setOrderErrors((prev) => ({ ...prev, deliveryAddress: undefined }))
-                    }}
-                    placeholder="House, road, area, city"
-                    disabled={isSubmitting}
-                    className={`w-full rounded-xl border bg-surface px-3.5 py-2.5 font-text text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none ${
-                      orderErrors.deliveryAddress ? "border-red-500" : "border-line"
-                    }`}
-                  />
-                  {orderErrors.deliveryAddress && (
-                    <p className="mt-1 font-text text-xs text-red-500">
-                      {orderErrors.deliveryAddress}
-                    </p>
-                  )}
-                </div>
-
-                {/* Customer phone */}
-                <div>
-                  <label htmlFor="customer-phone" className="mb-1.5 block font-heading text-xs font-semibold text-ink">
-                    Phone Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="customer-phone"
-                    type="tel"
-                    required
-                    value={customerPhone}
-                    onChange={(e) => {
-                      setCustomerPhone(e.target.value)
-                      if (orderErrors.customerPhone)
-                        setOrderErrors((prev) => ({ ...prev, customerPhone: undefined }))
-                    }}
-                    placeholder="e.g. 01700000000"
-                    disabled={isSubmitting}
-                    className={`w-full rounded-xl border bg-surface px-3.5 py-2.5 font-text text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none ${
-                      orderErrors.customerPhone ? "border-red-500" : "border-line"
-                    }`}
-                  />
-                  {orderErrors.customerPhone && (
-                    <p className="mt-1 font-text text-xs text-red-500">
-                      {orderErrors.customerPhone}
-                    </p>
-                  )}
-                </div>
-
                 {/* Total amount summary */}
                 <div className="flex items-center justify-between border-t border-line pt-2 text-sm">
                   <span className="font-text text-ink-muted">Total Payable:</span>
@@ -462,28 +467,264 @@ export default function MenuItemDetails({
                   </span>
                 </div>
 
-                {/* Submit button */}
-                <LoadingButton
-                  type="submit"
-                  isLoading={isSubmitting}
-                  loadingText="Placing order…"
+                {/* Open order modal button */}
+                <button
+                  type="button"
+                  onClick={() => setIsOrderModalOpen(true)}
                   className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand px-6 font-heading text-base font-semibold text-white shadow-lg shadow-brand/25 transition-all hover:-translate-y-0.5 active:scale-95"
                 >
                   <ShoppingBag className="h-5 w-5" />
                   <span>Order Now</span>
-                </LoadingButton>
-              </form>
-            ) : (
-              <div className="flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-900 dark:text-amber-200">
-                <Info className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
-                <p className="font-text text-sm font-medium">
-                  Only customers can place orders.
-                </p>
+                </button>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Order Form Modal Dialog */}
+      {isOrderModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isSubmitting) {
+              setIsOrderModalOpen(false)
+            }
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs overflow-y-auto"
+        >
+          <div className="relative my-8 w-full max-w-lg rounded-3xl border border-line bg-surface p-6 sm:p-8 shadow-2xl">
+            {/* Modal header */}
+            <div className="flex items-start justify-between border-b border-line pb-4">
+              <div>
+                <h3 className="font-heading text-xl font-bold text-ink">
+                  Complete Your Order
+                </h3>
+                <p className="mt-1 font-text text-xs text-ink-muted">
+                  {item.itemName} · {formatUSD(item.price)} each
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => !isSubmitting && setIsOrderModalOpen(false)}
+                disabled={isSubmitting}
+                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-ink-muted hover:bg-brand-soft hover:text-ink disabled:opacity-50"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleOrder} className="mt-5 space-y-4">
+              {/* Quantity selector inside modal */}
+              <div className="flex items-center justify-between rounded-2xl border border-line bg-brand-soft/30 p-3">
+                <span className="font-heading text-xs font-semibold text-ink">
+                  Quantity
+                </span>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    disabled={quantity <= 1 || isSubmitting}
+                    className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-line bg-surface text-ink hover:bg-brand-soft disabled:opacity-40"
+                  >
+                    <Minus className="h-3.5 w-3.5" />
+                  </button>
+                  <span className="w-6 text-center font-heading text-sm font-bold text-ink">
+                    {quantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => q + 1)}
+                    disabled={isSubmitting}
+                    className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-line bg-surface text-ink hover:bg-brand-soft"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Delivery Date */}
+              <div>
+                <label
+                  htmlFor="modal-delivery-date"
+                  className="mb-1.5 flex items-center gap-1 font-heading text-xs font-semibold text-ink"
+                >
+                  <Calendar className="h-3.5 w-3.5 text-brand-fg" />
+                  <span>Delivery Date</span>
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="modal-delivery-date"
+                  type="date"
+                  required
+                  min={todayStr}
+                  value={deliveryDate}
+                  onChange={(e) => {
+                    setDeliveryDate(e.target.value)
+                    if (orderErrors.deliveryDate) {
+                      setOrderErrors((prev) => ({ ...prev, deliveryDate: undefined }))
+                    }
+                  }}
+                  disabled={isSubmitting}
+                  className={`w-full rounded-xl border bg-surface px-3.5 py-2.5 font-text text-sm text-ink focus:border-brand focus:outline-none ${
+                    orderErrors.deliveryDate ? "border-red-500" : "border-line"
+                  }`}
+                />
+                {orderErrors.deliveryDate && (
+                  <p className="mt-1 font-text text-xs text-red-500">
+                    {orderErrors.deliveryDate}
+                  </p>
+                )}
+              </div>
+
+              {/* Delivery Address */}
+              <div>
+                <label
+                  htmlFor="modal-delivery-address"
+                  className="mb-1.5 flex items-center gap-1 font-heading text-xs font-semibold text-ink"
+                >
+                  <MapPin className="h-3.5 w-3.5 text-brand-fg" />
+                  <span>Delivery Address</span>
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="modal-delivery-address"
+                  type="text"
+                  required
+                  value={deliveryAddress}
+                  onChange={(e) => {
+                    setDeliveryAddress(e.target.value)
+                    if (orderErrors.deliveryAddress) {
+                      setOrderErrors((prev) => ({
+                        ...prev,
+                        deliveryAddress: undefined,
+                      }))
+                    }
+                  }}
+                  placeholder="House, road, area, city"
+                  disabled={isSubmitting}
+                  className={`w-full rounded-xl border bg-surface px-3.5 py-2.5 font-text text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none ${
+                    orderErrors.deliveryAddress ? "border-red-500" : "border-line"
+                  }`}
+                />
+                {orderErrors.deliveryAddress && (
+                  <p className="mt-1 font-text text-xs text-red-500">
+                    {orderErrors.deliveryAddress}
+                  </p>
+                )}
+              </div>
+
+              {/* Phone Number */}
+              <div>
+                <label
+                  htmlFor="modal-customer-phone"
+                  className="mb-1.5 flex items-center gap-1 font-heading text-xs font-semibold text-ink"
+                >
+                  <Phone className="h-3.5 w-3.5 text-brand-fg" />
+                  <span>Phone Number</span>
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="modal-customer-phone"
+                  type="tel"
+                  required
+                  value={customerPhone}
+                  onChange={(e) => {
+                    setCustomerPhone(e.target.value)
+                    if (orderErrors.customerPhone) {
+                      setOrderErrors((prev) => ({
+                        ...prev,
+                        customerPhone: undefined,
+                      }))
+                    }
+                  }}
+                  placeholder="e.g. 01700000000"
+                  disabled={isSubmitting}
+                  className={`w-full rounded-xl border bg-surface px-3.5 py-2.5 font-text text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none ${
+                    orderErrors.customerPhone ? "border-red-500" : "border-line"
+                  }`}
+                />
+                {orderErrors.customerPhone && (
+                  <p className="mt-1 font-text text-xs text-red-500">
+                    {orderErrors.customerPhone}
+                  </p>
+                )}
+              </div>
+
+              {/* Additional Message */}
+              <div>
+                <div className="mb-1.5 flex items-center justify-between">
+                  <label
+                    htmlFor="modal-message"
+                    className="flex items-center gap-1 font-heading text-xs font-semibold text-ink"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5 text-brand-fg" />
+                    <span>Additional Message</span>
+                    <span className="font-text text-[11px] font-normal text-ink-muted">
+                      (Optional)
+                    </span>
+                  </label>
+                  <span className="font-text text-[11px] text-ink-muted">
+                    {message.length}/500
+                  </span>
+                </div>
+                <textarea
+                  id="modal-message"
+                  rows={3}
+                  maxLength={500}
+                  value={message}
+                  onChange={(e) => {
+                    setMessage(e.target.value)
+                    if (orderErrors.message) {
+                      setOrderErrors((prev) => ({ ...prev, message: undefined }))
+                    }
+                  }}
+                  placeholder="Any delivery instructions or message for the vendor..."
+                  disabled={isSubmitting}
+                  className={`w-full rounded-xl border bg-surface px-3.5 py-2 font-text text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none ${
+                    orderErrors.message ? "border-red-500" : "border-line"
+                  }`}
+                />
+                {orderErrors.message && (
+                  <p className="mt-1 font-text text-xs text-red-500">
+                    {orderErrors.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Total amount summary */}
+              <div className="flex items-center justify-between border-t border-line pt-3 text-sm">
+                <span className="font-text text-ink-muted">Total Payable:</span>
+                <span className="font-heading text-xl font-extrabold text-brand-fg">
+                  {formatUSD(item.price * quantity)}
+                </span>
+              </div>
+
+              {/* Modal footer buttons */}
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsOrderModalOpen(false)}
+                  disabled={isSubmitting}
+                  className="rounded-xl border border-line bg-surface px-4 py-2.5 font-heading text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <LoadingButton
+                  type="submit"
+                  isLoading={isSubmitting}
+                  loadingText="Placing order…"
+                  className="flex h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand px-6 font-heading text-sm font-semibold text-white shadow-lg shadow-brand/25 transition-all hover:-translate-y-0.5 active:scale-95"
+                >
+                  <ShoppingBag className="h-4 w-4" />
+                  <span>Confirm Order</span>
+                </LoadingButton>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Customer Reviews Section */}
       <ItemReviewsSection

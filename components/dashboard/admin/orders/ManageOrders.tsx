@@ -35,6 +35,8 @@ export interface AdminOrder {
   customerEmail?: string
   customerPhone?: string
   deliveryAddress?: string
+  deliveryDate?: string
+  message?: string
   items: AdminOrderItem[]
   totalAmount: number
   vendorId?: string
@@ -214,6 +216,17 @@ export default function ManageOrders({ initialOrders }: ManageOrdersProps) {
                           {order.deliveryAddress}
                         </span>
                       )}
+                      {order.deliveryDate && !isNaN(new Date(order.deliveryDate).getTime()) && (
+                        <span className="flex items-center gap-1 font-medium text-brand-fg">
+                          <Calendar className="h-3.5 w-3.5 shrink-0" />
+                          Delivery:{" "}
+                          {new Date(order.deliveryDate).toLocaleDateString("en-US", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </span>
+                      )}
                       {order.customerPhone && (
                         <span>📞 {order.customerPhone}</span>
                       )}
@@ -228,6 +241,12 @@ export default function ManageOrders({ initialOrders }: ManageOrdersProps) {
                         </span>
                       )}
                     </div>
+
+                    {order.message && (
+                      <p className="font-text text-xs italic text-ink-muted bg-brand-soft/20 rounded-lg px-2.5 py-1 border border-line w-fit">
+                        Note: &ldquo;{order.message}&rdquo;
+                      </p>
+                    )}
 
                     {/* Items */}
                     <p className="font-text text-xs text-ink">

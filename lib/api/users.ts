@@ -87,16 +87,18 @@ export const getManagedUsers = async (): Promise<ManagedUser[]> => {
 // Private read: fetch vendor premium status via authFetch (GET /users/:id/premium)
 export const getPremiumVendorById = async (
   userId: string
-): Promise<{ isVendor: boolean; premium: boolean }> => {
+): Promise<{ isVendor: boolean; premium: boolean; plan: string; expiresAt: string | null }> => {
   try {
     const res = await authFetch(`${BASE_URL}/users/${userId}/premium`)
-    if (!res.ok) return { isVendor: false, premium: false }
+    if (!res.ok) return { isVendor: false, premium: false, plan: "free", expiresAt: null }
     const data = await res.json()
     return {
       isVendor: Boolean(data?.isVendor),
       premium: Boolean(data?.premium),
+      plan: data?.plan ?? "free",
+      expiresAt: data?.expiresAt ?? null,
     }
   } catch {
-    return { isVendor: false, premium: false }
+    return { isVendor: false, premium: false, plan: "free", expiresAt: null }
   }
 }

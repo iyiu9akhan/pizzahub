@@ -22,6 +22,8 @@ export async function OrderPizza(data: OrderPizzaInput): Promise<{
       })),
       deliveryAddress: data.deliveryAddress.trim(),
       customerPhone: data.customerPhone.trim(),
+      deliveryDate: data.deliveryDate,
+      message: data.message ? data.message.trim().slice(0, 500) : "",
     }
 
     const response = await authFetch(`${BASE_URL}/order`, {

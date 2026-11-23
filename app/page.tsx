@@ -11,10 +11,15 @@ import Footer from "@/components/home/Footer"
 import { getHeaderOrderCount } from "@/lib/core/server"
 
 export default async function Home() {
-  const orderCount = await getHeaderOrderCount()
+  let orderCount = 0
+  try {
+    orderCount = await getHeaderOrderCount()
+  } catch (error) {
+    console.error("Header order count failed:", error)
+  }
 
   return (
-    <div className="min-h-screen bg-page flex flex-col transition-colors duration-300">
+    <div className="flex min-h-screen flex-col bg-page transition-colors duration-300">
       <Navbar orderCount={orderCount} />
       <main className="flex-1">
         {/* 1. Hero banner */}

@@ -18,6 +18,7 @@ import {
 import { auth } from "@/lib/auth"
 import { getPremiumVendorById } from "@/lib/api/premiumVendors"
 import { getItemCount } from "@/lib/api/items"
+import PremiumBadge from "@/components/ui/PremiumBadge"
 import UpgradeButton from "./UpgradeButton"
 
 const FREE_LIMIT = 3
@@ -97,6 +98,7 @@ const VendorSubscriptionPage = async ({
 
   let usedItems = 0
   let isPremium = false
+  let expiresAt: string | null = null
 
   if (vendorId) {
     const [count, premiumData] = await Promise.all([
@@ -104,10 +106,13 @@ const VendorSubscriptionPage = async ({
       getPremiumVendorById(vendorId).catch(() => ({
         isVendor: false,
         premium: false,
+        plan: "free",
+        expiresAt: null,
       })),
     ])
     usedItems = count
     isPremium = Boolean(premiumData.isVendor && premiumData.premium)
+    expiresAt = isPremium ? (premiumData.expiresAt ?? null) : null
   }
 
   const usagePercent = Math.min((usedItems / FREE_LIMIT) * 100, 100)
@@ -131,9 +136,20 @@ const VendorSubscriptionPage = async ({
           </p>
         </div>
         {isPremium ? (
-          <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-amber-100 px-4 py-2 font-heading text-xs font-bold text-amber-800 sm:self-auto dark:bg-amber-500/20 dark:text-amber-300">
-            <Crown className="h-4 w-4" />
-            Current plan: Premium
+          <span className="inline-flex items-center gap-2 self-start rounded-full bg-amber-100 px-4 py-2 font-heading text-xs font-bold text-amber-800 sm:self-auto dark:bg-amber-500/20 dark:text-amber-300">
+            <PremiumBadge />
+            <span>Current plan: Premium</span>
+            {expiresAt && (
+              <span className="ml-1 font-text font-normal text-amber-700 dark:text-amber-400">
+                · expires{" "}
+                {new Intl.DateTimeFormat("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  timeZone: "UTC",
+                }).format(new Date(expiresAt))}
+              </span>
+            )}
           </span>
         ) : (
           <span className="inline-flex items-center gap-2 self-start rounded-full border border-line bg-surface px-4 py-2 font-text text-xs text-ink-muted sm:self-auto">
@@ -200,7 +216,7 @@ const VendorSubscriptionPage = async ({
               disabled
               className="w-full cursor-not-allowed rounded-full border border-line px-5 py-3 font-heading text-sm font-semibold text-ink-muted"
             >
-              Current plan
+              {!isPremium ? "Current plan" : "Free Plan"}
             </button>
           </div>
         </section>
@@ -237,10 +253,26 @@ const VendorSubscriptionPage = async ({
 
           <div className="relative mt-auto pt-8">
             {isPremium ? (
-              <div className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-5 py-3 font-heading text-sm font-bold text-emerald-700 dark:text-emerald-300">
-                <Crown className="h-4 w-4" />
-                Active Plan — Unlimited Access
-              </div>
+              <>
+                <div className="mb-3 inline-flex w-full items-center justify-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-5 py-3 font-heading text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                  <Crown className="h-4 w-4" />
+                  Active Plan — Unlimited Access
+                </div>
+                {expiresAt && (
+                  <p className="text-center text-xs text-ink-muted">
+                    Expires{" "}
+                    {new Intl.DateTimeFormat("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                      timeZone: "UTC",
+                    }).format(new Date(expiresAt))}
+                  </p>
+                )}
+                <div className="mt-3">
+                  <UpgradeButton isPremium />
+                </div>
+              </>
             ) : (
               <UpgradeButton />
             )}

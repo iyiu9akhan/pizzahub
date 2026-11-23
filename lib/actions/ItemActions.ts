@@ -184,3 +184,48 @@ export async function updateItemStatus(
     return { success: false, message: "Network error occurred" }
   }
 }
+
+export async function toggleItemAvailability(
+  id: string,
+  status: "approved" | "inactive"
+): Promise<{
+  success: boolean
+  message?: string
+  code?: string
+}> {
+  try {
+    const res = await authFetch(`${BASE_URL}/items/${id}/availability`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    })
+
+    const result = await res.json().catch(() => ({}))
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: result.message || "Failed to update item availability",
+        code: result.code || (res.status === 403 ? "LIMIT_REACHED" : undefined),
+      }
+    }
+
+    revalidatePath("/dashboard/vendor/menu-items")
+    revalidatePath("/dashboard/admin/items")
+    revalidatePath(`/menu/${id}`)
+    revalidatePath("/menu")
+    revalidatePath("/")
+
+    return { success: true }
+  } catch (err: unknown) {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "digest" in err &&
+      typeof (err as { digest: unknown }).digest === "string" &&
+      (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+    ) {
+      throw err
+    }
+    return { success: false, message: "Network error occurred" }
+  }
+}

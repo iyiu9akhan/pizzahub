@@ -6,12 +6,14 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 export interface TransactionRow {
   _id?: string
   id?: string
-  userId?: string
-  customer_email?: string
+  vendorId?: string
+  vendorName?: string | null
+  vendorEmail?: string | null
+  plan?: string
   amount: number
   currency?: string
-  payment_status: string
-  sessionId?: string
+  status?: string
+  stripeSessionId?: string
   createdAt?: string
 }
 

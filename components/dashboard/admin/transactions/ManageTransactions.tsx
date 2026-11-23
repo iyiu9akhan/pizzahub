@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
-import { Search, CreditCard, CheckCircle2, Clock } from "lucide-react"
+import { Search, CreditCard, CheckCircle2, XCircle, Clock } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import type { TransactionRow } from "@/lib/api/admin"
 
@@ -11,7 +11,6 @@ interface ManageTransactionsProps {
 
 const PAGE_SIZE = 10
 
-// Hydration safe UTC date formatter
 const formatUtcDate = (dateStr?: string) => {
   if (!dateStr) return "—"
   try {
@@ -28,6 +27,33 @@ const formatUtcDate = (dateStr?: string) => {
   }
 }
 
+const StatusBadge = ({ status }: { status?: string }) => {
+  const s = status || "unknown"
+  const isPaid = s === "paid"
+  const isRefunded = s === "refunded"
+  return (
+    <Badge
+      variant="secondary"
+      className={`flex w-fit items-center gap-1 rounded-full text-xs font-semibold capitalize ${
+        isPaid
+          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+          : isRefunded
+            ? "bg-red-500/10 text-red-600 dark:text-red-400"
+            : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+      }`}
+    >
+      {isPaid ? (
+        <CheckCircle2 className="h-3 w-3" />
+      ) : isRefunded ? (
+        <XCircle className="h-3 w-3" />
+      ) : (
+        <Clock className="h-3 w-3" />
+      )}
+      <span>{s}</span>
+    </Badge>
+  )
+}
+
 export default function ManageTransactions({
   transactions,
 }: ManageTransactionsProps) {
@@ -38,9 +64,11 @@ export default function ManageTransactions({
     return transactions.filter((t) => {
       const q = search.toLowerCase()
       return (
-        (t.customer_email?.toLowerCase() || "").includes(q) ||
-        (t.sessionId?.toLowerCase() || "").includes(q) ||
-        (t.payment_status?.toLowerCase() || "").includes(q)
+        (t.vendorEmail?.toLowerCase() || "").includes(q) ||
+        (t.vendorName?.toLowerCase() || "").includes(q) ||
+        (t.stripeSessionId?.toLowerCase() || "").includes(q) ||
+        (t.status?.toLowerCase() || "").includes(q) ||
+        (t.plan?.toLowerCase() || "").includes(q)
       )
     })
   }, [transactions, search])
@@ -63,17 +91,16 @@ export default function ManageTransactions({
           Transactions
         </h1>
         <p className="mt-1 font-text text-sm text-ink-muted">
-          Review Stripe checkout sessions and payment records.
+          Stripe premium subscription payments.
         </p>
       </div>
 
-      {/* Toolbar */}
       <div className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 sm:max-w-xs">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
           <input
             type="text"
-            placeholder="Search email, session ID, status…"
+            placeholder="Search vendor, session ID, status…"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value)
@@ -82,30 +109,29 @@ export default function ManageTransactions({
             className="w-full rounded-xl border border-line bg-surface py-2 pl-9 pr-3.5 font-text text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none"
           />
         </div>
-
         <span className="font-text text-xs text-ink-muted">
-          Total transactions: <strong className="font-heading text-ink">{transactions.length}</strong>
+          Total: <strong className="font-heading text-ink">{transactions.length}</strong>
         </span>
       </div>
 
-      {/* Table */}
       <div className="overflow-hidden rounded-2xl border border-line bg-surface">
         <div className="overflow-x-auto">
           <table className="w-full min-w-160 text-left">
             <thead>
               <tr className="border-b border-line bg-brand-soft/40">
-                <th className={head}>Customer</th>
+                <th className={head}>Vendor</th>
+                <th className={head}>Plan</th>
                 <th className={head}>Amount</th>
                 <th className={head}>Status</th>
                 <th className={head}>Session ID</th>
-                <th className={`${head} text-right`}>Created (UTC)</th>
+                <th className={`${head} text-right`}>Date (UTC)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {rows.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="py-12 text-center font-text text-sm text-ink-muted"
                   >
                     No transactions match your search.
@@ -113,17 +139,18 @@ export default function ManageTransactions({
                 </tr>
               ) : (
                 rows.map((row, idx) => {
-                  const displayAmount = (row.amount > 100 && Number.isInteger(row.amount))
-                    ? (row.amount / 100).toFixed(2)
-                    : Number(row.amount).toFixed(2)
-                  const currencySymbol = (row.currency || "USD").toUpperCase() === "USD" ? "$" : `${row.currency?.toUpperCase()} `
-
-                  const isPaid =
-                    row.payment_status === "paid" || row.payment_status === "complete"
+                  const displayAmount =
+                    row.amount > 100 && Number.isInteger(row.amount)
+                      ? (row.amount / 100).toFixed(2)
+                      : Number(row.amount).toFixed(2)
+                  const currencySymbol =
+                    (row.currency || "USD").toUpperCase() === "USD"
+                      ? "$"
+                      : `${row.currency?.toUpperCase()} `
 
                   return (
                     <tr
-                      key={row.sessionId || row._id || row.id || idx}
+                      key={row.stripeSessionId || row._id || idx}
                       className="border-line transition-colors hover:bg-muted/30"
                     >
                       <td className={cell}>
@@ -131,10 +158,19 @@ export default function ManageTransactions({
                           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-soft text-brand-fg">
                             <CreditCard className="h-4 w-4" />
                           </span>
-                          <span className="font-heading text-sm font-semibold text-ink">
-                            {row.customer_email || "Customer"}
-                          </span>
+                          <div className="min-w-0">
+                            <p className="font-heading text-sm font-semibold text-ink">
+                              {row.vendorName || "Vendor"}
+                            </p>
+                            <p className="font-text text-xs text-ink-muted">
+                              {row.vendorEmail || "—"}
+                            </p>
+                          </div>
                         </div>
+                      </td>
+
+                      <td className={`${cell} font-heading text-sm capitalize text-ink`}>
+                        {row.plan || "—"}
                       </td>
 
                       <td className={`${cell} font-heading text-sm font-bold text-ink`}>
@@ -142,26 +178,17 @@ export default function ManageTransactions({
                       </td>
 
                       <td className={cell}>
-                        <Badge
-                          variant="secondary"
-                          className={`flex w-fit items-center gap-1 rounded-full text-xs font-semibold capitalize ${
-                            isPaid
-                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                              : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                          }`}
-                        >
-                          {isPaid ? (
-                            <CheckCircle2 className="h-3 w-3" />
-                          ) : (
-                            <Clock className="h-3 w-3" />
-                          )}
-                          <span>{row.payment_status || "Pending"}</span>
-                        </Badge>
+                        <StatusBadge status={row.status} />
                       </td>
 
                       <td className={`${cell} font-mono text-xs text-ink-muted`}>
-                        <span className="max-w-[200px] truncate block" title={row.sessionId}>
-                          {row.sessionId ? `${row.sessionId.slice(0, 18)}…` : "—"}
+                        <span
+                          className="block max-w-[200px] truncate"
+                          title={row.stripeSessionId}
+                        >
+                          {row.stripeSessionId
+                            ? `${row.stripeSessionId.slice(0, 18)}…`
+                            : "—"}
                         </span>
                       </td>
 
@@ -176,7 +203,6 @@ export default function ManageTransactions({
           </table>
         </div>
 
-        {/* Pagination Footer */}
         <div className="flex items-center justify-between border-t border-line px-5 py-3">
           <p className="font-text text-xs text-ink-muted">
             Showing {rows.length} of {filtered.length} records

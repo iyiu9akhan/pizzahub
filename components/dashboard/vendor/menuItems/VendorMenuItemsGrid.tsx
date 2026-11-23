@@ -2,7 +2,18 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { CheckCircle2, Clock, Eye, Pencil, Trash2, XCircle } from "lucide-react"
+import {
+  CheckCircle2,
+  Clock,
+  Eye,
+  Loader2,
+  PauseCircle,
+  Pencil,
+  Power,
+  PowerOff,
+  Trash2,
+  XCircle,
+} from "lucide-react"
 import MenuItemCard, { MenuItemData } from "@/components/menu/MenuItemCard"
 import {
   AlertDialog,
@@ -14,7 +25,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog"
 import LoadingButton from "@/components/ui/LoadingButton"
-import { deleteItem } from "@/lib/actions/ItemActions"
+import { deleteItem, toggleItemAvailability } from "@/lib/actions/ItemActions"
 import { toastSuccess, toastError } from "@/lib/toast"
 
 interface Props {
@@ -48,12 +59,23 @@ const STATUS_CONFIG = {
     iconBox: "bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400",
     title: "text-red-700 dark:text-red-400",
   },
+  inactive: {
+    label: "Inactive",
+    hint: "Deactivated. Not visible to customers or orderable.",
+    Icon: PauseCircle,
+    box: "border-zinc-300/70 bg-zinc-50 dark:border-zinc-500/30 dark:bg-zinc-500/10",
+    iconBox: "bg-zinc-200 text-zinc-600 dark:bg-zinc-500/20 dark:text-zinc-400",
+    title: "text-zinc-700 dark:text-zinc-300",
+  },
 } as const
 
 // Small status panel shown above the action buttons on each card
 const StatusPanel = ({ status }: { status?: string }) => {
   // Missing or unknown status falls back to "pending"
-  const key = status === "approved" || status === "rejected" ? status : "pending"
+  const key =
+    status === "approved" || status === "rejected" || status === "inactive"
+      ? status
+      : "pending"
   const { label, hint, Icon, box, iconBox, title } = STATUS_CONFIG[key]
 
   return (
@@ -78,6 +100,31 @@ const VendorMenuItemsGrid = ({ initialItems }: Props) => {
   const [items, setItems] = useState(initialItems)
   const [itemToDelete, setItemToDelete] = useState<MenuItemData | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [togglingId, setTogglingId] = useState<string | null>(null)
+
+  const handleToggleAvailability = async (item: MenuItemData) => {
+    const nextStatus = item.status === "approved" ? "inactive" : "approved"
+    setTogglingId(item._id)
+    try {
+      const res = await toggleItemAvailability(item._id, nextStatus)
+      if (res.success) {
+        setItems((prev) =>
+          prev.map((i) => (i._id === item._id ? { ...i, status: nextStatus } : i))
+        )
+        toastSuccess(
+          nextStatus === "approved"
+            ? "Item activated and live on menu."
+            : "Item deactivated."
+        )
+      } else {
+        toastError("Failed to update status", res.message)
+      }
+    } catch {
+      toastError("Failed to update status", "An unexpected error occurred.")
+    } finally {
+      setTogglingId(null)
+    }
+  }
 
   // Executes the delete action and updates state upon confirmation
   const handleConfirmDelete = async () => {
@@ -122,15 +169,40 @@ const VendorMenuItemsGrid = ({ initialItems }: Props) => {
           const isCurrentDeleting = isDeleting && itemToDelete?._id === item._id
 
           return (
-            // No `status` prop here: the status is shown in the footer panel instead
             <MenuItemCard
               key={item._id}
               item={item}
+              status={item.status}
               showFavorite={false}
               actions={
-                // Vendor footer: status panel + Details, Edit, Delete
+                // Vendor footer: status panel + Activate/Deactivate + Details, Edit, Delete
                 <div className="flex flex-col gap-3">
                   <StatusPanel status={item.status} />
+
+                  {(item.status === "approved" || item.status === "inactive") && (
+                    <button
+                      type="button"
+                      onClick={() => handleToggleAvailability(item)}
+                      disabled={togglingId === item._id}
+                      className={`inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-full border px-3 py-2 font-heading text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${item.status === "approved"
+                        ? "border-amber-300/80 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400"
+                        : "border-emerald-300/80 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400"
+                        }`}
+                    >
+                      {togglingId === item._id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : item.status === "approved" ? (
+                        <PowerOff className="h-3.5 w-3.5" />
+                      ) : (
+                        <Power className="h-3.5 w-3.5" />
+                      )}
+                      <span>
+                        {item.status === "approved"
+                          ? "Deactivate item"
+                          : "Activate item"}
+                      </span>
+                    </button>
+                  )}
 
                   <div className="flex items-center gap-2">
                     {/* Details button — links to public menu item details route */}

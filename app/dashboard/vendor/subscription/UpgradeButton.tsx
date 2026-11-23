@@ -4,16 +4,14 @@ import { useState } from "react"
 import { Crown, Loader2 } from "lucide-react"
 import { toastError } from "@/lib/toast"
 
-const UpgradeButton = () => {
+const UpgradeButton = ({ isPremium = false }: { isPremium?: boolean }) => {
   const [isLoading, setIsLoading] = useState(false)
 
-  // Create a Stripe checkout session, then go to the Stripe page
   const handleClick = async () => {
     setIsLoading(true)
     try {
       const res = await fetch("/api/checkout_sessions", { method: "POST" })
       const data = await res.json().catch(() => ({}))
-      console.log("checkout response:", res.status, data) // debug
       if (!res.ok || !data.url) {
         throw new Error(data.message || `Request failed (${res.status})`)
       }
@@ -39,7 +37,7 @@ const UpgradeButton = () => {
       ) : (
         <Crown className="h-4 w-4" />
       )}
-      {isLoading ? "Processing payment..." : "Upgrade to Premium"}
+      {isLoading ? "Processing payment..." : isPremium ? "Renew Premium" : "Upgrade to Premium"}
     </button>
   )
 }

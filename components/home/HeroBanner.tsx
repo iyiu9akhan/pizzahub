@@ -3,6 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
+import { FadeIn } from "@/components/motion"
 
 export default function HeroBanner() {
   return (
@@ -22,7 +23,7 @@ export default function HeroBanner() {
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
 
           {/* Left column: pizza illustration */}
-          <div className="relative order-1 mx-auto w-full max-w-sm sm:max-w-md lg:max-w-lg">
+          <FadeIn duration={0.5} y={12} className="relative order-1 mx-auto w-full max-w-sm sm:max-w-md lg:max-w-lg">
             {/* Decorative circular backdrop */}
             <div
               aria-hidden="true"
@@ -43,10 +44,10 @@ export default function HeroBanner() {
                 className="scale-105 object-contain drop-shadow-2xl"
               />
             </div>
-          </div>
+          </FadeIn>
 
           {/* Right column: headline, description, CTA */}
-          <div className="order-2 flex flex-col items-center text-center lg:items-start lg:text-left lg:pl-6 xl:pl-10">
+          <FadeIn duration={0.5} delay={0.1} y={16} className="order-2 flex flex-col items-center text-center lg:items-start lg:text-left lg:pl-6 xl:pl-10">
             {/* Eyebrow label */}
             <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-1.5 font-text text-xs font-semibold uppercase tracking-widest text-ink-muted">
               <span aria-hidden="true">🍕</span> Fresh &amp; Local
@@ -74,7 +75,7 @@ export default function HeroBanner() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-          </div>
+          </FadeIn>
         </div>
       </div>
     </section>

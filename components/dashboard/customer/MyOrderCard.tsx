@@ -213,11 +213,24 @@ const MyOrderCard: React.FC<MyOrderCardProps> = ({ order, onCancelled }) => {
             <span className="line-clamp-1">{order.deliveryAddress}</span>
           </span>
         )}
+        {order.deliveryDate && (
+          <span className="flex items-center gap-1 font-medium text-brand-fg">
+            <Calendar className="h-3 w-3 shrink-0" />
+            <span>Delivery: {formatDate(order.deliveryDate)}</span>
+          </span>
+        )}
         <span className="flex items-center gap-1 ml-auto">
           <Calendar className="h-3 w-3 shrink-0" />
           {formatDate(order.createdAt)}
         </span>
       </div>
+
+      {order.message && (
+        <div className="mt-2.5 rounded-xl border border-line bg-brand-soft/20 px-3 py-1.5 text-xs text-ink-muted">
+          <span className="font-semibold text-ink">Note: </span>
+          <span>{order.message}</span>
+        </div>
+      )}
     </div>
   )
 }

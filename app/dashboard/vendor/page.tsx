@@ -6,7 +6,6 @@ import Link from "next/link"
 import {
   Package,
   ClipboardList,
-  Crown,
   Sparkles,
   ArrowRight,
   CheckCircle2,
@@ -18,6 +17,7 @@ import { getStats } from "@/lib/api/stats"
 import { getPremiumVendorById } from "@/lib/api/premiumVendors"
 import { getItemCount } from "@/lib/api/items"
 import { formatUSD } from "@/lib/format"
+import PremiumBadge from "@/components/ui/PremiumBadge"
 
 import OrdersAreaChart from "@/components/dashboard/charts/OrdersAreaChart"
 import OrdersStatusDonutChart from "@/components/dashboard/charts/OrdersStatusDonutChart"
@@ -76,9 +76,9 @@ export default async function VendorDashboardPage() {
         {/* Subscription Pill */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
           {isPremium ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3.5 py-1.5 font-heading text-xs font-semibold text-amber-800 shadow-2xs dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
-              <Crown className="h-4 w-4 text-amber-500" />
-              <span>Premium Plan • Unlimited Items</span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-3.5 py-1.5 font-heading text-xs font-semibold text-amber-800 shadow-2xs dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+              <PremiumBadge />
+              <span>Unlimited Items</span>
             </span>
           ) : (
             <Link

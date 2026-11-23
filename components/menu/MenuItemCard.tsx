@@ -4,7 +4,7 @@
 
 import React, { useState } from "react"
 import Link from "next/link"
-import { MapPin, Pizza, Crown, Star, Heart } from "lucide-react"
+import { MapPin, Pizza, Star, Heart } from "lucide-react"
 import { formatUSD } from "@/lib/format"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSession } from "@/lib/auth-client"
@@ -13,6 +13,7 @@ import {
   addToWishlistAction,
   removeFromWishlistAction,
 } from "@/lib/actions/WishlistActions"
+import PremiumBadge from "@/components/ui/PremiumBadge"
 
 // ----- Types ----------------------------------------------------------------
 
@@ -31,6 +32,7 @@ export interface MenuItemData {
   vendorName?: string
   vendorId?: string
   isPremiumVendor?: boolean
+  vendorPremium?: boolean
   ratingAvg?: number
   ratingCount?: number
 }
@@ -43,6 +45,8 @@ export interface MenuItemCardProps {
   showFavorite?: boolean
   /** Initial favorite state */
   isFavorite?: boolean
+  /** Subtle "Featured" label on premium items in featured section */
+  showFeaturedLabel?: boolean
   /** Custom footer content; if omitted, a "View Details" link is shown */
   actions?: React.ReactNode
 }
@@ -74,6 +78,7 @@ const MenuItemCard = ({
   status,
   showFavorite = true,
   isFavorite = false,
+  showFeaturedLabel = false,
   actions,
 }: MenuItemCardProps) => {
   const { data: session } = useSession()
@@ -159,11 +164,17 @@ const MenuItemCard = ({
           </span>
         )}
 
+        {/* Subtle "Featured" label on premium items in featured section */}
+        {!statusBadge && showFeaturedLabel && (item.isPremiumVendor || item.vendorPremium) && (
+          <span className="absolute left-3 top-3 rounded-full border border-brand/20 bg-surface/90 px-2.5 py-0.5 font-heading text-[10px] font-semibold text-brand-fg shadow-2xs backdrop-blur-xs">
+            Featured
+          </span>
+        )}
+
         {/* Premium vendor badge — top-right */}
-        {item.isPremiumVendor && (
-          <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 font-heading text-[10px] font-bold text-white shadow">
-            <Crown className="h-3 w-3" />
-            Premium
+        {(item.isPremiumVendor || item.vendorPremium) && (
+          <span className="absolute right-3 top-3">
+            <PremiumBadge />
           </span>
         )}
 
@@ -175,7 +186,7 @@ const MenuItemCard = ({
             disabled={isWishlistLoading}
             aria-label={favorite ? "Remove from wishlist" : "Add to wishlist"}
             className={`absolute z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-xs transition-transform hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 dark:bg-surface/90 ${
-              item.isPremiumVendor ? "right-3 top-10" : "right-3 top-3"
+              item.isPremiumVendor || item.vendorPremium ? "right-3 top-10" : "right-3 top-3"
             }`}
           >
             <Heart

@@ -1,5 +1,6 @@
 // WhyChooseUs — 4 benefit cards explaining PizzaHub's key value props.
 import { Wheat, Zap, Store, Smartphone } from "lucide-react"
+import { FadeIn, StaggerGroup, StaggerItem } from "@/components/motion"
 
 // Benefit data for each card
 const BENEFITS = [
@@ -39,23 +40,22 @@ const BENEFITS = [
 
 export default function WhyChooseUs() {
   return (
-    // Section with fade-up animation
-    <section className="bg-surface py-16 transition-colors duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both">
+    <section className="bg-surface py-16 transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-6">
         {/* Section heading */}
-        <div className="mb-10 text-center">
+        <FadeIn className="mb-10 text-center">
           <h2 className="font-heading text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
             Why Choose PizzaHub?
           </h2>
           <p className="mt-3 font-text text-base text-ink-muted">
             More than just delivery — it&apos;s a better pizza experience
           </p>
-        </div>
+        </FadeIn>
 
         {/* 2×2 grid on tablet+, single column on mobile */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <StaggerGroup className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {BENEFITS.map(({ icon: Icon, title, description, color, bg }) => (
-            <div
+            <StaggerItem
               key={title}
               className="flex flex-col gap-4 rounded-2xl border border-line bg-page p-6 shadow-sm transition-shadow duration-200 hover:shadow-md"
             >
@@ -73,9 +73,9 @@ export default function WhyChooseUs() {
               <p className="font-text text-sm leading-relaxed text-ink-muted">
                 {description}
               </p>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGroup>
       </div>
     </section>
   )

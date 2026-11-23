@@ -24,9 +24,10 @@
 `Express API / MongoDB` ➔ `lib/api/` (`authFetch` / `fetch`) ➔ `app/.../page.tsx` ➔ `components/...` (UI)
 
 ## 5. Data Models & Relations
-- **Item**: `{ _id, itemName, description, price, category, images[], vendorId, vendorName, status, ratingAvg, ratingCount }`
-- **Order**: `{ _id, customerId, customerName, customerEmail, customerPhone, deliveryAddress, items[], totalAmount, status, fulfillmentStatus, vendorId, vendorName, createdAt }`
-- **User**: `{ id, name, email, image, role: "admin" | "vendor" | "customer", businessName?, premium?: boolean }`
+- **Item**: `{ _id, itemName, description, price, category, images[], vendorId, vendorName, status, ratingAvg, ratingCount, vendorPremium? }`. Statuses: `pending`, `approved`, `rejected`, `inactive`. Active items for free plan limit = `pending` or `approved`.
+- **Order**: `{ _id, customerId, customerName, customerEmail, customerPhone, deliveryAddress, deliveryDate, message, items[], totalAmount, status, fulfillmentStatus, vendorId, vendorName, createdAt }`. Default status: `pending`.
+- **User**: `{ id, name, email, image, role: "admin" | "vendor" | "customer", businessName?, premium?: boolean, subscriptionPlan: "free" | "premium", subscriptionExpiresAt: Date | null, banned?: boolean }`.
+- **Transaction**: `{ _id, vendorId, plan: "premium", amount, currency, stripeSessionId (unique), stripeSubscriptionId, paymentIntentId, status: "paid" | "refunded" | "failed", createdAt }`.
 - **Status values**: `status`: `pending` | `accepted` | `rejected` | `cancelled`. `fulfillmentStatus`: `cooking` | `on_the_way` | `delivered`.
 
 ## 6. Role-Wise Dashboard Menus & Routes
@@ -35,11 +36,12 @@
 - **Admin**: `/dashboard/admin` (Overview), `/dashboard/admin/users`, `/dashboard/admin/items` (Products), `/dashboard/admin/orders`, `/dashboard/admin/transactions`, `/dashboard/admin/profile`
 
 ## 7. Key Logic Notes
-- **Item management**: Vendor sees own items, admin sees all items via `GET /items/manage`.
-- **Order management**: Vendor sees own orders, admin sees all orders via `GET /orders`. Customer sees own orders.
+- **Item management**: Vendor sees own items, admin sees all items via `GET /items/manage`. Vendor toggles availability between `approved` and `inactive` via `PATCH /items/:id/availability` (subject to free plan limit).
+- **Order management**: Vendor sees own orders (accept/reject while pending), admin sees all orders via `GET /orders`. Customer cancels only own pending orders. Order validation: deliveryDate (today or later), address, phone, message (max 500); 403 on self-ordering; 409 on duplicate order on same day.
 - **Header badge**: `ClipboardList` in header links to customer orders or vendor orders with live count.
-- **Vendor premium**: Free tier capped at 3 items. Premium vendors have unlimited items.
-- **Featured Menu**: Exclusively shows items from premium vendors (`isPremiumVendor: true` checked via MongoDB `user.premium`).
+- **Vendor premium**: Webhook only (`/payments/webhook`, Stripe signature check, 1-year duration, renewal extends later of expiry or now). Active check helper `isPremiumActive(user)` auto-downgrades past expiries. Free tier limit is 3 items (`pending` or `approved`). Premium vendors have unlimited items and `vendorPremium` badge.
+- **Featured Menu**: Homepage featured section shows at least 6 approved items, active Premium vendors first with subtle "Featured" label.
+- **Server search & sort**: `GET /items` supports `q` (case-insensitive regex on name, desc, location, vendor), `category`, `location`, `sort` (`price_asc`, `price_desc`, newest), `vendorId`. Distinct approved locations via `GET /items/locations`.
 - **Reviews**: `getItemReviews` in `lib/api/items.ts` enriches reviews with real reviewer name & avatar from `user` collection.
 
 ## 8. Coding Conventions

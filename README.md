@@ -1,169 +1,321 @@
-# PizzaHub — Client Application
+# 🍕 PizzaHub
 
-A modern, multi-vendor artisan pizza ordering platform built with Next.js 16 (App Router), TypeScript, Tailwind CSS v4, and Better Auth, backed by MongoDB and an Express REST API.
+**A modern pizza ordering and restaurant management platform.**
 
----
-
-## Live & Repository Links (Placeholders)
-
-- **Live Website**: `<LIVE_SITE_URL>`
-- **Client Repository**: `<CLIENT_REPO_URL>`
-- **Server Repository**: `<SERVER_REPO_URL>`
-- **Admin Email**: `<ADMIN_EMAIL>`
-- **Admin Password**: `<ADMIN_PASSWORD>`
-- **Stripe Test Card**: `<STRIPE_TEST_CARD_NUMBER>` (CVC: `424`, Exp: `12/34`)
+PizzaHub is a full-stack food ordering application designed to connect customers with pizza vendors through an intuitive ordering experience. The platform supports customer accounts, vendor management, menu administration, online payments, order processing, and a dedicated admin dashboard for managing the entire system.
 
 ---
 
-## Important Features
+## 🌐 Live Demo
 
-### Customer Role
-- **Browse & Discovery**: Search artisan pizzas by keyword, filter by categories and preparation locations, sort by price (ascending/descending).
-- **Item Details & Ordering**: Real-time quantity selector, custom delivery address, and contact number. Directly creates orders with initial `pending` status.
-- **My Orders**: Dedicated order management tracking fulfillment progress (`cooking` → `on_the_way` → `delivered`). Allows cancellation only while the order is `pending`.
-- **Wishlist**: Save favorite pizzas with optimistic UI updates and instant toggle notifications.
-- **Reviews & Ratings**: Submit star ratings and feedback for purchased menu items with instant reviewer avatar resolution.
-- **Profile Settings**: Manage name and custom avatar uploaded directly via ImgBB.
-
-### Vendor Role
-- **Kitchen Overview**: Stat metrics for sales volume, customer orders, delivered pizzas, and menu item quotas.
-- **Menu Item Management**: Create, edit, and toggle availability (active/inactive) for menu items with mandatory image upload.
-- **Tier Quota Enforcement**: Free tier capped at 3 active menu items; unlimited items for Premium subscribers.
-- **Customer Orders**: Review kitchen incoming orders with single-click Accept/Reject transitions for pending orders.
-- **Subscription Management**: Compare Free vs. Premium tiers, initiate Stripe Checkout, and view active plan details.
-- **Profile Settings**: Update store and business contact information.
-
-### Admin Role
-- **Platform Analytics**: High-level platform statistics including order volume trends, donut status distribution, user role breakdowns, and items by status.
-- **User Governance**: Browse registered accounts, search by name/email, filter by role (`customer`, `vendor`, `admin`), change user roles, and restrict/unrestrict accounts.
-- **Catalog Moderation**: Review all platform pizzas across vendors, approve/reject pending submissions, and delete violations.
-- **Orders Oversight**: View all platform orders with fulfillment status tracking.
-- **Payment Records**: Read-only log of Stripe Checkout sessions and verified subscription payments.
+- **Live Website:** [Add your deployed website URL]
+- **Frontend Repository:** [Add your frontend repository URL]
+- **Backend Repository:** [Add your backend repository URL]
 
 ---
 
-## Technology Stack
+## ✨ Features
 
-The application is built using the following dependencies from `package.json`:
+### 👤 Authentication & User Management
+- Secure email and password authentication.
+- Google social login.
+- User role management with Admin, Vendor, and Customer roles.
+- User profile management.
+- Admin-controlled user restrictions.
+- Protected routes and role-based access control.
 
-### Core Framework & UI
-- **Next.js (`16.4.5`)**: App Router with Turbopack, Server Components, and Server Actions.
-- **React & React DOM (`19.3.1`)**: Component architecture and hooks.
-- **TypeScript (`^5`)**: Strict end-to-end type safety.
-- **Tailwind CSS (`^4`)**: Modern CSS styling with semantic design tokens.
-- **ShadCN / Radix UI**: Accessible UI primitives (`@radix-ui/react-alert-dialog`, `@base-ui/react`).
-- **Lucide React (`^1.75.0`)**: Modern iconography.
-- **Recharts (`^3.8.0`)**: Responsive interactive charts for analytics dashboards.
-- **Sonner (`^2.0.8`)**: Toast notification system.
-- **tw-animate-css (`^1.4.0`)**: Micro-animations and transition effects.
-- **next-themes (`^0.4.6`)**: Dark and light mode switching.
+### 🍕 Menu & Food Discovery
+- Browse available pizza items.
+- View detailed information about each menu item.
+- Explore menu items by category.
+- Search and filter menu items.
+- View item prices, descriptions, images, ratings, and vendor information.
+- Premium vendor identification.
+- Responsive menu browsing experience.
 
-### Authentication & Database
-- **Better Auth (`^1.7.25`)**: Authentication engine supporting credentials and Google OAuth.
-- **@better-auth/mongo-adapter (`^1.7.25`)**: Native MongoDB persistence for Better Auth.
-- **MongoDB Node Driver (`^7.9.0`)**: Direct collection queries for high-performance data enrichment.
+### 🛒 Customer Features
+- Add menu items to wishlist.
+- Manage wishlist items.
+- Place food orders.
+- Secure online payment integration.
+- View and manage orders.
+- Track order status.
+- Review and rate menu items.
+- Access detailed menu item information without requiring authentication.
 
-### Payments & Validation
-- **Stripe (`^23.2.0`) & @stripe/stripe-js (`^10.3.0`)**: Server and client payment integration.
-- **Zod (`^4.6.7`)**: Runtime schema validation for forms and payloads.
+### 🏪 Vendor Dashboard
+- Dedicated vendor dashboard.
+- Create and manage menu items.
+- Update existing menu items.
+- Upload and manage menu item images.
+- Track menu item approval status.
+- View and manage incoming orders.
+- Update order processing status.
+- Manage vendor profile information.
+- Premium vendor support.
+
+### 🛡️ Admin Dashboard
+- Centralized dashboard for platform management.
+- Manage registered users.
+- Change user roles.
+- Restrict or activate user accounts.
+- Manage vendor menu items.
+- Approve or reject submitted menu items.
+- Ban and unban approved menu items.
+- Edit menu items belonging to any vendor.
+- Delete menu items.
+- Manage orders and platform activities.
+- Monitor premium vendor status.
+
+### 💳 Payment Integration
+- Secure payment processing with Stripe.
+- Payment intent creation and processing.
+- Payment status management.
+- Backend payment handling.
+- Protected payment endpoints.
+
+### 🎨 User Experience
+- Modern and responsive UI.
+- Clean dashboard layouts.
+- Dark and light theme support.
+- Loading states and skeleton components.
+- Toast notifications for user feedback.
+- Form validation.
+- Confirmation dialogs for destructive actions.
+- Responsive design for mobile, tablet, and desktop.
 
 ---
 
-## Installation & Local Development
+## 🛠️ Tech Stack
 
-1. **Clone the repository**:
-   ```bash
-   git clone <CLIENT_REPO_URL>
-   cd pizzahub
-   ```
+### Frontend
+- **Next.js** – React framework
+- **React** – UI development
+- **TypeScript** – Type safety
+- **Tailwind CSS** – Styling
+- **Lucide React** – Icons
+- **React Hot Toast** – Notifications
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+### Backend
+- **Node.js** – Runtime environment
+- **Express.js** – REST API framework
+- **MongoDB** – Database
+- **Stripe** – Payment processing
 
-3. **Configure Environment Variables**:
-   Create a `.env.local` file in the root directory (refer to `.env.example`):
-   ```bash
-   cp .env.example .env.local
-   ```
+### Authentication & Security
+- Authentication system with email/password and Google login
+- Session-based authentication
+- Role-based authorization
+- Protected API routes
+- Server-side authentication checks
+- Environment-based configuration
 
-4. **Start Development Server**:
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
+### Deployment
+- **Frontend:** Vercel
+- **Backend:** Node.js hosting platform
+- **Database:** MongoDB Atlas
 
 ---
 
-## Environment Variables
+## 👥 User Roles
 
-| Variable Name | Purpose |
+| Role | Permissions |
 |---|---|
-| `MONGODB_URI` | MongoDB connection string for session and user collections |
-| `BETTER_AUTH_SECRET` | Secret key used to encrypt and sign auth session cookies |
-| `BETTER_AUTH_URL` | Canonical origin for Better Auth (e.g., `http://localhost:3000`) |
-| `NEXT_PUBLIC_API_BASE_URL` | Base URL of the Express backend API (no trailing slash) |
-| `NEXT_PUBLIC_APP_URL` | Client origin URL used for redirect callbacks |
-| `GOOGLE_CLIENT_ID` | Google OAuth Client ID from Google Cloud Console |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret from Google Cloud Console |
-| `IMGBB_API_KEY` | Server-only API key for hosting images on ImgBB |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Public key for client-side Stripe checkout initialization |
-| `STRIPE_SECRET_KEY` | Server-side secret key for creating Checkout sessions |
+| Customer | Browse menu, wishlist, order food, make payments, review items, manage orders |
+| Vendor | Manage own menu items, view orders, update order statuses, manage vendor profile |
+| Admin | Manage users, vendors, menu items, orders, permissions, and platform operations |
 
 ---
 
-## Challenge Requirements
+## 📂 Project Structure
 
-### 1. Advanced Search, Filtering, and Sorting
-- **API Contract**: The client queries the backend catalog via `GET /items` with URL query parameters:
-  - `search`: Keyword string matched case-insensitively against `itemName` and `description`.
-  - `category`: Filter by pizza category (e.g., `Classic Pizzas`, `Vegetarian Pizzas`).
-  - `location`: Filter by vendor kitchen location.
-  - `sort`: Ordering direction (`price_asc` for lowest price, `price_desc` for highest price).
-  - `page` & `limit`: Pagination parameters.
-- **MongoDB Query Pipeline**:
-  - Only approved and active items (`status: "approved"`, `isActive: true`) are included in public queries.
-  - The query object dynamically builds regex criteria:
-    ```javascript
-    const query = { status: "approved" };
-    if (search) query.itemName = { $regex: search, $options: "i" };
-    if (category && category !== "All") query.category = category;
-    if (location && location !== "All") query.location = location;
-    ```
-  - Sorting applies numeric sort operators: `{ price: 1 }` for ascending or `{ price: -1 }` for descending.
+### Frontend
 
-### 2. Token & Role Verification Flow
-- **Authentication**: HTTP-only session cookies managed by Better Auth are verified on the Next.js server via `getSession()` from `lib/core/server.ts`.
-- **API Authorization**: When the Next.js server calls private Express endpoints, it attaches the bearer token: `Authorization: Bearer <session_token>`.
-- **Middleware Flow**:
-  1. **Token Extraction**: The server retrieves the token from the `Authorization` header.
-  2. **Signature Verification**: Validates the token against the active session store; returns `401 Unauthorized` if absent, expired, or tampered.
-  3. **Role Enforcement**: Middleware checks `user.role` against required permissions (e.g., `requireRole("admin")`); returns `403 Forbidden` if the role lacks privileges.
-  4. **Account Status Check**: If `user.banned` or `user.restricted` is true, the request is rejected with `403 ACCOUNT_RESTRICTED`, triggering automatic client sign-out and redirection to `/restricted`.
-  5. **Resource Ownership**: For mutations (updating/deleting an item or order), the handler asserts that `item.vendorId === req.user.id` or `order.customerId === req.user.id`.
+```text
+PizzaHub/
+├── app/
+│   ├── (auth)/
+│   ├── dashboard/
+│   ├── menu/
+│   ├── login/
+│   ├── register/
+│   └── ...
+├── components/
+│   ├── auth/
+│   ├── dashboard/
+│   ├── header/
+│   ├── home/
+│   ├── menu/
+│   └── ui/
+├── lib/
+│   ├── actions/
+│   ├── api/
+│   ├── auth/
+│   └── core/
+├── types/
+├── public/
+├── styles/
+├── package.json
+└── ...
+```
+
+### Backend
+
+```text
+PizzaHub-Server/
+├── routes/
+│   └── payments.js
+├── index.js
+├── package.json
+├── .env
+└── ...
+```
 
 ---
 
-## Payment Flow (Vendor Premium)
+## ⚙️ Installation & Setup
 
-1. **Session Creation**: Authenticated vendor clicks "Upgrade to Premium". The server creates a Stripe Checkout Session via `POST /api/checkout_sessions`, securely embedding `metadata: { vendorId: session.user.id }`.
-2. **Checkout Redirect**: The client redirects the vendor to Stripe's hosted payment page.
-3. **Webhook Verification**: Upon successful payment, Stripe issues a `checkout.session.completed` event.
-4. **Activation**: The backend verifies the event signature using `STRIPE_WEBHOOK_SECRET` and the raw request body. Upon verification, the vendor's record is updated with `premium: true`, unlocking unlimited menu items and featured placement.
-5. **Idempotency**: Duplicate event deliveries are ignored by recording the Stripe `sessionId` in the `payments` collection.
+### Prerequisites
+
+Make sure you have installed:
+
+- Node.js
+- npm
+- MongoDB Atlas account or local MongoDB installation
+- Stripe account
+
+### 1. Clone the Frontend Repository
+
+```bash
+git clone <frontend-repository-url>
+cd PizzaHub
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure Environment Variables
+
+Create a `.env.local` file in the frontend root directory.
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
+BETTER_AUTH_SECRET=your_auth_secret
+BETTER_AUTH_URL=http://localhost:3000
+```
+
+Configure the actual environment variables required by your authentication setup.
+
+### 4. Run the Frontend
+
+```bash
+npm run dev
+```
+
+The frontend will be available at:
+
+```text
+http://localhost:3000
+```
 
 ---
 
-## Google OAuth Setup
+### 5. Clone the Backend Repository
 
-To enable Google Sign-In and Sign-Up:
-1. Create a project in [Google Cloud Console](https://console.cloud.google.com/).
-2. Configure the OAuth Consent Screen (External, Support Email, Scopes: `email`, `profile`, `openid`).
-3. Create OAuth 2.0 Client Credentials:
-   - **Authorized JavaScript Origins**:
-     - `http://localhost:3000`
-     - `<LIVE_SITE_URL>`
-   - **Authorized Redirect URIs**:
-     - `http://localhost:3000/api/auth/callback/google`
-     - `<LIVE_SITE_URL>/api/auth/callback/google`
+```bash
+git clone <backend-repository-url>
+cd PizzaHub-Server
+```
+
+### 6. Install Backend Dependencies
+
+```bash
+npm install
+```
+
+### 7. Configure Backend Environment Variables
+
+Create a `.env` file in the backend root directory.
+
+```env
+PORT=5000
+FRONTEND_URL=http://localhost:3000
+
+MONGODB_URI=your_mongodb_connection_string
+DB_NAME=your_database_name
+
+STRIPE_SECRET_KEY=your_stripe_secret_key
+```
+
+Add any additional environment variables required by the backend configuration.
+
+### 8. Start the Backend Server
+
+```bash
+npm run dev
+```
+
+Or, if your backend uses a different development script:
+
+```bash
+node index.js
+```
+
+The backend API will be available at:
+
+```text
+http://localhost:5000
+```
+
+---
+
+## 🔐 Security
+
+PizzaHub follows security practices including:
+
+- Protected routes for authenticated users.
+- Role-based access control for Admin, Vendor, and Customer.
+- Server-side permission validation.
+- Restricted access to administrative operations.
+- Authentication verification for protected API requests.
+- Secure payment processing through Stripe.
+- Environment variables for sensitive configuration.
+- Input validation for API requests.
+- Unauthorized access handling.
+
+---
+
+## 📱 Responsive Design
+
+PizzaHub is designed to provide a consistent experience across different screen sizes.
+
+- Desktop
+- Tablet
+- Mobile
+
+The interface adapts to different screen sizes while maintaining usability across customer pages and dashboard interfaces.
+
+---
+
+## 🚀 Future Improvements
+
+- Advanced analytics for vendors and administrators.
+- Improved order tracking.
+- Promotional discounts and coupon management.
+- Enhanced vendor subscription management.
+- Notifications for order updates.
+- Additional payment methods.
+- Advanced menu search and filtering.
+
+---
+
+## 👨‍💻 Developer
+
+Developed as a full-stack web application using modern web technologies, focusing on user experience, secure authentication, role-based management, and efficient food ordering workflows.
+
+---
+
+

@@ -2,7 +2,17 @@
 
 import React, { useState, useMemo } from "react"
 import Link from "next/link"
-import { Check, X, Trash2, Pencil, Search, Pizza, Eye, Ban } from "lucide-react"
+import {
+  Ban,
+  Check,
+  Eye,
+  Pizza,
+  PowerOff,
+  RotateCcw,
+  Search,
+  Trash2,
+  X,
+} from "lucide-react"
 import { MenuItemData, MenuItemStatus } from "@/components/menu/MenuItemCard"
 import { formatUSD } from "@/lib/format"
 import { updateItemStatus, deleteItem } from "@/lib/actions/ItemActions"
@@ -40,6 +50,73 @@ const STATUS_BADGES: Record<MenuItemStatus, { label: string; cls: string }> = {
     label: "Inactive",
     cls: "bg-zinc-200 text-zinc-700 dark:bg-zinc-500/20 dark:text-zinc-300",
   },
+}
+
+/* ------------------------------------------------------------------ */
+/* Icon action buttons (one place for the shared look)                  */
+/* ------------------------------------------------------------------ */
+
+type ActionTone = "neutral" | "success" | "danger" | "warning"
+
+const ACTION_BASE =
+  "flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-colors disabled:opacity-40"
+
+const ACTION_TONES: Record<ActionTone, string> = {
+  neutral: "border-line text-ink hover:bg-brand-soft",
+  success:
+    "border-emerald-300 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-500/10",
+  danger:
+    "border-red-300 text-red-600 hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10",
+  warning:
+    "border-amber-300 text-amber-600 hover:bg-amber-50 dark:border-amber-500/40 dark:text-amber-400 dark:hover:bg-amber-500/10",
+}
+
+interface ActionButtonProps {
+  title: string
+  tone: ActionTone
+  onClick: () => void
+  disabled?: boolean
+  children: React.ReactNode
+}
+
+function ActionButton({
+  title,
+  tone,
+  onClick,
+  disabled,
+  children,
+}: ActionButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      aria-label={title}
+      className={`${ACTION_BASE} ${ACTION_TONES[tone]}`}
+    >
+      {children}
+    </button>
+  )
+}
+
+interface ActionLinkProps {
+  href: string
+  title: string
+  children: React.ReactNode
+}
+
+function ActionLink({ href, title, children }: ActionLinkProps) {
+  return (
+    <Link
+      href={href}
+      title={title}
+      aria-label={title}
+      className={`${ACTION_BASE} ${ACTION_TONES.neutral}`}
+    >
+      {children}
+    </Link>
+  )
 }
 
 export default function ManageProducts({ initialItems }: ManageProductsProps) {
@@ -113,7 +190,7 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
           Manage Products
         </h1>
         <p className="mt-1 font-text text-sm text-ink-muted">
-          Review, approve, edit, or remove all vendor menu items.
+          Review, approve, or remove all vendor menu items.
         </p>
       </div>
 
@@ -131,16 +208,15 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto">
-          {["all", "pending", "approved", "rejected"].map((tab) => (
+          {["all", "pending", "approved", "rejected", "inactive"].map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setStatusFilter(tab)}
-              className={`rounded-xl px-3.5 py-1.5 font-heading text-xs font-semibold capitalize transition-colors ${
-                statusFilter === tab
-                  ? "bg-brand text-white"
-                  : "border border-line bg-surface text-ink hover:bg-brand-soft"
-              }`}
+              className={`rounded-xl px-3.5 py-1.5 font-heading text-xs font-semibold capitalize transition-colors ${statusFilter === tab
+                ? "bg-brand text-white"
+                : "border border-line bg-surface text-ink hover:bg-brand-soft"
+                }`}
             >
               {tab}
             </button>
@@ -234,126 +310,105 @@ export default function ManageProducts({ initialItems }: ManageProductsProps) {
                         </Badge>
                       </td>
                       <td className="px-5 py-3.5 text-right">
+                        {/*
+                          Admin actions: review (approve / reject), change the
+                          status of published items, and delete. Admins do not
+                          edit item content (that belongs to the vendor).
+                        */}
                         <div className="flex items-center justify-end gap-1.5">
-                          {/* Pending: Approve & Reject */}
+                          {/* View public page */}
+                          {(statusKey === "approved" ||
+                            statusKey === "inactive") && (
+                              <ActionLink
+                                href={`/menu/${item._id}`}
+                                title="View public details"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </ActionLink>
+                            )}
+
+                          {/* Pending: approve or reject */}
                           {statusKey === "pending" && (
                             <>
-                              <button
-                                type="button"
+                              <ActionButton
+                                title="Approve item"
+                                tone="success"
+                                disabled={isUpdating}
                                 onClick={() =>
                                   handleStatusChange(item._id, "approved")
                                 }
-                                disabled={isUpdating}
-                                title="Approve item"
-                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-emerald-300 text-emerald-600 transition-colors hover:bg-emerald-50 disabled:opacity-40 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
                               >
                                 <Check className="h-4 w-4" />
-                              </button>
+                              </ActionButton>
 
-                              <button
-                                type="button"
+                              <ActionButton
+                                title="Reject item"
+                                tone="danger"
+                                disabled={isUpdating}
                                 onClick={() =>
                                   handleStatusChange(item._id, "rejected")
                                 }
-                                disabled={isUpdating}
-                                title="Reject item"
-                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-red-300 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-40 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10"
                               >
                                 <X className="h-4 w-4" />
-                              </button>
+                              </ActionButton>
                             </>
                           )}
 
-                          {/* Approved: View, Edit, Ban & Delete */}
+                          {/* Approved: deactivate or ban (reject) a published item */}
                           {statusKey === "approved" && (
                             <>
-                              <Link
-                                href={`/menu/${item._id}`}
-                                title="View Public Details"
-                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-line text-ink transition-colors hover:bg-brand-soft"
+                              <ActionButton
+                                title="Deactivate item"
+                                tone="warning"
+                                disabled={isUpdating}
+                                onClick={() =>
+                                  handleStatusChange(item._id, "inactive")
+                                }
                               >
-                                <Eye className="h-4 w-4" />
-                              </Link>
+                                <PowerOff className="h-4 w-4" />
+                              </ActionButton>
 
-                              <Link
-                                href={`/dashboard/vendor/menu-items/${item._id}/edit`}
-                                title="Edit item"
-                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-line text-ink transition-colors hover:bg-brand-soft"
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Link>
-
-                              <button
-                                type="button"
+                              <ActionButton
+                                title="Ban item"
+                                tone="danger"
+                                disabled={isUpdating}
                                 onClick={() =>
                                   handleStatusChange(item._id, "rejected")
                                 }
-                                disabled={isUpdating}
-                                title="Ban item"
-                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-amber-300 text-amber-600 transition-colors hover:bg-amber-50 disabled:opacity-40 dark:border-amber-500/40 dark:text-amber-400 dark:hover:bg-amber-500/10"
                               >
                                 <Ban className="h-4 w-4" />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => setItemToDelete(item)}
-                                title="Delete item"
-                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-red-300 text-red-600 transition-colors hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
+                              </ActionButton>
                             </>
                           )}
 
-                          {/* Inactive / Banned: View, Edit, Unban & Delete */}
-                          {statusKey === "inactive" && (
-                            <>
-                              <Link
-                                href={`/menu/${item._id}`}
-                                title="View Item"
-                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-line text-ink transition-colors hover:bg-brand-soft"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Link>
-
-                              <Link
-                                href={`/dashboard/vendor/menu-items/${item._id}/edit`}
-                                title="Edit item"
-                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-line text-ink transition-colors hover:bg-brand-soft"
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Link>
-
-                              <button
-                                type="button"
+                          {/* Inactive / Rejected: restore to approved */}
+                          {(statusKey === "inactive" ||
+                            statusKey === "rejected") && (
+                              <ActionButton
+                                title={
+                                  statusKey === "rejected"
+                                    ? "Restore item"
+                                    : "Reactivate item"
+                                }
+                                tone="success"
+                                disabled={isUpdating}
                                 onClick={() =>
                                   handleStatusChange(item._id, "approved")
                                 }
-                                disabled={isUpdating}
-                                title="Unban item"
-                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-emerald-300 text-emerald-600 transition-colors hover:bg-emerald-50 disabled:opacity-40 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
                               >
-                                <Check className="h-4 w-4" />
-                              </button>
+                                <RotateCcw className="h-4 w-4" />
+                              </ActionButton>
+                            )}
 
-                              <button
-                                type="button"
-                                onClick={() => setItemToDelete(item)}
-                                title="Delete item"
-                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-red-300 text-red-600 transition-colors hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </>
-                          )}
-
-                          {/* Rejected: No actions */}
-                          {statusKey === "rejected" && (
-                            <span className="text-xs text-ink-muted">
-                              No actions available
-                            </span>
-                          )}
+                          {/* Delete: any status */}
+                          <ActionButton
+                            title="Delete item"
+                            tone="danger"
+                            disabled={isUpdating}
+                            onClick={() => setItemToDelete(item)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </ActionButton>
                         </div>
                       </td>
                     </tr>
