@@ -1,6 +1,3 @@
-// NavBtn component — right-side navigation actions in the navbar.
-// Displays role-aware icons: cart for customer, orders badge for vendor, neither for admin/guest.
-// Also includes the user profile menu with dashboard links and interactive logout.
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
@@ -58,20 +55,26 @@ const NavBtn: React.FC<NavBtnProps> = ({
     return () => document.removeEventListener("mousedown", handleOutsideClick)
   }, [])
 
-  // Execute logout with spinner and toast notification
-  const handleLogout = async () => {
+
+const handleLogout = async () => {
     setIsLoggingOut(true)
+    let isLoggedOut = false
+
     try {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       await authClient.signOut()
-      toastSuccess("Logged out. See you next time!")
-      setMenuOpen(false)
-      onLinkClick?.()
-      router.push("/login")
-      router.refresh()
+      isLoggedOut = true
     } catch {
       toastError("Logout failed. Please try again.")
     } finally {
       setIsLoggingOut(false)
+    }
+
+    if (isLoggedOut) {
+      toastSuccess("Logged out. See you next time!")
+      setMenuOpen(false)
+      onLinkClick?.()
+      window.location.replace("/login")
     }
   }
 

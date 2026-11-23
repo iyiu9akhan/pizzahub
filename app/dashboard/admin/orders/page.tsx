@@ -1,6 +1,4 @@
-// Admin orders management page — /dashboard/admin/orders
 export const dynamic = "force-dynamic"
-
 import React from "react"
 import { requireRole } from "@/lib/core/server"
 import { getOrders } from "@/lib/api/orders"

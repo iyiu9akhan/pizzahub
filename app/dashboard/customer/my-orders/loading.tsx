@@ -1,7 +1,5 @@
-// Loading skeleton for the my-orders page — shown by Next.js while the page fetches data.
 import React from "react"
 
-// A single skeleton card matching MyOrderCard layout
 const OrderSkeleton = () => (
   <div className="rounded-2xl border border-line bg-surface p-4 shadow-xs animate-pulse">
     <div className="flex gap-4">

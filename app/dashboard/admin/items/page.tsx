@@ -1,6 +1,4 @@
-// Admin Manage Products page — /dashboard/admin/items
 export const dynamic = "force-dynamic"
-
 import { requireRole } from "@/lib/core/server"
 import { getManageItems } from "@/lib/api/items"
 import ManageProducts from "@/components/dashboard/admin/product/ManageProducts"

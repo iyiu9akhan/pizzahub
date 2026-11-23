@@ -28,9 +28,7 @@ export default async function DashboardRedirectPage() {
 
   let currentRole = userObj.role || "customer"
 
-  // Only assign role if newly signed up and role is valid ("vendor" | "customer")
-  // Existing users' roles are NEVER altered by Google login
-  // Admin role can never be overridden from client cookie
+
   if (
     signupRoleCookie &&
     (signupRoleCookie === "vendor" || signupRoleCookie === "customer") &&
@@ -57,7 +55,7 @@ export default async function DashboardRedirectPage() {
         }
       }
     } catch {
-      // Keep currentRole fallback
+      // fallback
     }
   }
 

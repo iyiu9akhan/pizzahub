@@ -3,6 +3,9 @@ import { Montserrat, Quicksand } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
 import { Toaster } from "sonner"
+import Navbar from "@/components/header/navbar/Navbar"
+import { getHeaderOrderCount } from "@/lib/core/server"
+import { NavbarGate } from "@/components/header/navbar/NavbarGate"
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -24,11 +27,13 @@ export const metadata: Metadata = {
     "Freshly baked artisan pizzas with premium organic ingredients, delivered hot to your door in minutes.",
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const orderCount = await getHeaderOrderCount()
+
   return (
     <html
       lang="en"
@@ -47,10 +52,14 @@ export default function RootLayout({
         className={cn(
           montserrat.variable,
           quicksand.variable,
-          "min-h-screen bg-page text-ink antialiased selection:bg-brand-soft selection:text-brand-fg transition-colors duration-300"
+          "flex min-h-screen flex-col bg-page text-ink antialiased transition-colors duration-300 selection:bg-brand-soft selection:text-brand-fg"
         )}
       >
-        {children}
+        <NavbarGate>
+          <Navbar orderCount={orderCount} />
+        </NavbarGate>
+
+        <div className="flex flex-1 flex-col">{children}</div>
 
         {/* Global toast notifications — card style, top-center, light and dark mode */}
         <Toaster
@@ -63,7 +72,8 @@ export default function RootLayout({
               toast:
                 "font-text !rounded-2xl !border !border-line !bg-surface !shadow-xl !shadow-black/10 !px-4 !py-3.5 !gap-3 !items-start",
               title: "font-heading !font-semibold !text-ink !text-sm",
-              description: "font-text !text-ink-muted !text-xs !leading-relaxed",
+              description:
+                "font-text !text-ink-muted !text-xs !leading-relaxed",
               closeButton:
                 "!border !border-line !bg-surface !text-ink-muted !rounded-full hover:!bg-brand-soft hover:!text-brand-fg",
               success:
@@ -72,8 +82,7 @@ export default function RootLayout({
                 "!border-l-4 !border-l-[#AF0000] [&>[data-icon]]:!text-[#AF0000]",
               warning:
                 "!border-l-4 !border-l-amber-500 [&>[data-icon]]:!text-amber-500",
-              info:
-                "!border-l-4 !border-l-blue-500 [&>[data-icon]]:!text-blue-500",
+              info: "!border-l-4 !border-l-blue-500 [&>[data-icon]]:!text-blue-500",
             },
           }}
         />

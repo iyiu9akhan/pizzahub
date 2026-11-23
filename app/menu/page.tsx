@@ -1,5 +1,4 @@
 export const dynamic = "force-dynamic"
-
 import React, { Suspense } from "react"
 import Navbar from "@/components/header/navbar/Navbar"
 import Footer from "@/components/home/Footer"
@@ -76,7 +75,7 @@ export default async function MenuPage({ searchParams }: MenuPageProps) {
 
   return (
     <div className="min-h-screen bg-page flex flex-col transition-colors duration-300">
-      <Navbar orderCount={orderCount} />
+      {/* <Navbar orderCount={orderCount} /> */}
       <main className="flex-1">
         <Suspense fallback={<MenuLoading />}>
           <MenuBrowser

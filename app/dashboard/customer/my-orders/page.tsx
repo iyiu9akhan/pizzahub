@@ -1,5 +1,3 @@
-// Customer my-orders page — /dashboard/customer/my-orders
-// Server component: fetches the logged-in customer's orders and renders a card per order.
 export const dynamic = "force-dynamic"
 
 import { requireRole } from "@/lib/core/server"
@@ -21,7 +19,6 @@ const MyOrdersPage = async () => {
 
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
-      {/* Page header */}
       <div className="mb-8">
         <h1 className="font-heading text-2xl font-bold tracking-tight text-ink sm:text-3xl">
           My Orders
@@ -31,7 +28,6 @@ const MyOrdersPage = async () => {
         </p>
       </div>
 
-      {/* Order list or empty state */}
       {orders.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-line bg-surface py-20 text-center">
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-soft text-brand-fg">

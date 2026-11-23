@@ -1,12 +1,8 @@
-// Route handler: POST /api/upload
-// Receives a multipart/form-data request with a "file" field,
-// verifies the active user session via getSession, delegates upload to uploadToImgBB,
-// and returns the hosted image URL.
+// imgbb upload
 import { getSession } from "@/lib/core/server"
 import { uploadToImgBB } from "@/lib/core/imgbb"
 
 export async function POST(request: Request) {
-  // Validate caller authentication
   const session = await getSession()
   if (!session?.user) {
     return Response.json({ error: "Not logged in" }, { status: 401 })

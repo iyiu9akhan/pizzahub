@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import React from "react"
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 
 import Navbar from "@/components/header/navbar/Navbar"
 import Footer from "@/components/home/Footer"
@@ -19,15 +19,13 @@ export default async function ItemDetailsPage({
   const { id } = await params
 
   const session = await getSession()
-  if (!session?.user) {
-    redirect(`/login?callbackUrl=${encodeURIComponent(`/menu/${id}`)}`)
-  }
+  const isAuthenticated = Boolean(session?.user)
 
   const [rawItem, rawReviews, orderCount, wishlistIds] = await Promise.all([
     getItemById(id),
     getItemReviews(id),
     getHeaderOrderCount(),
-    getCustomerWishlistIds(),
+    isAuthenticated ? getCustomerWishlistIds() : Promise.resolve([]),
   ])
 
   const itemData = rawItem?.item || rawItem
@@ -36,11 +34,16 @@ export default async function ItemDetailsPage({
     notFound()
   }
 
-  // Pending or rejected items are never visible to regular customers
-  const userRole = (session.user as { role?: string }).role || "customer"
+  // Pending or rejected items are only visible to the owner vendor or admin
+  const userRole = isAuthenticated
+    ? (session?.user as { role?: string })?.role || "customer"
+    : "guest"
   const isOwnerVendor =
-    userRole === "vendor" && String(itemData.vendorId) === String(session.user.id)
-  const isAdmin = userRole === "admin"
+    isAuthenticated &&
+    userRole === "vendor" &&
+    String(itemData.vendorId) === String(session?.user?.id)
+  const isAdmin = isAuthenticated && userRole === "admin"
+
   if (
     itemData.status &&
     itemData.status !== "approved" &&
@@ -64,11 +67,13 @@ export default async function ItemDetailsPage({
     ? rawReviews
     : rawReviews?.reviews || []
 
-  const isFavorite = wishlistIds.includes(normalizedItem._id)
+  const isFavorite = Array.isArray(wishlistIds)
+    ? wishlistIds.includes(normalizedItem._id)
+    : false
 
   return (
     <div className="flex min-h-screen flex-col bg-page transition-colors duration-300">
-      <Navbar orderCount={orderCount} />
+      {/* <Navbar orderCount={orderCount} /> */}
       <main className="flex-1">
         <MenuItemDetails
           item={normalizedItem}

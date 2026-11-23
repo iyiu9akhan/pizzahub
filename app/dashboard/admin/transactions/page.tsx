@@ -1,4 +1,3 @@
-// Admin transactions page — /dashboard/admin/transactions
 export const dynamic = "force-dynamic"
 
 import React from "react"

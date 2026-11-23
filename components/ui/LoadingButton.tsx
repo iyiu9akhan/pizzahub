@@ -1,5 +1,3 @@
-// Reusable button that shows a spinner and disables itself while loading.
-// Use on every form/action that calls an API.
 "use client"
 
 import React from "react"
@@ -8,9 +6,7 @@ import { cn } from "@/lib/utils"
 
 export interface LoadingButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /** When true, renders a spinner and disables the button */
   isLoading?: boolean
-  /** Text shown next to the spinner while loading */
   loadingText?: string
 }
 

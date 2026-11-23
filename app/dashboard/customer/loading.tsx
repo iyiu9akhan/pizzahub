@@ -5,7 +5,7 @@ import { CardSkeleton, ChartSkeleton } from "@/components/dashboard/skeletons/Da
 export default function CustomerLoading() {
   return (
     <div className="w-full space-y-8 p-4 sm:p-6 lg:p-8">
-      {/* Header Skeleton */}
+
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-2">
           <Skeleton className="h-8 w-64 rounded-xl" />
@@ -14,20 +14,20 @@ export default function CustomerLoading() {
         <Skeleton className="h-10 w-36 rounded-full" />
       </div>
 
-      {/* 4 Stat Cards */}
+    
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <CardSkeleton key={i} />
         ))}
       </div>
 
-      {/* 2 Charts Grid */}
+     
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <ChartSkeleton />
         <ChartSkeleton />
       </div>
 
-      {/* Recent Orders List Skeleton */}
+    
       <div className="rounded-3xl border border-line bg-surface p-6 shadow-xs space-y-4">
         <Skeleton className="h-6 w-36 rounded-lg" />
         <div className="divide-y divide-line">

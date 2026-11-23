@@ -1,6 +1,4 @@
-// Admin dashboard overview page — /dashboard/admin
 export const dynamic = "force-dynamic"
-
 import React from "react"
 import { requireRole } from "@/lib/core/server"
 import { getStats } from "@/lib/api/stats"
@@ -35,9 +33,9 @@ export default async function AdminDashboardPage() {
   const usersByRole = charts.usersByRole || {}
   const itemsByStatus = charts.itemsByStatus || {}
 
-  // Order revenue is in USD
+  // order revenue 
   const orderRevenue = cards.orderRevenue ?? cards.revenue ?? cards.totalRevenue ?? 0
-  // Subscription revenue is in USD
+  // subscription revenue
   const subscriptionRevenue = cards.subscriptionRevenue ?? cards.subRevenue ?? 0
   const totalTransactions = cards.totalTransactions ?? cards.subscriptions ?? 0
   const totalOrders = cards.orders ?? cards.totalOrders ?? 0
@@ -56,9 +54,9 @@ export default async function AdminDashboardPage() {
         </p>
       </div>
 
-      {/* Stat Cards Grid */}
+      {/* ststs card */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        {/*Food Order Revenue (USD) */}
+        {/*food order revenue */}
         <div className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-xs transition-all hover:shadow-md">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-brand-fg">
             <TrendingUp className="h-6 w-6" />
@@ -71,7 +69,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Subscription Revenue (USD) */}
+        {/* subscription revenue */}
         <div className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-xs transition-all hover:shadow-md">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
             <CreditCard className="h-6 w-6" />
@@ -84,7 +82,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Total Transactions */}
+        {/* total transactions */}
         <div className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-xs transition-all hover:shadow-md">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
             <CreditCard className="h-6 w-6" />
@@ -97,7 +95,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Total Orders */}
+        {/* total orders */}
         <div className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-xs transition-all hover:shadow-md">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
             <ShoppingBag className="h-6 w-6" />
@@ -110,7 +108,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Registered Users */}
+        {/* registered users */}
         <div className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-xs transition-all hover:shadow-md">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
             <Users className="h-6 w-6" />
@@ -123,7 +121,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Active Items */}
+        {/* active items */}
         <div className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-xs transition-all hover:shadow-md">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
             <Pizza className="h-6 w-6" />
@@ -137,7 +135,7 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Row 1 Charts: Orders Trend & Orders by Status */}
+      {/*  orders trend & orders by status */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 min-h-85">
         <OrdersAreaChart
           data={daily}
@@ -150,7 +148,7 @@ export default async function AdminDashboardPage() {
         />
       </div>
 
-      {/* Row 2 Charts: Users by Role & Items by Status */}
+      {/*   users by role & utems by status */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 min-h-85">
         <UsersByRoleDonutChart data={usersByRole} />
         <ItemsByStatusChart data={itemsByStatus} />

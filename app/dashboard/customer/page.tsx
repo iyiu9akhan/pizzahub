@@ -1,4 +1,3 @@
-// Customer dashboard overview page — /dashboard/customer
 export const dynamic = "force-dynamic"
 
 import React from "react"

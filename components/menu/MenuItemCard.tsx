@@ -121,11 +121,17 @@ const MenuItemCard = ({
         toastSuccess(nextState ? "Added to wishlist" : "Removed from wishlist")
       } else {
         setFavorite(!nextState)
-        toastError("Wishlist update failed", res.message || "Could not update wishlist.")
+        toastError(
+          "Wishlist update failed",
+          res.message || "Could not update wishlist."
+        )
       }
     } catch {
       setFavorite(!nextState)
-      toastError("Wishlist update failed", "An error occurred while updating wishlist.")
+      toastError(
+        "Wishlist update failed",
+        "An error occurred while updating wishlist."
+      )
     } finally {
       setIsWishlistLoading(false)
     }
@@ -158,22 +164,24 @@ const MenuItemCard = ({
         {/* Status badge — top-left, only when status prop is provided */}
         {statusBadge && (
           <span
-            className={`absolute left-3 top-3 rounded-full px-3 py-1 font-heading text-[11px] font-bold ${statusBadge.cls}`}
+            className={`absolute top-3 left-3 rounded-full px-3 py-1 font-heading text-[11px] font-bold ${statusBadge.cls}`}
           >
             {statusBadge.label}
           </span>
         )}
 
         {/* Subtle "Featured" label on premium items in featured section */}
-        {!statusBadge && showFeaturedLabel && (item.isPremiumVendor || item.vendorPremium) && (
-          <span className="absolute left-3 top-3 rounded-full border border-brand/20 bg-surface/90 px-2.5 py-0.5 font-heading text-[10px] font-semibold text-brand-fg shadow-2xs backdrop-blur-xs">
-            Featured
-          </span>
-        )}
+        {!statusBadge &&
+          showFeaturedLabel &&
+          (item.isPremiumVendor || item.vendorPremium) && (
+            <span className="absolute top-3 left-3 rounded-full border border-brand/20 bg-surface/90 px-2.5 py-0.5 font-heading text-[10px] font-semibold text-brand-fg shadow-2xs backdrop-blur-xs">
+              Featured
+            </span>
+          )}
 
         {/* Premium vendor badge — top-right */}
         {(item.isPremiumVendor || item.vendorPremium) && (
-          <span className="absolute right-3 top-3">
+          <span className="absolute top-3 right-3">
             <PremiumBadge />
           </span>
         )}
@@ -185,8 +193,10 @@ const MenuItemCard = ({
             onClick={handleToggleFavorite}
             disabled={isWishlistLoading}
             aria-label={favorite ? "Remove from wishlist" : "Add to wishlist"}
-            className={`absolute z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-xs transition-transform hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 dark:bg-surface/90 ${
-              item.isPremiumVendor || item.vendorPremium ? "right-3 top-10" : "right-3 top-3"
+            className={`absolute z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-xs transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:outline-none active:scale-95 dark:bg-surface/90 ${
+              item.isPremiumVendor || item.vendorPremium
+                ? "top-10 right-3"
+                : "top-3 right-3"
             }`}
           >
             <Heart
@@ -201,7 +211,7 @@ const MenuItemCard = ({
       </div>
 
       {/* Card body */}
-      <div className="flex flex-1 flex-col px-2 pb-1 pt-4">
+      <div className="flex flex-1 flex-col px-2 pt-4 pb-1">
         {/* Title + price on one row */}
         <div className="flex items-start justify-between gap-3">
           <h3 className="line-clamp-1 font-heading text-lg font-bold text-ink">
@@ -249,7 +259,7 @@ const MenuItemCard = ({
             // Default action: "View Details" link
             <Link
               href={`/menu/${item._id}`}
-              className="flex w-full items-center justify-center rounded-full bg-brand px-4 py-2.5 font-heading text-sm font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+              className="flex w-full items-center justify-center rounded-full bg-brand px-4 py-2.5 font-heading text-sm font-semibold text-white transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:outline-none"
             >
               View Details
             </Link>
@@ -265,26 +275,46 @@ export default MenuItemCard
 // ----- Skeleton -------------------------------------------------------------
 
 /** Grid placeholder shown while menu items are loading */
+/** Grid placeholder shown while menu items are loading */
 export const MenuItemCardSkeleton = () => (
   <div className="flex h-full flex-col rounded-3xl border border-line bg-surface p-3 shadow-2xs">
-    {/* Image placeholder */}
-    <Skeleton className="aspect-4/3 w-full rounded-2xl" />
-    <div className="flex flex-1 flex-col px-2 pb-1 pt-4 gap-3">
-      {/* Title row */}
-      <div className="flex items-center justify-between gap-3">
+    {/* Image placeholder matching aspect-4/3 */}
+    <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl bg-brand-soft/40">
+      <Skeleton className="h-full w-full rounded-2xl" />
+      {/* Bottom-left category chip placeholder */}
+      <Skeleton className="absolute bottom-3 left-3 h-6 w-28 rounded-full" />
+      {/* Top-right action circle placeholder */}
+      <Skeleton className="absolute top-3 right-3 h-8 w-8 rounded-full" />
+    </div>
+
+    {/* Card body matching MenuItemCard spacing */}
+    <div className="flex flex-1 flex-col px-2 pt-4 pb-1">
+      {/* Title + price row */}
+      <div className="flex items-start justify-between gap-3">
         <Skeleton className="h-6 w-3/5 rounded-full" />
-        <Skeleton className="h-7 w-16 rounded-full" />
+        <Skeleton className="h-7 w-14 shrink-0 rounded-full" />
       </div>
-      {/* Description lines */}
-      <Skeleton className="h-4 w-full rounded-full" />
-      <Skeleton className="h-4 w-4/5 rounded-full" />
-      {/* Chips */}
-      <div className="flex gap-2">
-        <Skeleton className="h-6 w-20 rounded-full" />
+
+      {/* Rating row */}
+      <div className="mt-1.5 flex items-center gap-1.5">
+        <Skeleton className="h-3.5 w-3.5 rounded-full" />
+        <Skeleton className="h-3.5 w-10 rounded-full" />
+      </div>
+
+      {/* 2-line description */}
+      <div className="mt-2 flex flex-col gap-1.5">
+        <Skeleton className="h-4 w-full rounded-full" />
+        <Skeleton className="h-4 w-4/5 rounded-full" />
+      </div>
+
+      {/* Location + vendor chips */}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Skeleton className="h-6 w-32 rounded-full" />
         <Skeleton className="h-6 w-24 rounded-full" />
       </div>
-      {/* Button */}
-      <Skeleton className="mt-auto h-10 w-full rounded-full" />
+
+      {/* Full-width button */}
+      <Skeleton className="mt-4 h-10 w-full rounded-full" />
     </div>
   </div>
 )

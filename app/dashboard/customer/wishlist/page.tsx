@@ -1,5 +1,4 @@
 export const dynamic = "force-dynamic"
-
 import React from "react"
 import { requireRole } from "@/lib/core/server"
 import { getWishlist } from "@/lib/api/wishlist"
