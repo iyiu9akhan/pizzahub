@@ -35,20 +35,6 @@ const EMPTY_FILTERS: Filters = {
   sort: "default" as SortOption,
 }
 
-type Filters = {
-  q: string
-  category: string
-  location: string
-  sort: SortOption
-}
-
-const EMPTY_FILTERS: Filters = {
-  q: "",
-  category: "",
-  location: "",
-  sort: "default" as SortOption,
-}
-
 export default function MenuBrowser({
   initialItems = [],
   initialError = null,
@@ -59,45 +45,33 @@ export default function MenuBrowser({
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
 
-<<<<<<< HEAD
   const parseSortParam = useCallback((param: string | null): SortOption => {
     if (param === "price_asc" || param === "price-asc") return "price-asc"
     if (param === "price_desc" || param === "price-desc") return "price-desc"
     return "default"
   }, [])
 
-  const currentParamsKey = searchParams.toString()
-  const [prevParamsKey, setPrevParamsKey] = useState(currentParamsKey)
-  const [filters, setFilters] = useState<Filters>(() => ({
-    q: searchParams.get("q") || "",
-    category: searchParams.get("category") || "",
-    location: searchParams.get("location") || "",
-    sort: parseSortParam(searchParams.get("sort")),
-  }))
-
-  if (currentParamsKey !== prevParamsKey) {
-    setPrevParamsKey(currentParamsKey)
-    setFilters({
+  const readFiltersFromUrl = useCallback(
+    (): Filters => ({
       q: searchParams.get("q") || "",
       category: searchParams.get("category") || "",
       location: searchParams.get("location") || "",
       sort: parseSortParam(searchParams.get("sort")),
-    })
+    }),
+    [searchParams, parseSortParam]
+  )
+
+  const currentParamsKey = searchParams.toString()
+  const [prevParamsKey, setPrevParamsKey] = useState(currentParamsKey)
+  const [filters, setFilters] = useState<Filters>(readFiltersFromUrl)
+
+  if (currentParamsKey !== prevParamsKey) {
+    setPrevParamsKey(currentParamsKey)
+    setFilters(readFiltersFromUrl())
   }
 
   const { q: query, category, location, sort } = filters
-=======
-  const [filters, setFilters] = useState<Filters>({
-    q: searchParams.get("q") || "",
-    category: searchParams.get("category") || "",
-    location: searchParams.get("location") || "",
-    sort: (searchParams.get("sort") as SortOption) || ("default" as SortOption),
-  })
 
-  const { q: query, category, location, sort } = filters
-
-  const items = initialItems
->>>>>>> f02b74d50817cf192f8290437bea680462a537a2
   const [isLoading, setIsLoading] = useState(false)
   const [fetchError, setFetchError] = useState<string | null>(initialError)
 
@@ -110,11 +84,7 @@ export default function MenuBrowser({
     }, 500)
   }
 
-<<<<<<< HEAD
   const fallbackLocations = useMemo(() => {
-=======
-  const uniqueLocations = useMemo(() => {
->>>>>>> f02b74d50817cf192f8290437bea680462a537a2
     const locSet = new Set<string>()
     initialItems.forEach((item) => {
       if (item.location?.trim()) {
@@ -124,7 +94,6 @@ export default function MenuBrowser({
     return Array.from(locSet).sort()
   }, [initialItems])
 
-<<<<<<< HEAD
   const locations =
     serverLocations.length > 0 ? serverLocations : fallbackLocations
 
@@ -150,87 +119,27 @@ export default function MenuBrowser({
     startTransition(() => {
       router.replace(qs ? `/menu?${qs}` : "/menu", { scroll: false })
     })
-=======
-  // URL update করে, কিন্তু server request করে না
-  const syncUrl = (next: Filters) => {
-    const params = new URLSearchParams()
-    Object.entries(next).forEach(([key, value]) => {
-      if (value && value !== "default" && value !== "All") {
-        params.set(key, value)
-      }
-    })
-    const qs = params.toString()
-    window.history.replaceState(null, "", qs ? `/menu?${qs}` : "/menu")
->>>>>>> f02b74d50817cf192f8290437bea680462a537a2
   }
 
   const setFilter = (key: keyof Filters, value: string) => {
     const next = { ...filters, [key]: value } as Filters
-<<<<<<< HEAD
     updateFilters(next)
-=======
-    setFilters(next)
-    syncUrl(next)
->>>>>>> f02b74d50817cf192f8290437bea680462a537a2
   }
 
   const clearAllFilters = useCallback(() => {
     setFilters(EMPTY_FILTERS)
-<<<<<<< HEAD
     startTransition(() => {
       router.replace("/menu", { scroll: false })
     })
   }, [router])
 
   const showLoading = isLoading || isPending
-=======
-    window.history.replaceState(null, "", "/menu")
-  }, [])
-
-  const filteredItems = useMemo(() => {
-    return items
-      .filter((item) => {
-        if (item.status && item.status !== "approved") {
-          return false
-        }
-
-        if (category && category !== "All" && item.category !== category) {
-          return false
-        }
-
-        if (location && item.location !== location) {
-          return false
-        }
-
-        if (query.trim()) {
-          const qLower = query.toLowerCase().trim()
-          const nameMatch = item.itemName?.toLowerCase().includes(qLower)
-          const catMatch = item.category?.toLowerCase().includes(qLower)
-          const locMatch = item.location?.toLowerCase().includes(qLower)
-          if (!nameMatch && !catMatch && !locMatch) {
-            return false
-          }
-        }
-
-        return true
-      })
-      .sort((a, b) => {
-        if (sort === "price-asc") return a.price - b.price
-        if (sort === "price-desc") return b.price - a.price
-        return 0
-      })
-  }, [items, query, category, location, sort])
->>>>>>> f02b74d50817cf192f8290437bea680462a537a2
 
   return (
     <div className="mx-auto max-w-7xl px-6 pb-20">
       <MenuHero />
 
-<<<<<<< HEAD
       <div className="sticky top-20 z-30 mb-5 rounded-b-2xl border border-line bg-surface/90 p-3 shadow-sm backdrop-blur-md sm:p-4">
-=======
-     <div className="sticky top-20 z-30 mb-5 rounded-b-2xl border border-line bg-surface/90 p-3 shadow-sm backdrop-blur-md sm:p-4">
->>>>>>> f02b74d50817cf192f8290437bea680462a537a2
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_220px_220px]">
           <div className="sm:col-span-2 lg:col-span-1">
             <MenuSearchBar
@@ -255,11 +164,7 @@ export default function MenuBrowser({
         />
       </div>
 
-<<<<<<< HEAD
       {!showLoading && !fetchError && (
-=======
-      {!isLoading && !fetchError && (
->>>>>>> f02b74d50817cf192f8290437bea680462a537a2
         <div className="mb-6">
           <ActiveFilterChips
             totalCount={initialItems.length}
@@ -276,11 +181,7 @@ export default function MenuBrowser({
         </div>
       )}
 
-<<<<<<< HEAD
       {showLoading ? (
-=======
-      {isLoading ? (
->>>>>>> f02b74d50817cf192f8290437bea680462a537a2
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <MenuItemCardSkeleton key={i} />
