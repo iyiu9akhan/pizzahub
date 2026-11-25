@@ -1,8 +1,6 @@
 export const dynamic = "force-dynamic"
-
 import React from "react"
-import { notFound } from "next/navigation"
-
+import { notFound, redirect } from "next/navigation"
 import Navbar from "@/components/header/navbar/Navbar"
 import Footer from "@/components/home/Footer"
 import MenuItemDetails from "@/components/menu/details/MenuItemDetails"
@@ -19,7 +17,11 @@ export default async function ItemDetailsPage({
   const { id } = await params
 
   const session = await getSession()
-  const isAuthenticated = Boolean(session?.user)
+  if (!session?.user) {
+    redirect("/login")
+  }
+
+  const isAuthenticated = true
 
   const [rawItem, rawReviews, orderCount, wishlistIds] = await Promise.all([
     getItemById(id),
@@ -31,8 +33,11 @@ export default async function ItemDetailsPage({
   const itemData = rawItem?.item || rawItem
 
   if (!itemData?._id) {
+    
     notFound()
   }
+
+  
 
   // Pending or rejected items are only visible to the owner vendor or admin
   const userRole = isAuthenticated
@@ -50,6 +55,7 @@ export default async function ItemDetailsPage({
     !isOwnerVendor &&
     !isAdmin
   ) {
+    
     notFound()
   }
 

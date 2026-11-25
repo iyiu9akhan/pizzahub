@@ -41,7 +41,6 @@ export default async function RootLayout({
       className={cn(montserrat.variable, quicksand.variable, "antialiased")}
     >
       <head>
-        {/* Inline script: apply saved theme before first paint to prevent flash */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var s=localStorage.getItem("pizzahub-theme");var d=s==="dark"||(!s&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(d){document.documentElement.classList.add("dark")}else{document.documentElement.classList.remove("dark")}}catch(e){}})()`,
@@ -61,7 +60,6 @@ export default async function RootLayout({
 
         <div className="flex flex-1 flex-col">{children}</div>
 
-        {/* Global toast notifications — card style, top-center, light and dark mode */}
         <Toaster
           position="top-center"
           closeButton

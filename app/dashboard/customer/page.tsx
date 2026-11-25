@@ -45,10 +45,14 @@ export default async function CustomerDashboardPage() {
   const ordersByStatus = charts.ordersByStatus || {}
 
   const totalOrders = cards.orders ?? cards.totalOrders ?? orders.length
-  const totalSpent = cards.spending ?? cards.revenue ?? cards.totalSpending ?? 0
+  const totalSpent =
+    cards.totalSpent ??
+    cards.spending ??
+    cards.revenue ??
+    cards.totalSpending ??
+    0
   const pendingOrders =
-    cards.pendingOrders ??
-    orders.filter((o) => o.status === "pending").length
+    cards.pendingOrders ?? orders.filter((o) => o.status === "pending").length
   const deliveredOrders =
     cards.deliveredOrders ??
     orders.filter((o) => o.fulfillmentStatus === "delivered").length
@@ -71,7 +75,8 @@ export default async function CustomerDashboardPage() {
             Welcome back, {userName}!
           </h1>
           <p className="mt-1 font-text text-sm text-ink-muted">
-            Here is a snapshot of your pizza orders, spending, and recent deliveries.
+            Here is a snapshot of your pizza orders, spending, and recent
+            deliveries.
           </p>
         </div>
 
@@ -92,7 +97,7 @@ export default async function CustomerDashboardPage() {
             <TrendingUp className="h-6 w-6" />
           </span>
           <div className="min-w-0">
-            <p className="font-heading text-2xl font-extrabold text-ink truncate">
+            <p className="truncate font-heading text-2xl font-extrabold text-ink">
               {formatUSD(totalSpent)}
             </p>
             <p className="font-text text-xs text-ink-muted">Total Spent</p>
@@ -105,7 +110,7 @@ export default async function CustomerDashboardPage() {
             <ShoppingBag className="h-6 w-6" />
           </span>
           <div className="min-w-0">
-            <p className="font-heading text-2xl font-extrabold text-ink truncate">
+            <p className="truncate font-heading text-2xl font-extrabold text-ink">
               {totalOrders}
             </p>
             <p className="font-text text-xs text-ink-muted">Total Orders</p>
@@ -118,10 +123,12 @@ export default async function CustomerDashboardPage() {
             <Clock className="h-6 w-6" />
           </span>
           <div className="min-w-0">
-            <p className="font-heading text-2xl font-extrabold text-ink truncate">
+            <p className="truncate font-heading text-2xl font-extrabold text-ink">
               {pendingOrders}
             </p>
-            <p className="font-text text-xs text-ink-muted">Pending Kitchen Approval</p>
+            <p className="font-text text-xs text-ink-muted">
+              Pending Kitchen Approval
+            </p>
           </div>
         </div>
 
@@ -131,7 +138,7 @@ export default async function CustomerDashboardPage() {
             <PackageCheck className="h-6 w-6" />
           </span>
           <div className="min-w-0">
-            <p className="font-heading text-2xl font-extrabold text-ink truncate">
+            <p className="truncate font-heading text-2xl font-extrabold text-ink">
               {deliveredOrders}
             </p>
             <p className="font-text text-xs text-ink-muted">Delivered</p>
@@ -140,7 +147,7 @@ export default async function CustomerDashboardPage() {
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 min-h-85">
+      <div className="grid min-h-85 grid-cols-1 gap-6 lg:grid-cols-2">
         <CustomerSpendingChart data={daily} />
         <OrdersStatusDonutChart
           data={ordersByStatus}
@@ -152,7 +159,9 @@ export default async function CustomerDashboardPage() {
       <div className="rounded-3xl border border-line bg-surface p-6 shadow-xs">
         <div className="flex items-center justify-between border-b border-line pb-4">
           <div>
-            <h2 className="font-heading text-lg font-bold text-ink">Recent Orders</h2>
+            <h2 className="font-heading text-lg font-bold text-ink">
+              Recent Orders
+            </h2>
             <p className="mt-0.5 font-text text-xs text-ink-muted">
               Quick view of your latest pizza orders
             </p>
@@ -198,14 +207,16 @@ export default async function CustomerDashboardPage() {
                     <p className="font-heading text-sm font-bold text-ink">
                       {firstItem?.itemName || "Delicious Pizza"}
                       {order.items && order.items.length > 1 && (
-                        <span className="font-text text-xs text-ink-muted ml-1">
+                        <span className="ml-1 font-text text-xs text-ink-muted">
                           +{order.items.length - 1} more
                         </span>
                       )}
                     </p>
                     <p className="font-text text-xs text-ink-muted">
                       {itemsCount} {itemsCount === 1 ? "item" : "items"} •{" "}
-                      {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : ""}
+                      {order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString()
+                        : ""}
                     </p>
                   </div>
 
@@ -218,10 +229,11 @@ export default async function CustomerDashboardPage() {
                         order.status === "pending"
                           ? "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300"
                           : order.fulfillmentStatus === "delivered"
-                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300"
-                          : order.status === "rejected" || order.status === "cancelled"
-                          ? "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300"
-                          : "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300"
+                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300"
+                            : order.status === "rejected" ||
+                                order.status === "cancelled"
+                              ? "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300"
+                              : "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300"
                       }`}
                     >
                       {order.fulfillmentStatus || order.status}

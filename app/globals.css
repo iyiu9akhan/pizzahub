@@ -5,17 +5,20 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --brand: #106033;
-  --brand-dark: color-mix(in srgb, var(--brand) 78%, black);
-  --brand-muted: color-mix(in srgb, var(--brand) 18%, white);
-  --surface: #ffffff;
-  --ink: #14201a;
-  --ink-muted: #5f6f66;
-  --line: color-mix(in srgb, var(--brand) 18%, white);
-  --page-bg: color-mix(in srgb, var(--brand) 6%, white);
-  --brand-soft: color-mix(in srgb, var(--brand) 10%, var(--surface));
+  /* Warm tomato red, baked-crust orange, cream dough */
+  --brand: #d13b1f;
+  --brand-dark: color-mix(in srgb, var(--brand) 80%, black);
+  --brand-muted: color-mix(in srgb, var(--brand) 14%, white);
+  --orange: #e8841c;
+  --orange-soft: color-mix(in srgb, var(--orange) 12%, var(--surface));
+  --surface: #fffcf6;
+  --ink: #2d1c14;
+  --ink-muted: #76604f;
+  --line: #efdcc0;
+  --page-bg: #fdf2dd;
+  --brand-soft: color-mix(in srgb, var(--brand) 6%, var(--surface));
   --brand-fg: var(--brand);
-  --danger: #af0000;
+  --danger: #a4161a;
   --danger-foreground: #ffffff;
 
   --font-heading: var(--font-montserrat);
@@ -29,13 +32,14 @@
   --popover-foreground: var(--ink);
   --primary: var(--brand);
   --primary-foreground: #ffffff;
-  --secondary: var(--brand-soft);
-  --secondary-foreground: var(--brand-fg);
-  --muted: var(--brand-soft);
+  --secondary: var(--orange-soft);
+  --secondary-foreground: color-mix(in srgb, var(--orange) 50%, black);
+  --muted: color-mix(in srgb, var(--ink) 4%, var(--page-bg));
   --muted-foreground: var(--ink-muted);
   --accent: var(--brand-soft);
   --accent-foreground: var(--brand-fg);
-  --destructive: #fff;
+  --destructive: var(--danger);
+  --destructive-foreground: var(--danger-foreground);
   --border: var(--line);
   --input: var(--line);
   --ring: var(--brand);
@@ -43,23 +47,27 @@
 }
 
 .dark {
-  --surface: #141d18;
-  --ink: #e9f1ec;
-  --ink-muted: #9daea4;
-  --line: #26362d;
-  --page-bg: #0c1310;
-  --brand-fg: color-mix(in srgb, var(--brand) 45%, white);
-  --brand-soft: color-mix(in srgb, var(--brand) 16%, var(--surface));
-  --brand-muted: #26362d;
+  --surface: #1c1613;
+  --ink: #f5ebdd;
+  --ink-muted: #b5a294;
+  --line: #342a23;
+  --page-bg: #120e0c;
+  --orange: #ee9440;
+  --orange-soft: color-mix(in srgb, var(--orange) 16%, var(--surface));
+  --brand-fg: #f28068;
+  --brand-soft: color-mix(in srgb, var(--brand) 18%, var(--surface));
+  --brand-muted: #342a23;
   --background: var(--page-bg);
   --foreground: var(--ink);
   --card: var(--surface);
   --card-foreground: var(--ink);
   --popover: var(--surface);
   --popover-foreground: var(--ink);
+  --muted: color-mix(in srgb, var(--ink) 6%, var(--page-bg));
+  --secondary-foreground: color-mix(in srgb, var(--orange) 70%, white);
   --border: var(--line);
   --input: var(--line);
-  --danger: #af0000;
+  --danger: #d63a45;
   --danger-foreground: #ffffff;
 }
 
@@ -76,6 +84,8 @@
   --color-brand-dark: var(--brand-dark);
   --color-brand-soft: var(--brand-soft);
   --color-brand-muted: var(--brand-muted);
+  --color-accent-orange: var(--orange);
+  --color-accent-orange-soft: var(--orange-soft);
   --color-page: var(--page-bg);
   --color-danger: var(--danger);
   --color-danger-foreground: var(--danger-foreground);
@@ -87,12 +97,14 @@
   --color-foreground: var(--ink);
   --color-primary: var(--brand);
   --color-primary-foreground: #ffffff;
-  --color-secondary: var(--brand-soft);
-  --color-secondary-foreground: var(--brand-fg);
-  --color-muted: var(--brand-soft);
+  --color-secondary: var(--orange-soft);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
   --color-muted-foreground: var(--ink-muted);
   --color-accent: var(--brand-soft);
   --color-accent-foreground: var(--brand-fg);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--danger-foreground);
   --color-card: var(--surface);
   --color-card-foreground: var(--ink);
   --color-popover: var(--surface);
@@ -193,17 +205,11 @@
   animation: float-reverse 5s ease-in-out infinite;
 }
 
-/* ─── Toast (Sonner) custom styles ───────────────────────────────────────────
-   Card-style toasts: rounded, shadowed, left accent border by type.
-   Mobile: full-width with side margin at top-center.
-   Desktop: fixed width, smooth slide-down entry animation.
-   ─────────────────────────────────────────────────────────────────────────── */
 
 [data-sonner-toaster] {
   --width: 380px;
 }
 
-/* Mobile: full-width with side gutters */
 @media (max-width: 600px) {
   [data-sonner-toaster] {
     left: 0 !important;

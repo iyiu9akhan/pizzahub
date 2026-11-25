@@ -31,7 +31,12 @@ const cell = `py-3 ${pad}`
 
 const UserCell = ({ user }: { user: ManagedUser }) => (
   <div className="flex items-center gap-3">
-    <UserAvatar image={user.image} role={user.role} name={user.name} size="sm" />
+    <UserAvatar
+      image={user.image}
+      role={user.role}
+      name={user.name}
+      size="sm"
+    />
     <div className="min-w-0">
       <p className="truncate font-heading text-sm font-semibold text-ink">
         {user.name}
@@ -153,7 +158,7 @@ const UsersTable = ({
         <button
           disabled={page === 1}
           onClick={() => onPage(page - 1)}
-          className="rounded-lg border border-line px-3 py-1.5 font-text text-xs text-ink disabled:opacity-40"
+          className="rounded-lg bg-brand px-3 py-1.5 font-text text-xs font-medium text-white transition hover:bg-brand/90 disabled:pointer-events-none disabled:opacity-40"
         >
           Prev
         </button>
@@ -163,7 +168,7 @@ const UsersTable = ({
         <button
           disabled={page === totalPages}
           onClick={() => onPage(page + 1)}
-          className="rounded-lg border border-line px-3 py-1.5 font-text text-xs text-ink disabled:opacity-40"
+          className="rounded-lg bg-brand px-3 py-1.5 font-text text-xs font-medium text-white transition hover:bg-brand/90 disabled:pointer-events-none disabled:opacity-40"
         >
           Next
         </button>

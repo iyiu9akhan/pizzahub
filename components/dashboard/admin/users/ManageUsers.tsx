@@ -29,7 +29,6 @@ const ManageUsers = ({ users: initialUsers }: { users: ManagedUser[] }) => {
 
   const handleToggleRestrict = async (user: ManagedUser, restricted: boolean) => {
     if (restricted) {
-      // Prompt for optional reason via dialog
       setRestrictingUser(user)
       setRestrictReason("")
     } else {

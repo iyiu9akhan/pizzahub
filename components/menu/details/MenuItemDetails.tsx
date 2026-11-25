@@ -103,6 +103,10 @@ export default function MenuItemDetails({
   const [isWishlisted, setIsWishlisted] = useState<boolean>(isFavorite)
   const [isWishlistLoading, setIsWishlistLoading] = useState<boolean>(false)
 
+  React.useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [item._id])
+
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsOrderModalOpen(false)
@@ -113,7 +117,11 @@ export default function MenuItemDetails({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [isOrderModalOpen])
 
-  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false)
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  )
 
   const role =
     (session?.user as { role?: string } | undefined)?.role || "customer"
@@ -145,11 +153,17 @@ export default function MenuItemDetails({
         toastSuccess(nextState ? "Added to wishlist" : "Removed from wishlist")
       } else {
         setIsWishlisted(!nextState)
-        toastError("Wishlist update failed", res.message || "Could not update wishlist.")
+        toastError(
+          "Wishlist update failed",
+          res.message || "Could not update wishlist."
+        )
       }
     } catch {
       setIsWishlisted(!nextState)
-      toastError("Wishlist update failed", "An error occurred while updating wishlist.")
+      toastError(
+        "Wishlist update failed",
+        "An error occurred while updating wishlist."
+      )
     } finally {
       setIsWishlistLoading(false)
     }
@@ -159,7 +173,9 @@ export default function MenuItemDetails({
     e.preventDefault()
 
     if (!session?.user) {
-      router.push(`/login?callbackUrl=${encodeURIComponent(`/menu/${item._id}`)}`)
+      router.push(
+        `/login?callbackUrl=${encodeURIComponent(`/menu/${item._id}`)}`
+      )
       return
     }
 
@@ -195,7 +211,10 @@ export default function MenuItemDetails({
 
       if (res.success) {
         setIsOrderModalOpen(false)
-        toastSuccess("Order placed successfully!", "You can track your order status in My Orders.")
+        toastSuccess(
+          "Order placed successfully!",
+          "You can track your order status in My Orders."
+        )
         router.push("/dashboard/customer/my-orders")
         router.refresh()
       } else {
@@ -209,7 +228,7 @@ export default function MenuItemDetails({
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10 lg:py-16">
+    <div className="mx-auto max-w-7xl px-6 py-10 lg:py-16">
       {/* Back to menu button */}
       <Link
         href="/menu"
@@ -252,8 +271,10 @@ export default function MenuItemDetails({
               type="button"
               onClick={handleToggleWishlist}
               disabled={isWishlistLoading}
-              aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-              className="absolute right-4 top-4 z-10 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-surface/90 shadow-md backdrop-blur-xs transition-transform hover:scale-110 active:scale-95 focus-visible:outline-none"
+              aria-label={
+                isWishlisted ? "Remove from wishlist" : "Add to wishlist"
+              }
+              className="absolute top-4 right-4 z-10 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-surface/90 shadow-md backdrop-blur-xs transition-transform hover:scale-110 focus-visible:outline-none active:scale-95"
             >
               <Heart
                 className={`h-5 w-5 transition-colors ${
@@ -267,7 +288,7 @@ export default function MenuItemDetails({
 
           {/* Thumbnail gallery */}
           {images.length > 1 && (
-            <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
+            <div className="no-scrollbar flex items-center gap-3 overflow-x-auto pb-2">
               {images.map((img, idx) => (
                 <button
                   key={idx}
@@ -307,7 +328,7 @@ export default function MenuItemDetails({
         <div className="flex flex-col gap-6">
           <div>
             <div className="flex items-center justify-between">
-              <span className="font-text text-xs font-bold uppercase tracking-widest text-brand-fg">
+              <span className="font-text text-xs font-bold tracking-widest text-brand-fg uppercase">
                 {item.category}
               </span>
 
@@ -319,11 +340,12 @@ export default function MenuItemDetails({
                     ? item.ratingAvg.toFixed(1)
                     : "New"}
                 </span>
-                {typeof item.ratingCount === "number" && item.ratingCount > 0 && (
-                  <span className="font-text text-xs text-ink-muted">
-                    ({item.ratingCount} reviews)
-                  </span>
-                )}
+                {typeof item.ratingCount === "number" &&
+                  item.ratingCount > 0 && (
+                    <span className="font-text text-xs text-ink-muted">
+                      ({item.ratingCount} reviews)
+                    </span>
+                  )}
               </div>
             </div>
 
@@ -346,7 +368,7 @@ export default function MenuItemDetails({
                 type="button"
                 onClick={handleToggleWishlist}
                 disabled={isWishlistLoading}
-                className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-1.5 font-heading text-xs font-semibold shadow-2xs transition-all hover:scale-105 active:scale-95 cursor-pointer ${
+                className={`inline-flex cursor-pointer items-center gap-2 rounded-xl border px-3.5 py-1.5 font-heading text-xs font-semibold shadow-2xs transition-all hover:scale-105 active:scale-95 ${
                   isWishlisted
                     ? "border-red-200 bg-red-50 text-red-600 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400"
                     : "border-line bg-surface text-ink hover:text-red-500"
@@ -355,7 +377,9 @@ export default function MenuItemDetails({
                 <Heart
                   className={`h-4 w-4 ${isWishlisted ? "fill-current" : ""}`}
                 />
-                <span>{isWishlisted ? "Saved in Wishlist" : "Save to Wishlist"}</span>
+                <span>
+                  {isWishlisted ? "Saved in Wishlist" : "Save to Wishlist"}
+                </span>
               </button>
             </div>
           </div>
@@ -366,7 +390,8 @@ export default function MenuItemDetails({
               Description
             </h2>
             <p className="mt-2 font-text text-base leading-relaxed text-ink-muted">
-              {item.description || "No specific description provided for this menu item."}
+              {item.description ||
+                "No specific description provided for this menu item."}
             </p>
           </div>
 
@@ -375,7 +400,8 @@ export default function MenuItemDetails({
             <div className="flex items-center gap-3 font-text text-sm text-ink">
               <MapPin className="h-4 w-4 shrink-0 text-brand-fg" />
               <span>
-                Location: <strong className="font-semibold">{item.location}</strong>
+                Location:{" "}
+                <strong className="font-semibold">{item.location}</strong>
               </span>
             </div>
 
@@ -384,7 +410,8 @@ export default function MenuItemDetails({
                 <div className="flex items-center gap-2">
                   <Store className="h-4 w-4 shrink-0 text-brand-fg" />
                   <span>
-                    Prepared by: <strong className="font-semibold">{item.vendorName}</strong>
+                    Prepared by:{" "}
+                    <strong className="font-semibold">{item.vendorName}</strong>
                   </span>
                 </div>
                 {item.isPremiumVendor && <PremiumBadge />}
@@ -435,7 +462,9 @@ export default function MenuItemDetails({
               <div className="flex flex-col gap-4">
                 {/* Quantity selector */}
                 <div className="flex items-center justify-between rounded-2xl border border-line bg-surface p-3.5">
-                  <span className="font-heading text-sm font-semibold text-ink">Quantity</span>
+                  <span className="font-heading text-sm font-semibold text-ink">
+                    Quantity
+                  </span>
                   <div className="flex items-center gap-3">
                     <button
                       type="button"
@@ -461,7 +490,9 @@ export default function MenuItemDetails({
 
                 {/* Total amount summary */}
                 <div className="flex items-center justify-between border-t border-line pt-2 text-sm">
-                  <span className="font-text text-ink-muted">Total Payable:</span>
+                  <span className="font-text text-ink-muted">
+                    Total Payable:
+                  </span>
                   <span className="font-heading text-xl font-extrabold text-brand-fg">
                     {formatUSD(item.price * quantity)}
                   </span>
@@ -492,9 +523,9 @@ export default function MenuItemDetails({
               setIsOrderModalOpen(false)
             }
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs overflow-y-auto"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-xs"
         >
-          <div className="relative my-8 w-full max-w-lg rounded-3xl border border-line bg-surface p-6 sm:p-8 shadow-2xl">
+          <div className="relative my-8 w-full max-w-lg rounded-3xl border border-line bg-surface p-6 shadow-2xl sm:p-8">
             {/* Modal header */}
             <div className="flex items-start justify-between border-b border-line pb-4">
               <div>
@@ -563,7 +594,10 @@ export default function MenuItemDetails({
                   onChange={(e) => {
                     setDeliveryDate(e.target.value)
                     if (orderErrors.deliveryDate) {
-                      setOrderErrors((prev) => ({ ...prev, deliveryDate: undefined }))
+                      setOrderErrors((prev) => ({
+                        ...prev,
+                        deliveryDate: undefined,
+                      }))
                     }
                   }}
                   disabled={isSubmitting}
@@ -605,7 +639,9 @@ export default function MenuItemDetails({
                   placeholder="House, road, area, city"
                   disabled={isSubmitting}
                   className={`w-full rounded-xl border bg-surface px-3.5 py-2.5 font-text text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none ${
-                    orderErrors.deliveryAddress ? "border-red-500" : "border-line"
+                    orderErrors.deliveryAddress
+                      ? "border-red-500"
+                      : "border-line"
                   }`}
                 />
                 {orderErrors.deliveryAddress && (
@@ -677,7 +713,10 @@ export default function MenuItemDetails({
                   onChange={(e) => {
                     setMessage(e.target.value)
                     if (orderErrors.message) {
-                      setOrderErrors((prev) => ({ ...prev, message: undefined }))
+                      setOrderErrors((prev) => ({
+                        ...prev,
+                        message: undefined,
+                      }))
                     }
                   }}
                   placeholder="Any delivery instructions or message for the vendor..."

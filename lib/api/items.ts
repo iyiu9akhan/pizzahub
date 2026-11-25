@@ -68,7 +68,7 @@ export const getItemLocations = async (): Promise<string[]> => {
 
 // Public read: fetch a single approved item by ID, enriched with vendor premium status
 export const getItemById = async (id: string) => {
-  const res = await fetch(`${BASE_URL}/items/${id}`, { cache: "no-store" })
+  const res = await authFetch(`${BASE_URL}/items/${id}`, { cache: "no-store" })
   if (!res.ok) return null
   const item = await res.json()
 

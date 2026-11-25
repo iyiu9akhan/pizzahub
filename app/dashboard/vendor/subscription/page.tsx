@@ -20,6 +20,7 @@ import { getPremiumVendorById } from "@/lib/api/premiumVendors"
 import { getItemCount } from "@/lib/api/items"
 import PremiumBadge from "@/components/ui/PremiumBadge"
 import UpgradeButton from "./UpgradeButton"
+import CancelButton from "./CancelButton"
 
 const FREE_LIMIT = 3
 const PREMIUM_PRICE = 29 // USD, one-time payment
@@ -270,7 +271,7 @@ const VendorSubscriptionPage = async ({
                   </p>
                 )}
                 <div className="mt-3">
-                  <UpgradeButton isPremium />
+                  <CancelButton />
                 </div>
               </>
             ) : (

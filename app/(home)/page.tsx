@@ -21,7 +21,6 @@ export default async function Home() {
 
       {/* <Navbar orderCount={orderCount} /> */}
 
-      <Navbar orderCount={orderCount} />
       <main className="flex-1">
         <HeroBanner />
         <FeatureMenu />

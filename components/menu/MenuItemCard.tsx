@@ -1,5 +1,3 @@
-// Shared menu item card used by customer browse, vendor dashboard, and admin panels.
-// All three contexts pass the same `item` shape; only the footer `actions` differ.
 "use client"
 
 import React, { useState } from "react"
@@ -15,8 +13,6 @@ import {
 } from "@/lib/actions/WishlistActions"
 import PremiumBadge from "@/components/ui/PremiumBadge"
 
-// ----- Types ----------------------------------------------------------------
-
 export type MenuItemStatus = "pending" | "approved" | "rejected" | "inactive"
 
 export interface MenuItemData {
@@ -26,7 +22,6 @@ export interface MenuItemData {
   description?: string
   price: number
   location: string
-  /** All image URLs — card reads item.images (already merged by parent) */
   images?: string[]
   status?: MenuItemStatus
   vendorName?: string
@@ -256,9 +251,8 @@ const MenuItemCard = ({
         {/* Footer — push to bottom for equal card heights in a grid */}
         <div className="mt-auto pt-4">
           {actions ?? (
-            // Default action: "View Details" link
             <Link
-              href={`/menu/${item._id}`}
+              href={session?.user ? `/menu/${item._id}` : "/login"}
               className="flex w-full items-center justify-center rounded-full bg-brand px-4 py-2.5 font-heading text-sm font-semibold text-white transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:outline-none"
             >
               View Details
@@ -272,10 +266,6 @@ const MenuItemCard = ({
 
 export default MenuItemCard
 
-// ----- Skeleton -------------------------------------------------------------
-
-/** Grid placeholder shown while menu items are loading */
-/** Grid placeholder shown while menu items are loading */
 export const MenuItemCardSkeleton = () => (
   <div className="flex h-full flex-col rounded-3xl border border-line bg-surface p-3 shadow-2xs">
     {/* Image placeholder matching aspect-4/3 */}
